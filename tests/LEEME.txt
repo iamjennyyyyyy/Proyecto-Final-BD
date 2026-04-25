@@ -1,0 +1,23 @@
+¿Qué es? Código que AUTOMATIZA pruebas para verificar que todo funciona.
+
+
+ejemplo en js:
+
+// tests/services/tratamientoService.test.js
+const tratamientoService = require('../../src/services/tratamientoService');
+
+test('No debe crear tratamiento con precio negativo', async () => {
+  const datosInvalidos = {
+    nombre: 'Masaje',
+    precio: -10
+  };
+  
+  await expect(tratamientoService.crearTratamiento(datosInvalidos))
+    .rejects.toThrow('El precio debe ser mayor a 0');
+});
+
+¿Qué va aquí?
+
+- Pruebas unitarias (probar un método)
+- Pruebas de integración (probar varias capas juntas)
+- Pruebas de API (probar endpoints)

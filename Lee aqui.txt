@@ -1,0 +1,20 @@
+¿Como funcciona una peticion? Paso a paso:
+
+
+1. Usuario envía POST /api/tratamientos
+   ↓
+2. routes/tratamientoRoutes.js → matchea la ruta
+   ↓
+3. middlewares/ (logger, auth, validación) → se ejecutan
+   ↓
+4. controllers/tratamientoController.js → recibe req/res (peticion/resultado)
+   ↓
+5. services/tratamientoService.js → aplica reglas de negocio
+   ↓
+6. repositories/tratamientoRepository.js → guarda en BD
+   ↓
+7. services → devuelve resultado al controller
+   ↓
+8. controller → envía respuesta JSON
+   ↓
+9. Usuario recibe la respuesta

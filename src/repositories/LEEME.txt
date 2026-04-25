@@ -1,0 +1,59 @@
+¿Qué es? La capa que HABLA con la base de datos. 
+Solo contiene consultas SQL y operaciones CRUD.
+
+Por ejemplo en js seria:
+
+// repositories/tratamientoRepository.js
+
+class TratamientoRepository {
+  
+  // CREATE - Guardar un tratamiento
+  async create(tratamientoData) {
+    const query = `
+      INSERT INTO tratamientos (nombretratamiento, precio, duracion)
+      VALUES ($1, $2, $3)
+      RETURNING *
+    `;
+    const result = await pool.query(query, [
+      tratamientoData.nombretratamiento,
+      tratamientoData.precio,
+      tratamientoData.duracion
+    ]);
+    return result.rows[0];
+  }
+  
+  // READ - Buscar todos
+  async findAll() {
+    const result = await pool.query('SELECT * FROM tratamientos');
+    return result.rows;
+  }
+  
+  // READ - Buscar por ID
+  async findById(id) {
+    const result = await pool.query('SELECT * FROM tratamientos WHERE idtratamiento = $1', [id]);
+    return result.rows[0];
+  }
+  
+  // UPDATE - Actualizar
+  async update(id, data) {
+    const query = `
+      UPDATE tratamientos 
+      SET nombretratamiento = $1, precio = $2
+      WHERE idtratamiento = $3
+      RETURNING *
+    `;
+    const result = await pool.query(query, [data.nombre, data.precio, id]);
+    return result.rows[0];
+  }
+  
+  // DELETE - Eliminar
+  async delete(id) {
+    await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1', [id]);
+  }
+}
+
+¿Qué va aquí?
+
+- SOLO consultas SQL
+- SOLO operaciones CRUD (Create, Read, Update, Delete)
+- NO lógica de negocio (no validaciones, no cálculos complejos)

@@ -1,0 +1,29 @@
+¿Qué es? Funciones helper que se usan en MÚLTIPLES capas.
+
+ejemplo en js:
+
+// utils/dateHelpers.js
+
+function formatearFecha(fecha) {
+  return fecha.toISOString().split('T')[0];
+}
+
+function calcularEdad(fechaNacimiento) {
+  const hoy = new Date();
+  const diff = hoy - fechaNacimiento;
+  return Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+}
+
+// utils/validators.js
+function esEmailValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+module.exports = { formatearFecha, calcularEdad, esEmailValido };
+
+¿Qué va aquí?
+
+- Formateo de fechas
+- Validaciones comunes (email, teléfono)
+- Cálculos matemáticos reutilizables
+- Generación de códigos aleatorios

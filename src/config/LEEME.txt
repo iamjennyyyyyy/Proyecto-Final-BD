@@ -1,0 +1,26 @@
+¿Qué es? Archivos que conectan tu app con servicios externos (BD, APIs, etc.)
+Por ejemplo, en javascript:
+
+La Configuración de conexión a PostgreSQL seria
+
+
+(se ingresan los datos de su servidor local de la BD y listo :D)
+
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: 'localhost',
+  user: 'postgres',
+  password: 'miPassword123',
+  database: 'spa_belleza'
+});
+
+module.exports = pool;
+
+¿Qué va aquí?
+
+- Conexión a base de datos
+- Configuración de JWT (tokens)
+- Configuración de emails
+- Variables de entorno
+

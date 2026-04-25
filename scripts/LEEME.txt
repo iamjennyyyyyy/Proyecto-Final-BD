@@ -1,0 +1,20 @@
+¿Qué es? 
+Código que NO es parte de la app principal (para inicialización, mantenimiento).
+
+// scripts/seed.js - Poblar base de datos con datos de prueba
+
+const pool = require('../src/config/database');
+
+async function insertarDatosPrueba() {
+  await pool.query("INSERT INTO tratamientos (nombre, precio) VALUES ('Masaje', 50)");
+  console.log('Datos insertados');
+}
+
+insertarDatosPrueba();
+
+¿Qué va aquí?
+
+- Scripts para crear la BD
+- Scripts para poblar con datos de prueba
+- Scripts para migraciones
+- Scripts de backup

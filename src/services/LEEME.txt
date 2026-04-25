@@ -1,0 +1,65 @@
+¿Qué es? El CORAZÓN de tu app. 
+Aquí van todas las reglas de negocio y validaciones complejas.
+
+En js seria:
+
+// services/tratamientoService.js
+
+class TratamientoService {
+  
+  async crearTratamiento(datos) {
+    // REGLA DE NEGOCIO 1: No pueden existir dos tratamientos con mismo nombre
+    const existente = await tratamientoRepository.findByName(datos.nombretratamiento);
+    if (existente) {
+      throw new Error(`Ya existe un tratamiento llamado "${datos.nombretratamiento}"`);
+    }
+    
+    // REGLA DE NEGOCIO 2: El precio no puede ser negativo
+    if (datos.precio <= 0) {
+      throw new Error('El precio debe ser mayor a 0');
+    }
+    
+    // REGLA DE NEGOCIO 3: La duración debe ser múltiplo de 15 minutos
+    if (datos.duracion % 15 !== 0) {
+      throw new Error('La duración debe ser múltiplo de 15 minutos');
+    }
+    
+    // Si pasa todas las reglas, guardar
+    return await tratamientoRepository.create(datos);
+  }
+  
+  async obtenerReporteIngresos(mes, año) {
+    // REGLA DE NEGOCIO: Calcular ingresos totales
+    const citas = await citaRepository.findByMes(mes, año);
+    
+    let ingresosPaquetes = 0;
+    let ingresosIndividuales = 0;
+    
+    for (const cita of citas) {
+      if (cita.idpaquetevendido) {
+        ingresosPaquetes += cita.precio;
+      } else {
+        ingresosIndividuales += cita.precio;
+      }
+    }
+    
+    return {
+      mes,
+      total: ingresosPaquetes + ingresosIndividuales,
+      paquetes: ingresosPaquetes,
+      individuales: ingresosIndividuales
+    };
+  }
+}
+
+¿Qué va aquí?
+
+- Reglas de negocio (horarios, precios, disponibilidad)
+- Validaciones complejas
+- Coordinación entre múltiples repositorios
+- Cálculos de reportes
+
+¿Qué NO va aquí?
+
+- Consultas SQL directas (eso es del repository)
+- Manejo de peticiones HTTP (eso es del controller)

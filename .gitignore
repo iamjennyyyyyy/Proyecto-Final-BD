@@ -1,0 +1,43 @@
+# Dependencias de Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos de entorno (contraseñas, configuraciones locales)
+.env
+.env.local
+.env.production
+
+# Archivos del sistema operativo
+.DS_Store  # Mac
+Thumbs.db  # Windows
+
+# IDE y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de logs
+logs/
+*.log
+
+# Base de datos local (si tienes archivos .db)
+*.db
+*.sqlite
+
+# Archivos de construcción
+dist/
+build/
+
+# Archivos de cobertura de pruebas
+coverage/
+.nyc_output/
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Configuración de sesiones
+.session
