@@ -1,16 +1,26 @@
-class Area{
-
-    constructor(idArea, nombre){
-        this.idArea = idArea;
-        this.nombre = nombre;
+// models/Area.js
+class Area {
+    constructor(datos = {}) {
+        this.idArea = datos.idArea || null;
+        this.nombre = datos.nombre || '';
+        this.cantidadPersonalFijo = datos.cantidadPersonalFijo || 0;
     }
 
-    validar(){
-
-        if(this.nombre == null || this.nombre.trim() === ''){
+    validar() {
+        if (!this.nombre || this.nombre.trim() === '') {
             throw new Error('El nombre del área es obligatorio');
         }
-
+        if (this.nombre.trim().length < 3) {
+            throw new Error('El nombre del área debe tener al menos 3 caracteres');
+        }
+        if (this.nombre.trim().length > 100) {
+            throw new Error('El nombre del área no puede superar los 100 caracteres');
+        }
+        if (this.cantidadPersonalFijo < 0) {
+            throw new Error('La cantidad de personal fijo no puede ser negativa');
+        }
         return true;
     }
 }
+
+module.exports = Area;
