@@ -3,7 +3,7 @@
 // ============================================
 
 // Importar el servicio que contiene la lógica de negocio
-const empleadoService = require('../services/empleadoService');
+const clienteService = require('../services/clienteService');
 
 // Opcional: Importar librerías adicionales si son necesarias
 // const moment = require('moment'); // Para fechas
@@ -14,7 +14,12 @@ const empleadoService = require('../services/empleadoService');
 // 2. LA CLASE DEL CONTROLADOR
 // ============================================
 
-class EmpleadoController {
+class ClienteController {
+  
+  // ==========================================
+  // SECCIÓN 1: MÉTODOS DE LECTURA (GET)
+  // ==========================================
+  
   /**
    * 📌 MÉTODO 1: LISTAR TODOS LOS REGISTROS
    * GET /api/entidad
@@ -32,7 +37,7 @@ class EmpleadoController {
   async listarTodos(req, res) {
     try {
       // 1. Llamar al servicio para obtener los datos
-      const datos = await entidadService.listarTodos();
+      const datos = await clienteService.listarTodos();
       
       // 2. Enviar respuesta exitosa
       res.status(200).json({
@@ -78,7 +83,7 @@ class EmpleadoController {
       }
       
       // 3. Llamar al servicio
-      const dato = await entidadService.obtenerPorId(id);
+      const dato = await clienteService.obtenerPorId(id);
       
       // 4. Si no existe, responder 404
       if (!dato) {
@@ -103,80 +108,35 @@ class EmpleadoController {
     }
   }
   
-
-   /**
-     * 📌 MÉTODO 3: BUSCAR POR TÉRMINO (LIKE)
-     * GET /api/entidad/buscar?q=termino
-     * 
-     * ¿QUÉ HACE? Busca registros que contengan el término en nombre o descripción
-     * ¿PARA QUÉ SIRVE? Para barras de búsqueda, autocompletado, filtros
-     * 
-     * EJEMPLO URL: /api/tratamientos/buscar?q=masaje
-     * 
-     * EJEMPLO RESPUESTA:
-     * { "success": true, "count": 3, "data": [...] }
-     */
-    async buscarPorTermino(req, res) {
-      try {
-        // 1. Obtener el término de búsqueda de los query params
-        const termino = req.query.q;
-        
-        // 2. Validar que se envió un término
-        if (!termino || termino.trim() === '') {
-          return res.status(400).json({
-            success: false,
-            message: 'Debe proporcionar un término de búsqueda (?q=texto)'
-          });
-        }
-        
-        // 3. Llamar al servicio
-        const resultados = await empleadoService.buscarPorTermino(termino);
-        
-        // 4. Enviar respuesta
-        res.status(200).json({
-          success: true,
-          count: resultados.length,
-          data: resultados
-        });
-        
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          message: 'Error al buscar',
-          error: error.message
-        });
-      }
-    }
-
   /**
-   * 📌 MÉTODO 4: FILTRAR POR CAMPO ESPECÍFICO
-   * GET /api/entidad/filtro/:campo/:valor
+   * 📌 MÉTODO 3: BUSCAR POR TÉRMINO (LIKE)
+   * GET /api/entidad/buscar?q=termino
    * 
-   * ¿QUÉ HACE? Filtra registros donde un campo específico tenga un valor
-   * ¿PARA QUÉ SIRVE? Para filtrar por categoría, estado, etc.
+   * ¿QUÉ HACE? Busca registros que contengan el término en nombre o descripción
+   * ¿PARA QUÉ SIRVE? Para barras de búsqueda, autocompletado, filtros
    * 
-   * EJEMPLO URL: /api/tratamientos/filtro/categoria/1
+   * EJEMPLO URL: /api/tratamientos/buscar?q=masaje
    * 
    * EJEMPLO RESPUESTA:
-   * { "success": true, "count": 5, "data": [...] }
-   * 
-   * ESTO ES PARA FILTRAR POR DISTRITO Y POR FIJOS
+   * { "success": true, "count": 3, "data": [...] }
    */
-  async filtrarPorCampo(req, res) {
+  async buscarPorTermino(req, res) {
     try {
-      const campo = req.params.campo;
-      const valor = req.params.valor;
+      // 1. Obtener el término de búsqueda de los query params
+      const termino = req.query.q;
       
-      // Validar que los parámetros existan
-      if (!campo || !valor) {
+      // 2. Validar que se envió un término
+      if (!termino || termino.trim() === '') {
         return res.status(400).json({
           success: false,
-          message: 'Debe especificar campo y valor para filtrar'
+          message: 'Debe proporcionar un término de búsqueda (?q=texto)'
         });
       }
       
-      const resultados = await entidadService.filtrarPorCampo(campo, valor);
+      // 3. Llamar al servicio
+      const resultados = await clienteService.buscarPorTermino(termino);
       
+      // 4. Enviar respuesta
       res.status(200).json({
         success: true,
         count: resultados.length,
@@ -186,7 +146,74 @@ class EmpleadoController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Error al filtrar',
+        message: 'Error al buscar',
+        error: error.message
+      });
+    }
+  }
+  
+  /**
+   * 📌 MÉTODO 5: OBTENER CON PAGINACIÓN
+   * GET /api/entidad/paginar?page=1&limit=10
+   * 
+   * ¿QUÉ HACE? Devuelve los registros divididos en páginas
+   * ¿PARA QUÉ SIRVE? Para listados muy largos, mejora el rendimiento
+   * 
+   * EJEMPLO URL: /api/tratamientos/paginar?page=2&limit=5
+   * 
+   * EJEMPLO RESPUESTA:
+   * {
+   *   "success": true,
+   *   "data": [...],
+   *   "pagination": {
+   *     "page": 2,
+   *     "limit": 5,
+   *     "total": 50,
+   *     "pages": 10
+   *   }
+   * }
+   */
+  async listarConPaginacion(req, res) {
+    try {
+      // 1. Obtener parámetros de paginación (con valores por defecto)
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      
+      // 2. Validar que sean números positivos
+      if (page < 1 || limit < 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Page y limit deben ser mayores a 0'
+        });
+      }
+      
+      // 3. Calcular offset (desde qué registro empezar)
+      const offset = (page - 1) * limit;
+      
+      // 4. Llamar al servicio
+      const { datos, total } = await clienteService.listarConPaginacion(limit, offset);
+      
+      // 5. Calcular total de páginas
+      const totalPages = Math.ceil(total / limit);
+      
+      // 6. Enviar respuesta con metadatos de paginación
+      res.status(200).json({
+        success: true,
+        data: datos,
+        pagination: {
+          page: page,
+          limit: limit,
+          total: total,
+          pages: totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      });
+      
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error al paginar',
         error: error.message
       });
     }
@@ -230,7 +257,7 @@ class EmpleadoController {
       // Ejemplo: if (!datos.nombre) { return res.status(400).json(...) }
       
       // 4. Llamar al servicio
-      const nuevo = await entidadService.crear(datos);
+      const nuevo = await clienteService.crear(datos);
       
       // 5. Responder con código 201 (Created)
       res.status(201).json({
@@ -248,12 +275,11 @@ class EmpleadoController {
       });
     }
   }
-  
+
   
   // ==========================================
   // SECCIÓN 3: MÉTODOS DE ACTUALIZACIÓN (PUT / PATCH)
   // ==========================================
-  
   /**
    * 📌 MÉTODO 11: ACTUALIZAR PARCIALMENTE (PATCH)
    * PATCH /api/entidad/:id
@@ -277,7 +303,7 @@ class EmpleadoController {
         });
       }
       
-      const actualizado = await entidadService.actualizarParcial(id, datos);
+      const actualizado = await clienteService.actualizarParcial(id, datos);
       
       res.status(200).json({
         success: true,
@@ -319,7 +345,7 @@ class EmpleadoController {
         });
       }
       
-      await entidadService.eliminar(id);
+      await clienteService.eliminar(id);
       
       res.status(200).json({
         success: true,
@@ -334,6 +360,62 @@ class EmpleadoController {
       });
     }
   }
+  
+  /**
+   * 📌 MÉTODO 14: ELIMINACIÓN LÓGICA (SOFT DELETE)
+   * DELETE /api/entidad/:id/soft
+   * 
+   * ¿QUÉ HACE? Marca el registro como eliminado pero no lo borra de la BD
+   * ¿PARA QUÉ SIRVE? Para mantener historial, recuperar datos borrados
+   * 
+   * REQUIERE: Un campo "activo" o "eliminado" en la tabla (boolean)
+   */
+  async eliminarLogico(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      
+      await clienteService.eliminarLogico(id);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Registro marcado como eliminado'
+      });
+      
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  /**
+   * 📌 MÉTODO 15: RESTAURAR REGISTRO ELIMINADO
+   * POST /api/entidad/:id/restaurar
+   * 
+   * ¿QUÉ HACE? Restaura un registro que fue eliminado lógicamente
+   * ¿PARA QUÉ SIRVE? Para deshacer un soft delete
+   */
+  async restaurar(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const restaurado = await clienteService.restaurar(id);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Registro restaurado',
+        data: restaurado
+      });
+      
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
   
   // ==========================================
   // SECCIÓN 5: MÉTODOS PARA VISTAS HTML (RENDER)
@@ -350,10 +432,10 @@ class EmpleadoController {
    */
   async mostrarPaginaListado(req, res) {
     try {
-      const datos = await entidadService.listarTodos();
+      const datos = await clienteService.listarTodos();
       
-      res.render('entidad/listar', {
-        titulo: 'Listado de [Entidad]',
+      res.render('cliente/listar', {
+        titulo: 'Listado de [Cliente]',
         datos: datos,
         usuario: req.session?.usuario || null,
         mensajeExito: req.query.exito || null,
@@ -361,8 +443,8 @@ class EmpleadoController {
       });
       
     } catch (error) {
-      res.render('entidad/listar', {
-        titulo: 'Listado de [Entidad]',
+      res.render('cliente/listar', {
+        titulo: 'Listado de [Cliente]',
         datos: [],
         error: error.message
       });
@@ -381,15 +463,15 @@ class EmpleadoController {
       // Si el formulario necesita selects con opciones dinámicas
       // const opciones = await entidadService.obtenerOpciones();
       
-      res.render('entidad/crear', {
-        titulo: 'Crear Nuevo [Entidad]',
+      res.render('cliente/crear', {
+        titulo: 'Crear Nuevo [Cliente]',
         // opciones: opciones,
         datos: null,
         errores: null
       });
       
     } catch (error) {
-      res.redirect('/entidad');
+      res.redirect('/cliente');
     }
   }
   
@@ -403,17 +485,17 @@ class EmpleadoController {
   async mostrarFormularioEditar(req, res) {
     try {
       const id = parseInt(req.params.id);
-      const dato = await entidadService.obtenerPorId(id);
+      const dato = await clienteService.obtenerPorId(id);
       
       if (!dato) {
         req.session.error_msg = 'Registro no encontrado';
-        return res.redirect('/entidad');
+        return res.redirect('/cliente');
       }
       
       // const opciones = await entidadService.obtenerOpciones();
       
-      res.render('entidad/editar', {
-        titulo: 'Editar [Entidad]',
+      res.render('cliente/editar', {
+        titulo: 'Editar [Cliente]',
         dato: dato,
         // opciones: opciones,
         errores: null
@@ -421,9 +503,75 @@ class EmpleadoController {
       
     } catch (error) {
       req.session.error_msg = error.message;
-      res.redirect('/entidad');
+      res.redirect('/cliente');
+    }
+  }
+  
+  
+  // ==========================================
+  // SECCIÓN 6: MÉTODOS DE EXPORTACIÓN
+  // ==========================================
+  
+  /**
+   * 📌 MÉTODO 22: EXPORTAR A CSV
+   * GET /api/entidad/exportar/csv
+   * 
+   * ¿QUÉ HACE? Devuelve un archivo CSV con todos los registros
+   * ¿PARA QUÉ SIRVE? Para descargar datos y abrirlos en Excel
+   */
+  async exportarCSV(req, res) {
+    try {
+      const datos = await clienteService.listarTodos();
+      
+      // Crear cabeceras CSV
+      const cabeceras = Object.keys(datos[0] || {}).join(',');
+      
+      // Crear filas CSV
+      const filas = datos.map(row => Object.values(row).join(',')).join('\n');
+      
+      const csv = `${cabeceras}\n${filas}`;
+      
+      // Configurar cabeceras para descarga
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=datos.csv');
+      
+      res.status(200).send(csv);
+      
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+  
+  /**
+   * 📌 MÉTODO 23: EXPORTAR A EXCEL (JSON)
+   * GET /api/entidad/exportar/json
+   * 
+   * ¿QUÉ HACE? Devuelve los datos en formato JSON para descargar
+   * ¿PARA QUÉ SIRVE? Para exportar datos a otros sistemas
+   */
+  async exportarJSON(req, res) {
+    try {
+      const datos = await clienteService.listarTodos();
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename=datos.json');
+      
+      res.status(200).json(datos);
+      
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
     }
   }
 }
 
-module.exports = new EmpleadoController();
+// ============================================
+// 3. EXPORTAR LA CLASE
+// ============================================
+
+module.exports = new ClienteController();

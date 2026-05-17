@@ -1,0 +1,230 @@
+/**
+ * ============================================
+ * RUTAS DE [ENTIDAD]
+ * ============================================
+ * 
+ * ¿QUÉ ES UN ROUTER?
+ * Es el "mapa" que le dice al servidor: 
+ * "Cuando llegue esta URL, ejecuta este método del Controller"
+ * 
+ * ¿QUÉ HACE UN ARCHIVO DE ROUTES?
+ * 1. Define las URLs que van a existir
+ * 2. Conecta cada URL con un método del Controller
+ * 3. Agrupa rutas por tema (tratamientos, empleados, etc.)
+ * 4. Aplica middlewares si es necesario (autenticación, validación)
+ * 
+ * ¿QUÉ NO DEBE HACER UN ROUTES?
+ * ❌ Tener lógica de negocio
+ * ❌ Consultar la base de datos
+ * ❌ Validar datos (solo conecta URLs con métodos)
+ */
+
+// ============================================
+// 1. IMPORTS
+// ============================================
+
+const express = require('express');
+const router = express.Router();
+
+// Importar el controlador
+const entidadController = require('../controllers/entidadController');
+
+// Opcional: Importar middlewares (para autenticación, validación)
+// const { verificarToken } = require('../middlewares/authMiddleware');
+// const { validarEntidad } = require('../middlewares/validationMiddleware');
+
+
+// ============================================
+// 2. RUTAS PARA API (devuelven JSON)
+// ============================================
+// Estas rutas empiezan con /api/entidad
+
+// ===== MÉTODOS DE LECTURA (GET) =====
+
+/**
+ * GET /api/entidad
+ * Listar todos los registros
+ * Ejemplo: GET http://localhost:3000/api/entidad
+ */
+router.get('/', entidadController.listarTodos);
+
+/**
+ * GET /api/entidad/:id
+ * Obtener un registro por ID
+ * Ejemplo: GET http://localhost:3000/api/entidad/5
+ */
+router.get('/:id', entidadController.obtenerPorId);
+
+/**
+ * GET /api/entidad/buscar
+ * Buscar por término (query string)
+ * Ejemplo: GET http://localhost:3000/api/entidad/buscar?q=masaje
+ */
+router.get('/buscar', entidadController.buscarPorTermino);
+
+/**
+ * GET /api/entidad/filtro/:campo/:valor
+ * Filtrar por campo específico
+ * Ejemplo: GET http://localhost:3000/api/entidad/filtro/categoria/1
+ */
+router.get('/filtro/:campo/:valor', entidadController.filtrarPorCampo);
+
+/**
+ * GET /api/entidad/paginar
+ * Listar con paginación
+ * Ejemplo: GET http://localhost:3000/api/entidad/paginar?page=2&limit=10
+ */
+router.get('/paginar', entidadController.listarConPaginacion);
+
+/**
+ * GET /api/entidad/fechas
+ * Filtrar por rango de fechas
+ * Ejemplo: GET http://localhost:3000/api/entidad/fechas?inicio=2024-01-01&fin=2024-12-31
+ */
+router.get('/fechas', entidadController.listarPorRangoFechas);
+
+/**
+ * GET /api/entidad/contar
+ * Contar registros
+ * Ejemplo: GET http://localhost:3000/api/entidad/contar
+ */
+router.get('/contar', entidadController.contar);
+
+// ===== MÉTODOS DE ESCRITURA (POST, PUT, DELETE) =====
+
+/**
+ * POST /api/entidad
+ * Crear un nuevo registro
+ * Ejemplo: POST http://localhost:3000/api/entidad
+ * Body: { "nombre": "Masaje", "precio": 80 }
+ */
+router.post('/', entidadController.crear);
+
+/**
+ * POST /api/entidad/bulk
+ * Crear múltiples registros
+ * Ejemplo: POST http://localhost:3000/api/entidad/bulk
+ * Body: { "registros": [{...}, {...}] }
+ */
+router.post('/bulk', entidadController.crearMultiples);
+
+/**
+ * PUT /api/entidad/:id
+ * Actualizar COMPLETAMENTE un registro
+ * Ejemplo: PUT http://localhost:3000/api/entidad/5
+ * Body: { "nombre": "Masaje Deluxe", "precio": 100, "duracion": 90 }
+ */
+router.put('/:id', entidadController.actualizarCompleto);
+
+/**
+ * PATCH /api/entidad/:id
+ * Actualizar PARCIALMENTE un registro
+ * Ejemplo: PATCH http://localhost:3000/api/entidad/5
+ * Body: { "precio": 90 }  (solo actualiza el precio)
+ */
+router.patch('/:id', entidadController.actualizarParcial);
+
+/**
+ * DELETE /api/entidad/:id
+ * Eliminar un registro (físico)
+ * Ejemplo: DELETE http://localhost:3000/api/entidad/5
+ */
+router.delete('/:id', entidadController.eliminar);
+
+/**
+ * DELETE /api/entidad/bulk
+ * Eliminar múltiples registros
+ * Ejemplo: DELETE http://localhost:3000/api/entidad/bulk
+ * Body: { "ids": [1, 2, 3] }
+ */
+router.delete('/bulk', entidadController.eliminarMultiples);
+
+/**
+ * DELETE /api/entidad/:id/soft
+ * Eliminación lógica (soft delete)
+ * Ejemplo: DELETE http://localhost:3000/api/entidad/5/soft
+ */
+router.delete('/:id/soft', entidadController.eliminarLogico);
+
+/**
+ * POST /api/entidad/:id/restaurar
+ * Restaurar un registro eliminado lógicamente
+ * Ejemplo: POST http://localhost:3000/api/entidad/5/restaurar
+ */
+router.post('/:id/restaurar', entidadController.restaurar);
+
+// ===== MÉTODOS DE EXPORTACIÓN =====
+
+/**
+ * GET /api/entidad/exportar/csv
+ * Exportar a CSV (para Excel)
+ * Ejemplo: GET http://localhost:3000/api/entidad/exportar/csv
+ */
+router.get('/exportar/csv', entidadController.exportarCSV);
+
+/**
+ * GET /api/entidad/exportar/json
+ * Exportar a JSON
+ * Ejemplo: GET http://localhost:3000/api/entidad/exportar/json
+ */
+router.get('/exportar/json', entidadController.exportarJSON);
+
+
+// ============================================
+// 3. RUTAS PARA VISTAS HTML (devuelven páginas)
+// ============================================
+// ⚠️ OPCIONAL: Solo si tu backend genera HTML directamente
+// Estas rutas NO tienen /api/ al inicio
+
+// ===== RUTAS DE VISTAS (sin /api/) =====
+
+/**
+ * GET /entidad
+ * Mostrar página con listado de registros (HTML)
+ * Ejemplo: GET http://localhost:3000/entidad
+ */
+router.get('/', entidadController.mostrarPaginaListado);
+
+/**
+ * GET /entidad/nuevo
+ * Mostrar formulario para crear (HTML)
+ * Ejemplo: GET http://localhost:3000/entidad/nuevo
+ */
+router.get('/nuevo', entidadController.mostrarFormularioCrear);
+
+/**
+ * GET /entidad/editar/:id
+ * Mostrar formulario para editar (HTML)
+ * Ejemplo: GET http://localhost:3000/entidad/editar/5
+ */
+router.get('/editar/:id', entidadController.mostrarFormularioEditar);
+
+/**
+ * POST /entidad
+ * Procesar el formulario de creación (redirige)
+ * Ejemplo: POST http://localhost:3000/entidad
+ * Body: datos del formulario (application/x-www-form-urlencoded)
+ */
+router.post('/', entidadController.procesarFormularioCrear);
+
+/**
+ * POST /entidad/:id
+ * Procesar el formulario de edición (redirige)
+ * Ejemplo: POST http://localhost:3000/entidad/5
+ * Body: datos del formulario
+ */
+router.post('/:id', entidadController.procesarFormularioEditar);
+
+/**
+ * POST /entidad/:id/eliminar
+ * Procesar eliminación desde un botón HTML
+ * Ejemplo: POST http://localhost:3000/entidad/5/eliminar
+ */
+router.post('/:id/eliminar', entidadController.procesarEliminarDesdeHTML);
+
+
+// ============================================
+// 4. EXPORTAR EL ROUTER
+// ============================================
+
+module.exports = router;

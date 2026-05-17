@@ -25,10 +25,10 @@
 // ============================================
 
 // Importar el Repository para acceder a la base de datos
-const citaRepository = require('../repositories/citaRepository');
+const entidadRepository = require('../repositories/entidadRepository');
 
 // Importar el Model si necesitas crear objetos
-const Cita = require('../models/Cita');
+const Entidad = require('../models/Entidad');
 
 // Importar otros servicios si es necesario
 // const otroService = require('./otroService');
@@ -38,7 +38,7 @@ const Cita = require('../models/Cita');
 // 2. CLASE DEL SERVICE
 // ============================================
 
-class CitaService {
+class EntidadService {
   
   // ==========================================
   // SECCIÓN 1: MÉTODOS DE LECTURA
@@ -53,7 +53,7 @@ class CitaService {
   async listarTodos() {
     try {
       // Llamar al repository
-      const datos = await citaRepository.findAll();
+      const datos = await entidadRepository.findAll();
       
       // Aquí podrías aplicar reglas de negocio como:
       // - Si el usuario no es admin, no mostrar ciertos campos
@@ -79,7 +79,7 @@ class CitaService {
         throw new Error('ID inválido');
       }
       
-      const dato = await citaRepository.findById(id);
+      const dato = await entidadRepository.findById(id);
       
       // Regla de negocio: Si no existe, lanzar error
       if (!dato) {

@@ -1,0 +1,68 @@
+Formulario HTML
+      │
+      │ POST /api/tratamientos
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  ROUTES (tratamientoRoutes.js)                              │
+│  router.post('/', tratamientoController.crear)              │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ llama a
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  CONTROLLER (tratamientoController.js)                      │
+│  async crear(req, res) {                                    │
+│    const datos = req.body;                                  │
+│    const resultado = await service.crearTratamiento(datos)  │
+│    res.json(resultado)                                      │
+│  }                                                          │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ llama a
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  SERVICE (tratamientoService.js)                            │
+│  async crearTratamiento(datos) {                            │
+│    if (datos.precio < 0) throw Error()                      │
+│    if (!datos.nombre) throw Error()                         │
+│    return await repository.guardar(datos)                   │
+│  }                                                          │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ llama a
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  REPOSITORY (tratamientoRepository.js)                      │
+│  async guardar(datos) {                                     │
+│    const tratamiento = new Tratamiento(datos)               │
+│    tratamiento.validar()                                    │
+│    await pool.query('INSERT...')                            │
+│    return resultado                                         │
+│  }                                                          │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ usa
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  MODEL (Tratamiento.js)                                     │
+│  class Tratamiento {                                        │
+│    constructor(datos) { ... }                               │
+│    validar() { ... }                                        │
+│  }                                                          │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ guarda en
+      ↓
+┌─────────────────────────────────────────────────────────────┐
+│  BASE DE DATOS (PostgreSQL)                                 │
+│  INSERT INTO tratamientos...                                │
+│  → Se guarda el tratamiento                                 │
+└─────────────────────────────────────────────────────────────┘
+      │
+      │ devuelve resultado
+      ↓
+  (vuelve por el mismo camino)
+      ↓
+  Controller responde al navegador
+      ↓
+  Usuario ve: "Tratamiento creado"
