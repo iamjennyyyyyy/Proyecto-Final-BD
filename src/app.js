@@ -1,14 +1,11 @@
-// 🔗 CONEXIÓN 21: Importo Express y mis rutas
 const express = require('express');
-const tratamientoRoutes = require('./routes/tratamientoRoutes');
-
 const app = express();
 
-// Middleware para leer JSON
-app.use(express.json());
+// ✅ Ruta CORREGIDA (agrega src/)
+const areaRoutes = require('./routes/areaRoutes');
 
-// 🔗 CONEXIÓN 22: Conecto las rutas a una URL base
-app.use('/api/tratamientos', tratamientoRoutes);
+app.use(express.json());
+app.use('/api/areas', areaRoutes);
 
 // Inicio el servidor
 app.listen(3000, () => {

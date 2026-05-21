@@ -10,8 +10,6 @@ class Empleado {
         this.telefono = datos.telefono || '';
         this.idDistrito = datos.idDistrito || null;
         this.esFijo = datos.esFijo !== undefined ? datos.esFijo : false;
-        this.sueldo = datos.sueldo || 0;
-        this.fechaIngreso = datos.fechaIngreso || null;
     }
 
     validar() {
@@ -44,8 +42,8 @@ class Empleado {
         if (!/^\d+$/.test(ciLimpio)) {
             throw new Error('La cédula debe contener solo números');
         }
-        if (ciLimpio.length < 7 || ciLimpio.length > 11) {
-            throw new Error('La cédula debe tener entre 7 y 11 dígitos');
+        if (ciLimpio.length != 11) {
+            throw new Error('La cédula debe tener 11 dígitos');
         }
         this.CI = ciLimpio;
 

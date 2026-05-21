@@ -1,0 +1,217 @@
+Necesito que actúes como un **ingeniero de bases de datos y backend** para desarrollar un sistema completo de gestión para un SPA de lujo llamado "Belleza y Relajación".
+
+## 📋 CONTEXTO GENERAL
+
+El SPA ofrece tratamientos de bienestar (masajes, faciales, hidroterapia, etc.) y paquetes de servicios. Se requiere un sistema automatizado que gestione:
+
+- Tratamientos, categorías, áreas, materiales, empleados (fijos y suplentes), clientes, citas, paquetes y reportes.
+
+## 🧩 ENTIDADES PRINCIPALES Y RELACIONES
+
+### 1. Área (areas)
+- idArea (PK)
+- nombreArea (único, no nulo)
+- cantidadPersonalFijo (entero, no nulo, se actualiza automáticamente con triggers)
+
+**Relaciones:**
+- Un Área tiene muchas Categorías (1 a N)
+- Un Área tiene muchos EmpleadosFijos (a través de la tabla empleadosPorArea)
+
+### 2. Categoría (categorias)
+- idCategoria (PK)
+- nombreCategoria (único, no nulo)
+- idArea (FK → areas)
+
+**Relaciones:**
+- Una Categoría pertenece a un Área (N a 1)
+- Una Categoría tiene muchos Tratamientos (1 a N)
+
+### 3. Tratamiento (tratamientos)
+- idTratamiento (PK)
+- nombre (único, no nulo, mínimo 3 caracteres, solo letras, números y espacios)
+- precio (numérico, >0, <1000)
+- duracion (entero, múltiplo de 15, entre 15 y 240 minutos)
+- descripcion (texto opcional)
+- frecuenciaSolicitudMensual (entero, se actualiza automáticamente)
+- idCategoria (FK → categorias)
+
+**Relaciones:**
+- Un Tratamiento pertenece a una Categoría (N a 1)
+- Un Tratamiento puede tener muchos EmpleadosFijos (N a N con empleadosFijosPorTratamiento)
+- Un Tratamiento puede requerir muchos Materiales (N a N con materialesPorTratamiento)
+- Un Tratamiento puede estar en muchos Paquetes (N a N con contenidopaquete)
+
+### 4. Material (materiales)
+- idMaterial (PK)
+- nombre (único, no nulo)
+- cantidad (entero, no nulo, se actualiza con triggers)
+
+**Relaciones:**
+- Un Material tiene una cantidad estimada a usar en muchos Tratamientos (N a N con materialesPorTratamiento)
+- Un Material puede ser usado en cierta cantidad en muchas Citas (N a N con materialesPorCita)
+
+### 5. Distrito (distritos)
+- idDistrito (PK)
+- nombreDistrito (único, no nulo)
+
+**Relaciones:**
+- Un Distrito puede tener muchos Empleados (1 a N)
+
+### 6. Empleado (empleados)
+- idEmpleado (PK)
+- nombre (solo letras y espacios, mínimo 3 caracteres)
+- especialidad (solo letras y espacios, obligatoria si esFijo = true, se asocia a las categorias))
+- horasTrabajo (entero, entre 4 y 40, para suplentes máximo 20)
+- direccion (texto, no nulo)
+- CI (único, solo números, 11 dígitos)
+- telefono (solo números, 8 dígitos)
+- idDistrito (FK → distritos)
+- esFijo (booleano, true = empleado fijo, false = suplente)
+
+**Relaciones:**
+- Un Empleado pertenece a un Distrito (N a 1)
+- Un Empleado Fijo puede estar en muchas Áreas (N a N con empleadosPorArea)
+- Un Empleado Fijo puede estar asignado a muchos Tratamientos (N a N con empleadosFijosPorTratamiento)
+- Un Empleado (fijo o suplente) puede atender muchas Citas (1 a N)
+
+### 7. Cliente (clientes)
+- idCliente (PK)
+- nombre (solo letras y espacios, mínimo 3 caracteres)
+- ci (único, solo números, 11 dígitos)
+- telefono (opcional, solo números)
+- email (opcional, formato válido)
+
+**Relaciones:**
+- Un Cliente puede tener muchas Citas (1 a N)
+- Un Cliente puede comprar muchos Paquetes (1 a N en paquetesVendidos)
+
+### 8. Paquete (paquetes)
+- idPaquete (PK)
+- nombre (único, no nulo, mínimo 3 caracteres)
+- precio (numérico, >0, <10000)
+- duracionTotal (entero, calculada automáticamente según tratamientos incluidos)
+
+**Relaciones:**
+- Un Paquete puede contener muchos Tratamientos (N a N con contenidopaquete)
+- Un Paquete puede ser comprado por muchos Clientes (1 a N en paquetesVendidos)
+
+### 9. Cita (citas)
+- idCita (PK)
+- fecha (date, no nulo, no puede ser pasada ni domingo)
+- hora (time, no nulo, entre 09:00 y 18:00, debe respetar duración del tratamiento)
+- estado (pendiente, realizada, cancelada)
+- observaciones (texto opcional)
+- idCliente (FK → clientes)
+- idTratamiento (FK → tratamientos)
+- idEmpleado (FK → empleados)
+- idPaqueteVendido (FK → paquetesVendidos, opcional, es para indicar si la cita perteneció a un paquete))
+
+**Reglas de negocio específicas para Citas:**
+- No se pueden agendar citas en domingo.
+- El horario laboral es de 09:00 a 13:00 y de 14:00 a 18:00. La cita debe terminar antes de las 18:00.
+- Un empleado no puede tener dos citas que se superpongan en el mismo día.
+- Si la cita se agenda a través de un paquete vendido, la fecha debe estar dentro del rango de validez del paquete.
+- Cuando la fecha y hora de la cita ya pasaron y el estado es "pendiente", el sistema debe cambiarla automáticamente a "cancelada".
+- Si se cambia el estado a "realizada", se debe registrar automáticamente el ingreso (tabla ingresos implícita o lógica de pago).
+- Un cliente puede tener dos citas a la misma hora si son para diferentes personas (no hay restricción por cliente).
+
+### 10. PaqueteVendido (paquetesVendidos)
+- idPaqueteVendido (PK)
+- fechaCompra (date, por defecto CURRENT_DATE)
+- fechaInicio (date, no puede ser anterior a fechaCompra)
+- fechaFin (date, no puede ser anterior a fechaInicio)
+- idPaquete (FK → paquetes)
+- idCliente (FK → clientes)
+
+**Reglas de negocio:**
+- El pago del paquete se registra en el momento de la compra.
+- Las citas dentro del paquete deben estar dentro de [fechaInicio, fechaFin].
+- Cancelar una cita del paquete no afecta el precio ya pagado.
+
+### 11. Tablas intermedias N a N (para triggers y validaciones)
+
+**empleadosPorArea** (idEmpleado, idArea)
+- Un empleado fijo puede estar en múltiples áreas.
+- Al insertar/eliminar un empleado fijo, se actualiza cantidadPersonalFijo en áreas.
+
+**empleadosFijosPorTratamiento** (idEmpleadoFijo, idTratamiento)
+- Solo empleados con esFijo = true pueden ser asignados a tratamientos.
+
+**materialesPorTratamiento** (idMaterial, idTratamiento, cantidad)
+- Define materiales planificados para un tratamiento.
+
+**materialesPorCita** (idCita, idMaterial, cantidadUtilizada)
+- Registra los materiales realmente usados. Al insertar, se descuenta del stock.
+
+**contenidopaquete** (idPaquete, idTratamiento)
+- Define qué tratamientos incluye un paquete.
+
+## 🧠 REGLAS DE NEGOCIO COMPLETAS
+
+### 👥 Roles
+1. **Dependiente**: CRUD de clientes, agenda citas, cambia estado de cita (realizada/cancelada), agenda y registra compras de paquetes.
+2. **Administrador**: CRUD de tratamientos, empleados, áreas, categorías, materiales, paquetes.
+3. **Empleado fijo**: Puede registrar materiales usados en una cita.
+
+### 📅 Gestión de Citas y Horarios
+- El sistema debe calcular horarios disponibles automáticamente en base a:
+  - Duración del tratamiento.
+  - Citas ya agendadas de ese empleado.
+  - Horario laboral (09:00 a 13:00 y de 14:00 a 18:00).
+  - No se permiten citas los domingos.
+- Al agendar, se debe validar que no haya superposición con otras citas del mismo empleado.
+- Si la cita se agenda con paquete, validar que esté dentro del período de validez.
+
+### 🧾 Pagos y Estados
+- El pago de una cita individual se registra cuando la cita pasa a estado "realizada".
+- El pago de un paquete se registra en la compra (fechaCompra).
+- Las citas canceladas no generan reembolso en paquetes.
+
+### 🧑‍🏭 Empleados Fijos y Suplentes
+- Al insertar/eliminar/actualizar un empleado fijo, se actualiza automáticamente la cantidadPersonalFijo en el área correspondiente.
+- Los suplentes no están asignados a áreas, pero pueden atender citas.
+- Un suplente no puede trabajar más de 20 horas semanales.
+
+### 📦 Stock de Materiales
+- Al insertar en materialesPorCita, se descuenta automáticamente del stock en materiales.
+- Si el stock queda negativo, se debe lanzar un error.
+
+### 📊 Reportes Obligatorios (funciones SQL)
+1. **Top 3 tratamientos más solicitados**.
+2. **Tratamientos y paquetes solicitados por un cliente en un periodo de tiempo**.
+3. **Lista de empleados que atendieron a un cliente**.
+4. **Informe de discrepancias mensual** por tratamiento: planificados vs realizados, materiales planificados vs usados.
+5. **Informe de ingresos mensual**: cantidad y monto de paquetes vendidos, tratamientos individuales, ingresos totales.
+6. **Localización de personal por distrito**.
+
+## 🔁 TRIGGERS Y FUNCIONES SQL REQUERIDAS
+
+Necesito que generes el código SQL para los siguientes triggers (en orden de prioridad):
+
+1. ✅ **validar_tratamiento** (BEFORE INSERT OR UPDATE) → precio, duración, nombre.
+2. ✅ **validar_empleado** (BEFORE INSERT OR UPDATE) → CI, teléfono, horas, esFijo.
+3. ✅ **validar_cita** (BEFORE INSERT OR UPDATE) → fecha, hora, duración, conflicto de horario.
+4. ✅ **actualizar_cantidad_personal_fijo** (AFTER INSERT OR UPDATE OR DELETE ON empleados) → actualiza áreas.cantidadPersonalFijo.
+5. ✅ **validar_cita_en_paquete** (BEFORE INSERT OR UPDATE ON citas) → si idPaqueteVendido no es nulo, verifica rango de fechas.
+6. ✅ **actualizar_stock_materiales** (AFTER INSERT ON materialesPorCita) → descuenta stock de materiales.
+7. ✅ **finalizar_cita** (BEFORE UPDATE ON citas) → cuando estado pasa a 'realizada', registrar pago.
+8. ✅ **actualizar_citas_vencidas** (se puede llamar desde un schedule o trigger) → cambiar estado 'pendiente' a 'cancelada' si fecha pasada.
+9. ✅ **validar_no_conflicto_horario_empleado** (dentro de validar_cita) → evita superposición de citas para mismo empleado.
+
+## 📄 OUTPUT ESPERADO
+
+Genera un **archivo SQL completo y autocontenido** que incluya:
+
+1. **Tablas principales** (con relaciones y restricciones).
+2. **Funciones auxiliares** (validaciones tipo es_solo_letras, es_solo_numeros, validar_rango, etc.).
+3. **Triggers** asociados a cada tabla.
+4. **Funciones de reporte** (consultas para obtener los informes requeridos).
+5. **Comentarios** explicativos en cada sección.
+
+El código debe ser compatible con **PostgreSQL 18** y ejecutable directamente en pgAdmin o psql sin errores de sintaxis.
+
+No uses `$$` para delimitar funciones si puede causar problemas. Usa en su lugar: `LANGUAGE plpgsql AS '...'` o usa la sintaxis estándar con `$$` pero bien escrita.
+
+Asegúrate de que todas las funciones de trigger tengan `RETURNS TRIGGER` y que los triggers llamen correctamente a esas funciones.
+
+Incluye ejemplos de llamada a los reportes al final del script.
