@@ -1,9 +1,9 @@
-const tratamientoService = require('../services/tratamientoService');
+const distritoService = require('../services/distritoService');
 
-const tratamientoController = {
+const distritoController = {
   async listarTodos(req, res) {
     try {
-      const datos = await tratamientoService.listarTratamientos();
+      const datos = await distritoService.listarDistritos();
       res.json({ success: true, count: datos.length, data: datos });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -13,7 +13,7 @@ const tratamientoController = {
   async obtenerPorId(req, res) {
     try {
       const id = parseInt(req.params.id);
-      const dato = await tratamientoService.obtenerTratamiento(id);
+      const dato = await distritoService.obtenerDistrito(id);
       res.json({ success: true, data: dato });
     } catch (error) {
       res.status(404).json({ success: false, error: error.message });
@@ -22,7 +22,7 @@ const tratamientoController = {
 
   async crear(req, res) {
     try {
-      const dato = await tratamientoService.crearTratamiento(req.body);
+      const dato = await distritoService.crearDistrito(req.body);
       res.status(201).json({ success: true, data: dato });
     } catch (error) {
       res.status(400).json({ success: false, error: error.message });
@@ -31,12 +31,12 @@ const tratamientoController = {
 
   async eliminar(req, res) {
     try {
-      await tratamientoService.eliminarTratamiento(parseInt(req.params.id));
-      res.json({ success: true, message: 'Tratamiento eliminado' });
+      await distritoService.eliminarDistrito(parseInt(req.params.id));
+      res.json({ success: true, message: 'Distrito eliminado' });
     } catch (error) {
       res.status(404).json({ success: false, error: error.message });
     }
   }
 };
 
-module.exports = tratamientoController;
+module.exports = distritoController;

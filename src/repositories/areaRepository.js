@@ -17,7 +17,7 @@ class AreaRepository {
     }
 
     async guardar(datos){
-        const result = await pool.query('INSERT INTO areas (nombre) VALUES ($1) RETURNING *', [datos.nombre]);
+        const result = await pool.query('INSERT INTO areas (nombre, cantidadpersonalfijo) VALUES ($1, 0) RETURNING *', [datos.nombre]);
         return result.rows[0];
     }
 

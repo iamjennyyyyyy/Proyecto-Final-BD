@@ -15,7 +15,8 @@ const categoriaService = {
 
         async crearCategoria(datos){
             const area = await areaRepository.obtenerCategoriaPorId(datos.idarea);
-            if(!area) throw new Error('El área de la categoría no existe')
+            if(!area) throw new Error('El área de la categoría no existe');
+            await categoriaRepository.crear(datos);
         },
 
         async modificarCategoria(id, datos){
@@ -23,7 +24,7 @@ const categoriaService = {
                     throw new Error('El nombre de la categoría es obligatorio y debe contener entre 3 y 50 caracteres');
                 if(await categoriaRepository.buscarPorNombre(datos.nombre))
                     throw new Error('Ya existe una categoría con ese nombre');
-                return await categoriaRepository.modificarNombre(id, datos);
+                return await categoriaRepository.actualizar(id, datos);
             },
 
         async eliminarCategoria(id){

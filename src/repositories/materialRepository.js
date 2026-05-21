@@ -1,19 +1,19 @@
 const pool = require('../config/database');
 
-class CategoriaRepository{
+class materialRepository{
 
-    async listarTodos(){
-        const result = await pool.query('SELECT * FROM categorias');
+    async listarTodos() {
+        const result = await pool.query('SELECT * FROM materiales');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT * FROM categorias WHERE idcategoria = $1', [id]);
+        const result = await pool.query('SELECT * FROM materiales WHERE idmaterial = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre){
-        const result = await pool.query('SELECT * FROM categorias WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT * FROM materiales WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -26,17 +26,17 @@ class CategoriaRepository{
             valores.push(datos.nombre);
         }
         
-        if (datos.idarea !== undefined) {
-            campos.push(`idarea`);
-            valores.push(datos.idarea);
+        if (datos.cantidad !== undefined) {
+            campos.push(`cantidad`);
+            valores.push(datos.cantidad);
         }
         
         if (campos.length === 0) {
-            throw new Error('No hay datos para crear la categoría');
+            throw new Error('No hay datos para crear el material');
         }
         
         const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
-        const query = `INSERT INTO categorias (${campos.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+        const query = `INSERT INTO materiales (${campos.join(', ')}) VALUES (${placeholders}) RETURNING *`;
         
         const result = await pool.query(query, valores);
         return result.rows[0];
@@ -53,9 +53,9 @@ class CategoriaRepository{
             contador++;
         }
         
-        if (datos.idarea !== undefined) {
-            sets.push(`idarea = $${contador}`);
-            valores.push(datos.idarea);
+        if (datos.cantidad !== undefined) {
+            sets.push(`cantidad = $${contador}`);
+            valores.push(datos.cantidad);
             contador++;
         }
         
@@ -64,15 +64,20 @@ class CategoriaRepository{
         }
         
         valores.push(id);
-        const query = `UPDATE categorias SET ${sets.join(', ')} WHERE idcategoria = $${contador} RETURNING *`;
+        const query = `UPDATE materiales SET ${sets.join(', ')} WHERE idmaterial = $${contador} RETURNING *`;
         
         const result = await pool.query(query, valores);
         return result.rows[0];
     }
 
+    async aumentarCantidad(id, cantidad){
+        const result = await pool.query('UPDATE materiales SET cantidad = $1 WHERE idmaterial = $2 RETURNING *', [cantidad, id]);
+        return result.rows[0];
+    }
+
     async eliminar(id){
-        await pool.query('DELETE FROM categorias WHERE idcategoria = $1', [id]);
+        await pool.query('DELETE FROM materiales WHERE idmaterial = $1', [id]);
     }
 }
 
-module.exports = new CategoriaRepository();
+module.exports = new MaterialRepository();
