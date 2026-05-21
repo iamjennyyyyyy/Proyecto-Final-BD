@@ -1,27 +1,67 @@
 const pool = require('../config/database');
 
 class DistritoRepository {
-  async listarTodos() {
-    const result = await pool.query('SELECT * FROM distritos ORDER BY iddistrito');
-    return result.rows;
-  }
 
-  async buscarPorId(id) {
-    const result = await pool.query('SELECT * FROM distritos WHERE iddistrito = $1', [id]);
-    return result.rows[0];
-  }
+	async listarTodos() {
+		const result = await pool.query('SELECT * FROM distritos ORDER BY iddistrito');
+		return result.rows;
+	}
 
-  async guardar({ nombreDistrito }) {
-    const result = await pool.query(
-      'INSERT INTO distritos (nombredistrito) VALUES ($1) RETURNING *',
-      [nombreDistrito]
-    );
-    return result.rows[0];
-  }
+	async buscarPorId(id) {
+		const result = await pool.query('SELECT * FROM distritos WHERE iddistrito = $1', [id]);
+		return result.rows[0];
+	}
 
-  async eliminar(id) {
-    await pool.query('DELETE FROM distritos WHERE iddistrito = $1', [id]);
-  }
+	async buscarPorNombre(nombre){
+        const result = await pool.query('SELECT * FROM distritos WHERE nombre = $1', [nombre]);
+        return result.rows[0];
+    }
+
+	async crear(datos) {
+		const valores = [];
+		const campos = [];
+		
+		if (datos.nombre !== undefined) {
+		campos.push(`nombre`);
+		valores.push(datos.nombre);
+		}
+		
+		if (campos.length === 0) {
+		throw new Error('No hay datos para crear el distrito');
+		}
+		
+		const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
+		const query = `INSERT INTO distritos (${campos.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+		
+		const result = await pool.query(query, valores);
+		return result.rows[0];
+	}
+	
+	async actualizar(id, datos) {
+		const valores = [];
+		const sets = [];
+		let contador = 1;
+		
+		if (datos.nombre !== undefined) {
+		sets.push(`nombre = $${contador}`);
+		valores.push(datos.nombre);
+		contador++;
+		}
+		
+		if (sets.length === 0) {
+		throw new Error('No hay datos para actualizar');
+		}
+		
+		valores.push(id);
+		const query = `UPDATE distritos SET ${sets.join(', ')} WHERE iddistrito = $${contador} RETURNING *`;
+		
+		const result = await pool.query(query, valores);
+		return result.rows[0];
+	}
+
+	async eliminar(id) {
+		await pool.query('DELETE FROM distritos WHERE iddistrito = $1', [id]);
+	}
 }
 
 module.exports = new DistritoRepository();

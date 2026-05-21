@@ -1,13 +1,13 @@
 // models/Tratamiento.js
 class Tratamiento {
   constructor(datos = {}) {
-      this.idTratamiento = datos.idTratamiento || null;
-      this.idCategoria = datos.idCategoria || null;
+      this.idtratamiento = datos.idtratamiento || null;
+      this.idcategoria = datos.idcategoria || null;
       this.nombre = datos.nombre || '';
       this.precio = datos.precio || 0;
       this.duracion = datos.duracion || 0;
       this.descripcion = datos.descripcion || '';
-      this.frecuenciaSolicitudMensual = datos.frecuenciaSolicitudMensual || 0;
+      this.frecuenciasolicitudmensual = datos.frecuenciasolicitudmensual || 0;
   }
 
   validar() {
@@ -35,10 +35,10 @@ class Tratamiento {
       if (this.duracion % 15 !== 0) {
           throw new Error('La duración debe ser múltiplo de 15 minutos');
       }
-      if (!this.idCategoria) {
+      if (!this.idcategoria) {
           throw new Error('La categoría es obligatoria');
       }
-      if (this.frecuenciaSolicitudMensual < 0) {
+      if (this.frecuenciasolicitudmensual < 0) {
           throw new Error('La frecuencia mensual no puede ser negativa');
       }
       return true;

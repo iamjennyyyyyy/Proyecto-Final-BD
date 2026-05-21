@@ -6,7 +6,7 @@ class DistritoService {
     return await distritoRepository.listarTodos();
   }
 
-  async obtenerDistrito(id) {
+  async obtenerDistritoPorId(id) {
     const distrito = await distritoRepository.buscarPorId(id);
     if (!distrito) throw new Error('Distrito no encontrado');
     return distrito;
@@ -15,11 +15,19 @@ class DistritoService {
   async crearDistrito(datos) {
     const distrito = new Distrito(datos);
     distrito.validar();
-    return await distritoRepository.guardar(datos);
+    if(await distritoRepository.buscarPorNombre(distrito.nombre)) throw new Error('Ya existe un distrito con ese nombre');
+    return await distritoRepository.crear(datos);
+  }
+
+  async actualizarDistrito(id, datos) {
+    const distrito = new Distrito(datos);
+    distrito.validar();
+    if(!this.obtenerDistritoPorId(id)) throw new Error('Distrito no encontrado');
+    if(await distritoRepository.buscarPorNombre(distrito.nombre)) throw new Error('Ya existe un distrito con ese nombre');
+    return await distritoRepository.actualizar(id, datos);
   }
 
   async eliminarDistrito(id) {
-    await this.obtenerDistrito(id);
     await distritoRepository.eliminar(id);
   }
 }

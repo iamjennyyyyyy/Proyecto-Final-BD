@@ -1,9 +1,9 @@
 // models/Area.js
 class Area {
     constructor(datos = {}) {
-        this.idArea = datos.idArea || null;
+        this.idarea = datos.idarea || null;
         this.nombre = datos.nombre || '';
-        this.cantidadPersonalFijo = datos.cantidadPersonalFijo || 0;
+        this.cantidadpersonalfijo = datos.cantidadpersonalfijo || 0;
     }
 
     validar() {
@@ -16,7 +16,7 @@ class Area {
         if (this.nombre.trim().length > 100) {
             throw new Error('El nombre del área no puede superar los 100 caracteres');
         }
-        if (this.cantidadPersonalFijo < 0) {
+        if (this.cantidadpersonalfijo < 0) {
             throw new Error('La cantidad de personal fijo no puede ser negativa');
         }
         return true;

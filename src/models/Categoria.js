@@ -1,9 +1,9 @@
 // models/Categoria.js
 class Categoria {
     constructor(datos = {}) {
-        this.idCategoria = datos.idCategoria || null;
+        this.idcategoria = datos.idcategoria || null;
         this.nombre = datos.nombre || '';
-        this.idArea = datos.idArea || null;
+        this.idarea = datos.idarea || null;
     }
 
     validar() {
@@ -16,7 +16,7 @@ class Categoria {
         if (this.nombre.trim().length > 100) {
             throw new Error('El nombre de la categoría no puede superar los 100 caracteres');
         }
-        if (!this.idArea) {
+        if (!this.idarea) {
             throw new Error('El área es obligatoria');
         }
         return true;

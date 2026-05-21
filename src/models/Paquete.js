@@ -1,10 +1,10 @@
 // models/Paquete.js
 class Paquete {
     constructor(datos = {}) {
-        this.idPaquete = datos.idPaquete || null;
+        this.idpaquete = datos.idpaquete || null;
         this.nombre = datos.nombre || '';
         this.precio = datos.precio || 0;
-        this.duracionTotal = datos.duracionTotal || 0;
+        this.duraciontotal = datos.duraciontotal || 0;
         this.descuento = datos.descuento || 0;
     }
 
@@ -21,10 +21,10 @@ class Paquete {
         if (this.precio > 10000) {
             throw new Error('El precio no puede superar los 10,000');
         }
-        if (this.duracionTotal <= 0) {
+        if (this.duraciontotal <= 0) {
             throw new Error('La duración total debe ser mayor a 0');
         }
-        if (this.duracionTotal > 480) {
+        if (this.duraciontotal > 480) {
             throw new Error('La duración total no puede superar las 8 horas');
         }
         if (this.descuento < 0 || this.descuento > 100) {

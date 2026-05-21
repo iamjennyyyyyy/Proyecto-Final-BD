@@ -80,4 +80,4 @@ class materialRepository{
     }
 }
 
-module.exports = new MaterialRepository();
+module.exports = new materialRepository();

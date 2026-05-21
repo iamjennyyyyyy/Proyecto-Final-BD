@@ -73,7 +73,11 @@ body {
 .btn-d { background: var(--white); color: var(--danger); border: 1.5px solid #fecaca; }
 .btn-d:hover { background: var(--danger-l); border-color: var(--danger); }
 .btn-s { padding: 5px 10px; font-size: 11.5px; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-g); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+.actions { white-space: nowrap; }
+.actions .btn + .btn { margin-left: 4px; }
 
 /* Cards */
 .card { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow); border: 1px solid #f1f5f9; overflow: hidden; }

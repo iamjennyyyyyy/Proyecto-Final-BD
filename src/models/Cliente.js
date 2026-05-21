@@ -1,9 +1,9 @@
 // models/Cliente.js
 class Cliente {
     constructor(datos = {}) {
-        this.idCliente = datos.idCliente || null;
+        this.idcliente = datos.idcliente || null;
         this.nombre = datos.nombre || '';
-        this.ci = datos.ci || '';
+        this.dni = datos.dni || '';
         this.telefono = datos.telefono || '';
         this.email = datos.email || '';
     }
@@ -16,17 +16,17 @@ class Cliente {
             throw new Error('El nombre debe tener al menos 3 caracteres');
         }
 
-        if (!this.ci || this.ci.trim() === '') {
+        if (!this.dni || this.dni.trim() === '') {
             throw new Error('La cédula de identidad es obligatoria');
         }
-        const ciLimpio = this.ci.toString().replace(/[\s\.\-]/g, '');
-        if (!/^\d+$/.test(ciLimpio)) {
+        const dniLimpio = this.dni.toString().replace(/[\s\.\-]/g, '');
+        if (!/^\d+$/.test(dniLimpio)) {
             throw new Error('La cédula debe contener solo números');
         }
-        if (ciLimpio.length < 7 || ciLimpio.length > 11) {
-            throw new Error('La cédula debe tener entre 7 y 11 dígitos');
+        if (dniLimpio.length != 11) {
+            throw new Error('La cédula debe tener 11 dígitos');
         }
-        this.ci = ciLimpio;
+        this.dni = dniLimpio;
 
         if (this.telefono) {
             const telLimpio = this.telefono.toString().replace(/[\s\-\(\)]/g, '');
