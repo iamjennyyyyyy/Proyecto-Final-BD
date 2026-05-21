@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belleza y Relajación</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-h">
+      <h1>Belleza &amp; Relax</h1>
+      <p>SPA Manager</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#/" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span> <span>Dashboard</span>
+      </a>
+      <a href="#/areas" class="nav-item" data-page="areas">
+        <span class="nav-icon">🏢</span> <span>Áreas</span>
+      </a>
+      <a href="#/tratamientos" class="nav-item" data-page="tratamientos">
+        <span class="nav-icon">💆</span> <span>Tratamientos</span>
+      </a>
+      <a href="#/clientes" class="nav-item" data-page="clientes">
+        <span class="nav-icon">👤</span> <span>Clientes</span>
+      </a>
+      <a href="#/distritos" class="nav-item" data-page="distritos">
+        <span class="nav-icon">📍</span> <span>Distritos</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="content-h">
+      <h2 id="pageTitle">Dashboard</h2>
+    </header>
+    <div id="pageContent" class="content-b"></div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

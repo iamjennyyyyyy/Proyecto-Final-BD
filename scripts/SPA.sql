@@ -1,18 +1,18 @@
 create table areas(
   idArea Serial primary key,
-  nombrearea varchar(200) not null,
+  nombre varchar(200) not null,
   cantidadPersonalFijo integer not null
 );
 
 create table categorias(
   idcategoria Serial primary key,
-  nombrecategoria Varchar(200) not null,
+  nombre Varchar(200) not null,
   idArea integer references areas(idArea)
 );
 
 create table tratamientos(
   idtratamiento SERIAL primary key,
-  nombretratamiento VARCHAR(100) not null unique,
+  nombre VARCHAR(100) not null unique,
   precio numeric(10,2) not null,
   descripcion text,
   duracion integer not null,
@@ -21,13 +21,13 @@ create table tratamientos(
 
 create table Distritos(
 idDistrito Serial primary key,
-nombreDistrito VARCHAR(100) unique
+nombre VARCHAR(100) unique
 
 );
 
 create table empleados(
  idEmpleado Serial primary key,
- nombreEmpleado VARCHAR(100) not null,
+ nombre VARCHAR(100) not null,
  especialidad VARCHAR(100) not null,
  horasTrabajo integer not null,
  direccion text not null,
@@ -39,18 +39,18 @@ create table empleados(
 
 create table clientes(
   idcliente Serial primary key,
-  nombrecliente VARCHAR(100) not null 
+  nombre VARCHAR(100) not null 
 );
 
 create table paquetes(
   idpaquete SERIAL primary key,
-  nombrepaquete VARCHAR(100) not null unique,
+  nombre VARCHAR(100) not null unique,
   precio numeric(10,2) not null 
 );
 
 create table materiales(
   idmaterial Serial primary key,
-  nombrematerial Varchar(100) not null
+  nombre Varchar(100) not null
 );
 
 create table contenidopaquete(
