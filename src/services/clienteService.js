@@ -1,5 +1,5 @@
 const clienteRepository = require('../repositories/clienteRepository');
-import Cliente from '../models/Cliente';
+const Cliente = require('../models/Cliente');
 
 class ClienteService {
     async listarClientes() {

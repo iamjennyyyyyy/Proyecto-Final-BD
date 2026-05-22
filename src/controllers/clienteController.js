@@ -3,8 +3,8 @@ const clienteService = require('../services/clienteService');
 const clienteController = {
     async listarTodos(req, res) {
         try {
-        const datos = await clienteService.listarClientes();
-        res.json({ success: true, count: datos.length, data: datos });
+        const clientes = await clienteService.listarClientes();
+        res.json({ success: true, count: clientes.length, data: datos });
         } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         }
@@ -13,8 +13,8 @@ const clienteController = {
     async obtenerPorId(req, res) {
         try {
         const id = parseInt(req.params.id);
-        const dato = await clienteService.obtenerClientePorId(id);
-        res.json({ success: true, data: dato });
+        const cliente = await clienteService.obtenerClientePorId(id);
+        res.json({ success: true, data: cliente });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
         }
@@ -22,8 +22,8 @@ const clienteController = {
 
     async crear(req, res) {
         try {
-        const dato = await clienteService.crearCliente(req.body);
-        res.status(201).json({ success: true, data: dato });
+        const cliente = await clienteService.crearCliente(req.body);
+        res.status(201).json({ success: true, data: cliente });
         } catch (error) {
         res.status(400).json({ success: false, error: error.message });
         }

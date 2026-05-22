@@ -3,8 +3,8 @@ const distritoService = require('../services/distritoService');
 const distritoController = {
     async listarTodos(req, res) {
         try {
-        const datos = await distritoService.listarDistritos();
-        res.json({ success: true, count: datos.length, data: datos });
+        const distritos = await distritoService.listarDistritos();
+        res.json({ success: true, count: distritos.length, data: distritos });
         } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         }
@@ -13,8 +13,8 @@ const distritoController = {
     async obtenerPorId(req, res) {
         try {
         const id = parseInt(req.params.id);
-        const dato = await distritoService.obtenerDistritoPorId(id);
-        res.json({ success: true, data: dato });
+        const distrito = await distritoService.obtenerDistritoPorId(id);
+        res.json({ success: true, data: distrito });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
         }
@@ -22,8 +22,8 @@ const distritoController = {
 
     async crear(req, res) {
         try {
-        const dato = await distritoService.crearDistrito(req.body);
-        res.status(201).json({ success: true, data: dato });
+        const distrito = await distritoService.crearDistrito(req.body);
+        res.status(201).json({ success: true, data: distrito });
         } catch (error) {
         res.status(400).json({ success: false, error: error.message });
         }

@@ -3,8 +3,8 @@ const tratamientoService = require('../services/tratamientoService');
 const tratamientoController = {
     async listarTodos(req, res) {
         try {
-        const datos = await tratamientoService.listarTratamientos();
-        res.json({ success: true, count: datos.length, data: datos });
+        const tratamientos = await tratamientoService.listarTratamientos();
+        res.json({ success: true, count: tratamientos.length, data: tratamientos });
         } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         }
@@ -13,8 +13,8 @@ const tratamientoController = {
     async obtenerPorId(req, res) {
         try {
         const id = parseInt(req.params.id);
-        const dato = await tratamientoService.obtenerTratamientoPorId(id);
-        res.json({ success: true, data: dato });
+        const tratamiento = await tratamientoService.obtenerTratamientoPorId(id);
+        res.json({ success: true, data: tratamiento });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
         }
@@ -22,8 +22,8 @@ const tratamientoController = {
 
     async crear(req, res) {
         try {
-        const dato = await tratamientoService.crearTratamiento(req.body);
-        res.status(201).json({ success: true, data: dato });
+        const tratamiento = await tratamientoService.crearTratamiento(req.body);
+        res.status(201).json({ success: true, data: tratamiento });
         } catch (error) {
         res.status(400).json({ success: false, error: error.message });
         }

@@ -1,5 +1,5 @@
 const areaRepository = require('../repositories/areaRepository');
-import Area from '../models/Area';
+const Area = require('../models/Area');
 const areaService = {
 
     async listarAreas(){

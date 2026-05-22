@@ -11,6 +11,9 @@ const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const distritoRoutes = require('./routes/distritoRoutes');
 const materialRoutes = require('./routes/materialRoutes');
+const empleadoRoutes = require('./routes/empleadoRoutes');
+const paqueteRoutes = require('./routes/paqueteRoutes');
+const paqueteVendidoRoutes = require('./routes/paqueteVendidoRoutes');
 
 app.use('/api/areas', areaRoutes);
 app.use('/api/categorias', categoriaRoutes);
@@ -18,6 +21,9 @@ app.use('/api/tratamientos', tratamientoRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/distritos', distritoRoutes);
 app.use('/api/materiales', materialRoutes);
+app.use('/api/empleados', empleadoRoutes);
+app.use('/api/paquetes', paqueteRoutes);
+app.use('/api/paquetes-vendidos', paqueteVendidoRoutes);
 
 app.listen(3000, () => {
   console.log('Servidor corriendo en http://localhost:3000');

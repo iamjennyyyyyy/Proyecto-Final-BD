@@ -4,6 +4,7 @@ class empleadoRepository{
 
     async listarTodos() {
         const result = await pool.query('SELECT * FROM empleados');
+        return result.rows;
     }
 
     async buscarPorId(id){
@@ -117,7 +118,7 @@ class empleadoRepository{
             contador++;
         }
         
-        if (datos.idDistrito !== undefined) {
+        if (datos.iddistrito !== undefined) {
             sets.push(`iddistrito = $${contador}`);
             valores.push(datos.iddistrito);
             contador++;
@@ -141,4 +142,4 @@ class empleadoRepository{
     }
 }
 
-module.exports = new EmpleadoRepository();
+module.exports = new empleadoRepository();
