@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const materialController = require('../controllers/materialController');
 
-router.get('/', materialController.listarTodos);
-router.get('/:id', materialController.obtenerPorId);
-router.post('/', materialController.crear);
+routes.get('/', materialController.listarTodos);
+routes.get('/:id', materialController.obtenerPorId);
+routes.post('/', materialController.crear);
 router.put('/:id', materialController.actualizar);
-router.delete('/:id', materialController.eliminar);
+routes.delete('/:id', materialController.eliminar);
 
 module.exports = router;

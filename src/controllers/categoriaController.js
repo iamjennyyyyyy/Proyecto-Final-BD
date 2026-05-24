@@ -26,10 +26,10 @@ const categoriaController = {
     async crear(req,res){
         try{
             const categoria = await categoriaService.crearCategoria(req.body);
-            res.status(201).json({success: true, data: categoria});
+            res.json({success: true, data: categoria});
         }
         catch(error){
-            res.status(400).json({success: false, error: error.message});
+            res.status(500).json({success: false, error: error.message});
         }
     },
 
@@ -40,7 +40,7 @@ const categoriaController = {
             res.json({success: true, data: categoria});
         }
         catch(error){
-            res.status(400).json({success: false, error: error.message});
+            res.status(500).json({success: false, error: error.message});
         }
     },
 
@@ -50,7 +50,7 @@ const categoriaController = {
             res.json({success: true, message: 'Categoría eliminada'});
         }
         catch(error){
-            res.status(404).json({success: false, error: error.message});
+            res.status(500).json({success: false, error: error.message});
         }
     }
 }

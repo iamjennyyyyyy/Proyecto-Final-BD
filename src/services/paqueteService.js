@@ -1,38 +1,38 @@
 const paqueteRepository = require('../repositories/paqueteRepository');
-const Paquete = require('../models/Paquete');
+import Paquete from '../models/Paquete';
 
-class PaqueteService {
-  async listarPaquetes() {
-    return await paqueteRepository.listarTodos();
-  }
+const paqueteService = {
 
-  async obtenerPaquetePorId(id) {
-    const paquete = await paqueteRepository.buscarPorId(id);
-    if (!paquete) throw new Error('Paquete no encontrado');
-    return paquete;
-  }
+    async listarPaquetes(){
+        return await paqueteRepository.listarTodos();
+    },
 
-  async crearPaquete(datos) {
-    const paquete = new Paquete(datos);
-    paquete.validar();
-    if(await paqueteRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un paquete con ese nombre');
-    return await paqueteRepository.crear(datos);
-  }
+    async obtenerPaquetesPorId(id){
+        const paquete = await paqueteRepository.buscarPorId(id);
+        if(!paquete) throw new Error('Paquete no encontrado');
+        return paquete;
+    },
 
-  async actualizarPaquete(id, datos) {
-    const existente = await paqueteRepository.buscarPorId(id);
-    if (!existente) throw new Error('Paquete no encontrado');
-    if(datos.nombre && datos.nombre !== existente.nombre && await paqueteRepository.buscarPorNombre(datos.nombre))
-      throw new Error('Ya existe un paquete con ese nombre');
-    const paquete = new Paquete(datos);
-    paquete.validar();
-    return await paqueteRepository.actualizar(id, datos);
-  }
+    async crearPaquete(datos){
+        const paquete = new Paquete(datos);
+        paquete.validar();
+        if(await paqueteRepository.buscarPorNombre(paquete.nombre)) throw new Error('Ya existe un paquete con ese nombre');
+        return await paqueteRepository.crear(datos);
+    },
 
-  async eliminarPaquete(id) {
-    await this.obtenerPaquetePorId(id);
-    await paqueteRepository.eliminar(id);
-  }
+    async actualizarPaquete(id, datos){
+        const existente = await paqueteRepository.buscarPorId(id);
+        if(!existente) throw new Error('Paquete no encontrado');
+        if(datos.nombre && datos.nombre !== existente.nombre && await paqueteRepository.buscarPorNombre(datos.nombre))
+            throw new Error('Ya existe un paquete con ese nombre');
+        const paquete = new Paquete(datos);
+        paquete.validar();
+        return await paqueteRepository.actualizar(id, datos);
+    },
+
+    async eliminarPaquete(id){
+        await paqueteRepository.eliminar(id);
+    }
 }
 
-module.exports = new PaqueteService();
+module.exports = paqueteService;
