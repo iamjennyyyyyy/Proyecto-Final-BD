@@ -27,7 +27,7 @@ const areaService = {
             throw new Error('Ya existe un área con ese nombre');
         const area = new Area(datos);
         area.validar();
-        return await areaRepository.modificarNombre(id, datos);
+        return await areaRepository.actualizar(id, datos);
     },
 
     async eliminarArea(id){

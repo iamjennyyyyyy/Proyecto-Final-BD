@@ -4,7 +4,7 @@ const clienteController = {
     async listarTodos(req, res) {
         try {
         const clientes = await clienteService.listarClientes();
-        res.json({ success: true, count: clientes.length, data: datos });
+        res.json({ success: true, count: clientes.length, data: clientes });
         } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         }
