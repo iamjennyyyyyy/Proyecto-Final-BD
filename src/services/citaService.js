@@ -1,474 +1,111 @@
-/**
- * ============================================
- * SERVICIO DE [ENTIDAD]
- * ============================================
- * 
- * ¿QUÉ ES UN SERVICE?
- * Es el "cerebro" de la aplicación. Contiene TODA la lógica de negocio.
- * 
- * ¿QUÉ HACE UN SERVICE?
- * 1. Contiene las reglas de negocio (validaciones complejas)
- * 2. Coordina la llamada a uno o más Repositories
- * 3. Procesa datos antes de enviarlos al Controller
- * 4. Maneja transacciones que involucran múltiples tablas
- * 
- * ¿QUÉ NO DEBE HACER UN SERVICE?
- * ❌ Hablar directamente con la base de datos (eso es del Repository)
- * ❌ Manejar peticiones HTTP (req, res) (eso es del Controller)
- * ❌ Renderizar vistas (eso es del Controller)
- * 
- * REGLA DE ORO: El Service es la única capa que REPOSITORIES conocen.
- */
-
-// ============================================
-// 1. IMPORTS
-// ============================================
-
-// Importar el Repository para acceder a la base de datos
 const citaRepository = require('../repositories/citaRepository');
+const clienteRepository = require('../repositories/clienteRepository');
+const tratamientoRepository = require('../repositories/tratamientoRepository');
+const empleadoRepository = require('../repositories/empleadoRepository');
+const paqueteVendidoRepository = require('../repositories/paqueteVendidoRepository');
 
-// Importar el Model si necesitas crear objetos
-const Cita = require('../models/Cita');
+const citaService = {
 
-// Importar otros servicios si es necesario
-// const otroService = require('./otroService');
+    async listarCitas() {
+        return await citaRepository.listarTodos();
+    },
 
+    async obtenerCitaPorId(id) {
+        const cita = await citaRepository.buscarPorId(id);
+        if (!cita) throw new Error('Cita no encontrada');
+        return cita;
+    },
 
-// ============================================
-// 2. CLASE DEL SERVICE
-// ============================================
+    async listarCitasPorCliente(idCliente) {
+        const cliente = await clienteRepository.buscarPorId(idCliente);
+        if (!cliente) throw new Error('Cliente no encontrado');
+        return await citaRepository.buscarPorCliente(idCliente);
+    },
 
-class CitaService {
-  
-  // ==========================================
-  // SECCIÓN 1: MÉTODOS DE LECTURA
-  // ==========================================
-  
-  /**
-   * 📌 MÉTODO 1: LISTAR TODOS LOS REGISTROS
-   * 
-   * ¿QUÉ HACE? Devuelve todos los registros de la entidad
-   * ¿REGLAS DE NEGOCIO? Puede filtrar según rol del usuario, etc.
-   */
-  async listarTodos() {
-    try {
-      // Llamar al repository
-      const datos = await citaRepository.findAll();
-      
-      // Aquí podrías aplicar reglas de negocio como:
-      // - Si el usuario no es admin, no mostrar ciertos campos
-      // - Ordenar de cierta forma
-      // - Calcular campos adicionales
-      
-      return datos;
-    } catch (error) {
-      throw new Error(`Error al listar: ${error.message}`);
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 2: OBTENER POR ID
-   * 
-   * ¿QUÉ HACE? Devuelve un registro específico
-   * ¿REGLAS DE NEGOCIO? Verificar permisos, etc.
-   */
-  async obtenerPorId(id) {
-    try {
-      // Validar que el ID sea válido (regla de negocio)
-      if (!id || id <= 0) {
-        throw new Error('ID inválido');
-      }
-      
-      const dato = await citaRepository.findById(id);
-      
-      // Regla de negocio: Si no existe, lanzar error
-      if (!dato) {
-        throw new Error('Registro no encontrado');
-      }
-      
-      // Aquí podrías aplicar reglas como:
-      // - Si el registro está desactivado, no mostrarlo (soft delete)
-      
-      return dato;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 3: BUSCAR POR TÉRMINO
-   * 
-   * ¿QUÉ HACE? Busca registros que coincidan con el término
-   * ¿REGLAS DE NEGOCIO? Mínimo 3 caracteres, etc.
-   */
-  async buscarPorTermino(termino) {
-    try {
-      // Regla de negocio: El término debe tener al menos 3 caracteres
-      if (!termino || termino.trim().length < 3) {
-        throw new Error('El término de búsqueda debe tener al menos 3 caracteres');
-      }
-      
-      const resultados = await entidadRepository.searchByTerm(termino);
-      
-      return resultados;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 4: FILTRAR POR CAMPO
-   */
-  async filtrarPorCampo(campo, valor) {
-    try {
-      // Regla de negocio: Validar que el campo exista
-      const camposPermitidos = ['categoria', 'estado', 'distrito'];
-      if (!camposPermitidos.includes(campo)) {
-        throw new Error(`No se puede filtrar por el campo "${campo}"`);
-      }
-      
-      const resultados = await entidadRepository.filterByField(campo, valor);
-      
-      return resultados;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 5: LISTAR CON PAGINACIÓN
-   */
-  async listarConPaginacion(limit, offset) {
-    try {
-      // Regla de negocio: Límites máximos
-      if (limit > 100) {
-        throw new Error('El límite máximo es 100 registros por página');
-      }
-      
-      const datos = await entidadRepository.findWithPagination(limit, offset);
-      const total = await entidadRepository.count();
-      
-      return { datos, total };
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 6: LISTAR POR RANGO DE FECHAS
-   */
-  async listarPorRangoFechas(fechaInicio, fechaFin) {
-    try {
-      // Regla de negocio: Validar formato de fechas
-      const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
-      if (!regexFecha.test(fechaInicio) || !regexFecha.test(fechaFin)) {
-        throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
-      }
-      
-      // Regla de negocio: Fecha inicio no puede ser mayor a fecha fin
-      if (fechaInicio > fechaFin) {
-        throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
-      }
-      
-      const resultados = await entidadRepository.findByDateRange(fechaInicio, fechaFin);
-      
-      return resultados;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 7: CONTAR REGISTROS
-   */
-  async contar() {
-    try {
-      const total = await entidadRepository.count();
-      return total;
-    } catch (error) {
-      throw new Error(`Error al contar: ${error.message}`);
-    }
-  }
-  
-  
-  // ==========================================
-  // SECCIÓN 2: MÉTODOS DE CREACIÓN
-  // ==========================================
-  
-  /**
-   * 📌 MÉTODO 8: CREAR UN REGISTRO
-   * 
-   * ¿QUÉ HACE? Crea un nuevo registro con VALIDACIONES COMPLEJAS
-   * 
-   * DIFERENCIA CON EL CONTROLLER:
-   * - Controller valida que LLEGARON los datos (básico)
-   * - Service valida que los datos sean VÁLIDOS (reglas de negocio)
-   */
-  async crear(datos) {
-    try {
-      // ==========================================
-      // REGLAS DE NEGOCIO (VALIDACIONES COMPLEJAS)
-      // ==========================================
-      
-      // Regla 1: Validar campos obligatorios
-      if (!datos.nombre || datos.nombre.trim() === '') {
-        throw new Error('El nombre es obligatorio');
-      }
-      
-      // Regla 2: Validar longitud mínima
-      if (datos.nombre.length < 3) {
-        throw new Error('El nombre debe tener al menos 3 caracteres');
-      }
-      
-      // Regla 3: Validar que no exista un registro con el mismo nombre
-      const existente = await entidadRepository.findByName(datos.nombre);
-      if (existente) {
-        throw new Error(`Ya existe un registro con el nombre "${datos.nombre}"`);
-      }
-      
-      // Regla 4: Validar rangos numéricos
-      if (datos.precio && datos.precio <= 0) {
-        throw new Error('El precio debe ser mayor a 0');
-      }
-      
-      if (datos.precio && datos.precio > 500) {
-        throw new Error('El precio no puede superar los 500');
-      }
-      
-      // Regla 5: Validar duración
-      if (datos.duracion && datos.duracion % 15 !== 0) {
-        throw new Error('La duración debe ser múltiplo de 15 minutos');
-      }
-      
-      // ==========================================
-      // CREAR EL OBJETO USANDO EL MODEL
-      // ==========================================
-      
-      const nuevoRegistro = new Entidad(datos);
-      nuevoRegistro.validar(); // Validaciones adicionales del Model
-      
-      // ==========================================
-      // GUARDAR EN BASE DE DATOS
-      // ==========================================
-      
-      const guardado = await entidadRepository.save(nuevoRegistro);
-      
-      return guardado;
-      
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 9: CREAR MÚLTIPLES REGISTROS
-   */
-  async crearMultiples(registros) {
-    try {
-      // Regla de negocio: Máximo 100 registros por lote
-      if (registros.length > 100) {
-        throw new Error('No se pueden crear más de 100 registros a la vez');
-      }
-      
-      const resultados = [];
-      
-      for (const registro of registros) {
-        const nuevo = await this.crear(registro);
-        resultados.push(nuevo);
-      }
-      
-      return resultados;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  
-  // ==========================================
-  // SECCIÓN 3: MÉTODOS DE ACTUALIZACIÓN
-  // ==========================================
-  
-  /**
-   * 📌 MÉTODO 10: ACTUALIZAR COMPLETAMENTE
-   */
-  async actualizarCompleto(id, datos) {
-    try {
-      // Regla 1: Verificar que el registro existe
-      const existente = await entidadRepository.findById(id);
-      if (!existente) {
-        throw new Error('Registro no encontrado');
-      }
-      
-      // Regla 2: Aplicar mismas validaciones que al crear
-      if (datos.nombre && datos.nombre.trim() === '') {
-        throw new Error('El nombre no puede estar vacío');
-      }
-      
-      // Regla 3: Si cambia el nombre, verificar que no exista otro con ese nombre
-      if (datos.nombre && datos.nombre !== existente.nombre) {
-        const duplicado = await entidadRepository.findByName(datos.nombre);
-        if (duplicado && duplicado.id !== id) {
-          throw new Error(`Ya existe otro registro con el nombre "${datos.nombre}"`);
+    async listarCitasPorEmpleado(idEmpleado) {
+        const empleado = await empleadoRepository.buscarPorId(idEmpleado);
+        if (!empleado) throw new Error('Empleado no encontrado');
+        return await citaRepository.buscarPorEmpleado(idEmpleado);
+    },
+
+    async listarCitasPorFecha(fecha) {
+        if (!fecha) throw new Error('La fecha es obligatoria');
+        return await citaRepository.buscarPorFecha(fecha);
+    },
+
+    async crearCita(datos) {
+        if (!datos.idCliente) throw new Error('El cliente es obligatorio');
+        if (!datos.idTratamiento) throw new Error('El tratamiento es obligatorio');
+        if (!datos.fecha) throw new Error('La fecha es obligatoria');
+        if (!datos.hora) throw new Error('La hora es obligatoria');
+
+        const cliente = await clienteRepository.buscarPorId(datos.idCliente);
+        if (!cliente) throw new Error('El cliente no existe');
+
+        const tratamiento = await tratamientoRepository.buscarPorId(datos.idTratamiento);
+        if (!tratamiento) throw new Error('El tratamiento no existe');
+
+        if (datos.idEmpleado) {
+            const empleado = await empleadoRepository.buscarPorId(datos.idEmpleado);
+            if (!empleado) throw new Error('El empleado no existe');
         }
-      }
-      
-      const actualizado = await entidadRepository.update(id, datos);
-      
-      return actualizado;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 11: ACTUALIZAR PARCIALMENTE
-   * Solo actualiza los campos que vienen en el objeto
-   */
-  async actualizarParcial(id, datos) {
-    try {
-      // Regla: Verificar que el registro existe
-      const existente = await entidadRepository.findById(id);
-      if (!existente) {
-        throw new Error('Registro no encontrado');
-      }
-      
-      // Solo actualizar los campos que vienen en datos
-      const actualizado = await entidadRepository.updatePartial(id, datos);
-      
-      return actualizado;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  
-  // ==========================================
-  // SECCIÓN 4: MÉTODOS DE ELIMINACIÓN
-  // ==========================================
-  
-  /**
-   * 📌 MÉTODO 12: ELIMINAR FÍSICAMENTE
-   */
-  async eliminar(id) {
-    try {
-      // Regla 1: Verificar que el registro existe
-      const existente = await entidadRepository.findById(id);
-      if (!existente) {
-        throw new Error('Registro no encontrado');
-      }
-      
-      // Regla 2: Verificar que no tenga dependencias (foreign keys)
-      const tieneDependencias = await entidadRepository.hasRelations(id);
-      if (tieneDependencias) {
-        throw new Error('No se puede eliminar porque tiene registros relacionados');
-      }
-      
-      await entidadRepository.delete(id);
-      
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 13: ELIMINAR MÚLTIPLES
-   */
-  async eliminarMultiples(ids) {
-    try {
-      let eliminados = 0;
-      
-      for (const id of ids) {
-        try {
-          await this.eliminar(id);
-          eliminados++;
-        } catch (error) {
-          console.log(`No se pudo eliminar ID ${id}: ${error.message}`);
+
+        if (datos.idPaqVendido) {
+            const paquete = await paqueteVendidoRepository.buscarPorId(datos.idPaqVendido);
+            if (!paquete) throw new Error('El paquete vendido no existe');
         }
-      }
-      
-      return eliminados;
-    } catch (error) {
-      throw error;
+
+        if (datos.estado && !['pendiente', 'realizada', 'cancelada'].includes(datos.estado)) {
+            throw new Error('Estado no válido. Debe ser: pendiente, realizada o cancelada');
+        }
+
+        if (datos.observaciones && datos.observaciones.length > 500) {
+            throw new Error('Las observaciones no pueden superar los 500 caracteres');
+        }
+
+        return await citaRepository.guardar(datos);
+    },
+
+    async modificarCita(id, datos) {
+        const cita = await citaRepository.buscarPorId(id);
+        if (!cita) throw new Error('Cita no encontrada');
+
+        if (datos.idCliente) {
+            const cliente = await clienteRepository.buscarPorId(datos.idCliente);
+            if (!cliente) throw new Error('El cliente no existe');
+        }
+
+        if (datos.idTratamiento) {
+            const tratamiento = await tratamientoRepository.buscarPorId(datos.idTratamiento);
+            if (!tratamiento) throw new Error('El tratamiento no existe');
+        }
+
+        if (datos.idEmpleado) {
+            const empleado = await empleadoRepository.buscarPorId(datos.idEmpleado);
+            if (!empleado) throw new Error('El empleado no existe');
+        }
+
+        if (datos.idPaqVendido) {
+            const paquete = await paqueteVendidoRepository.buscarPorId(datos.idPaqVendido);
+            if (!paquete) throw new Error('El paquete vendido no existe');
+        }
+
+        if (datos.estado && !['pendiente', 'realizada', 'cancelada'].includes(datos.estado)) {
+            throw new Error('Estado no válido. Debe ser: pendiente, realizada o cancelada');
+        }
+
+        if (datos.observaciones && datos.observaciones.length > 500) {
+            throw new Error('Las observaciones no pueden superar los 500 caracteres');
+        }
+
+        return await citaRepository.actualizar(id, datos);
+    },
+
+    async eliminarCita(id) {
+        const cita = await citaRepository.buscarPorId(id);
+        if (!cita) throw new Error('Cita no encontrada');
+        await citaRepository.eliminar(id);
     }
-  }
-  
-  /**
-   * 📌 MÉTODO 14: ELIMINACIÓN LÓGICA (soft delete)
-   * Marca como eliminado pero no borra de la BD
-   */
-  async eliminarLogico(id) {
-    try {
-      const existente = await entidadRepository.findById(id);
-      if (!existente) {
-        throw new Error('Registro no encontrado');
-      }
-      
-      await entidadRepository.softDelete(id);
-      
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * 📌 MÉTODO 15: RESTAURAR
-   */
-  async restaurar(id) {
-    try {
-      const existente = await entidadRepository.findDeleted(id);
-      if (!existente) {
-        throw new Error('No hay registro eliminado con ese ID');
-      }
-      
-      const restaurado = await entidadRepository.restore(id);
-      
-      return restaurado;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  
-  // ==========================================
-  // SECCIÓN 5: MÉTODOS DE EXPORTACIÓN
-  // ==========================================
-  
-  /**
-   * 📌 MÉTODO 16: OBTENER DATOS PARA EXPORTAR
-   */
-  async obtenerDatosParaExportar(formato) {
-    try {
-      const datos = await entidadRepository.findAll();
-      
-      // Formatear datos según el formato solicitado
-      if (formato === 'csv') {
-        return this._formatearACSV(datos);
-      }
-      
-      return datos;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  /**
-   * Método privado para formatear a CSV
-   * (el guión bajo indica que es privado)
-   */
-  _formatearACSV(datos) {
-    if (!datos || datos.length === 0) return '';
-    
-    const cabeceras = Object.keys(datos[0]);
-    const filas = datos.map(row => Object.values(row).join(','));
-    
-    return [cabeceras.join(','), ...filas].join('\n');
-  }
 }
 
-// ============================================
-// 3. EXPORTAR
-// ============================================
-
-module.exports = new EntidadService();
+module.exports = citaService;

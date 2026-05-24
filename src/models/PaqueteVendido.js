@@ -9,6 +9,7 @@ class PaqueteVendido {
         this.fechaCompra = datos.fechaCompra || null;
         this.fechaInicio = datos.fechaInicio || null;
         this.fechaFin = datos.fechaFin || null;
+        this.precio = datos.precio || null;
     }
 
     validar() {
@@ -23,6 +24,9 @@ class PaqueteVendido {
         }
         if (!this.fechaInicio) {
             throw new Error('La fecha de inicio es obligatoria');
+        }
+         if (!this.precio) {
+            throw new Error('El precio no puede ser null');
         }
         if (!this.fechaFin) {
             throw new Error('La fecha de fin es obligatoria');
