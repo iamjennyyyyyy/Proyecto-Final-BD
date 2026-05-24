@@ -140,7 +140,6 @@ const ENT = {
       { h: 'Nombre', v: r => `<strong>${r.nombre||''}</strong>` },
       { h: 'Precio', v: r => `<span class="precio">$${Number(r.precio).toFixed(2)}</span>` },
       { h: 'Duración', v: r => `${r.duraciontotal||0} min` },
-      { h: 'Dto.', v: r => `<span class="badge badge-warning">${Number(r.descuento||0).toFixed(0)}%</span>` }
     ],
     form: (d) => `
       <div class="f-group"><label>Nombre <span class="req">*</span></label>
@@ -150,7 +149,7 @@ const ENT = {
         <input name="precio" type="number" step="0.01" required min="1" max="10000" value="${d?.precio||''}" placeholder="120"></div>
         <div class="f-group"><label>Duración total (min)</label>
         <input name="duraciontotal" type="number" min="1" max="480" required value="${d?.duraciontotal||''}" placeholder="120"></div>
-      </div>
+      </div>,
       <div class="f-group"><label>Descuento (%)</label>
       <input name="descuento" type="number" step="0.01" min="0" max="100" value="${d?.descuento||''}" placeholder="10"></div>`,
     btn: 'Paquete', api: 'paquetes'

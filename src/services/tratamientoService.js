@@ -20,11 +20,13 @@ class TratamientoService {
   }
 
   async actualizarTratamiento(id, datos) {
+    const existente = await tratamientoRepository.buscarPorId(id);
+    if(!existente) throw new Error('Tratamiento no encontrado');
+    if(datos.nombre && datos.nombre !== existente.nombre && await tratamientoRepository.buscarPorNombre(datos.nombre))
+      throw new Error('Ya existe un tratamiento con ese nombre');
     const tratamiento = new Tratamiento(datos);
     tratamiento.validar();
-    if(!this.obtenerTratamientoPorId(id)) throw new Error('Tratamiento no encontrado');
-    if(await tratamientoRepository.buscarPorNombre(tratamiento.nombre)) throw new Error('Ya existe un tratamiento con ese nombre');
-    return await tratamientoRepository.actualizar(datos);
+    return await tratamientoRepository.actualizar(id, datos);
   }
 
   async eliminarTratamiento(id) {

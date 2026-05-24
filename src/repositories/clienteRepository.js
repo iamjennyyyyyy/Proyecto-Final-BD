@@ -89,8 +89,8 @@ class ClienteRepository {
     }
         
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM clientes WHERE LOWER(nombre) LIKE LOWER($1)', [`%${nombre}%`]);
-        return result.rows;
+        const result = await pool.query('SELECT * FROM clientes WHERE nombre = $1', [nombre]);
+        return result.rows[0];
     }
 
     async eliminar(id) {

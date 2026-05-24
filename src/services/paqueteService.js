@@ -15,11 +15,15 @@ class PaqueteService {
   async crearPaquete(datos) {
     const paquete = new Paquete(datos);
     paquete.validar();
+    if(await paqueteRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un paquete con ese nombre');
     return await paqueteRepository.crear(datos);
   }
 
   async actualizarPaquete(id, datos) {
-    await this.obtenerPaquetePorId(id);
+    const existente = await paqueteRepository.buscarPorId(id);
+    if (!existente) throw new Error('Paquete no encontrado');
+    if(datos.nombre && datos.nombre !== existente.nombre && await paqueteRepository.buscarPorNombre(datos.nombre))
+      throw new Error('Ya existe un paquete con ese nombre');
     const paquete = new Paquete(datos);
     paquete.validar();
     return await paqueteRepository.actualizar(id, datos);

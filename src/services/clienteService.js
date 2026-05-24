@@ -15,14 +15,18 @@ class ClienteService {
     async crearCliente(datos) {
         const cliente = new Cliente(datos);
         cliente.validar();
+        if(await clienteRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un cliente con ese nombre');
         return await clienteRepository.crear(datos);
     }
 
     async actualizarCliente(id, datos) {
+        const existente = await clienteRepository.buscarPorId(id);
+        if(!existente) throw new Error('Cliente no encontrado');
+        if(datos.nombre && datos.nombre !== existente.nombre && await clienteRepository.buscarPorNombre(datos.nombre))
+            throw new Error('Ya existe un cliente con ese nombre');
         const cliente = new Cliente(datos);
         cliente.validar();
-        if(!this.obtenerClientePorId(id)) throw new Error('Cliente no encontrado');
-        return await clienteRepository.crear(id, datos);
+        return await clienteRepository.actualizar(id, datos);
     }
 
     async eliminarCliente(id) {

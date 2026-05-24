@@ -21,11 +21,13 @@ const areaService = {
     },
 
     async actualizarArea(id, datos){
+        const existente = await areaRepository.buscarPorId(id);
+        if(!existente) throw new Error('Área no encontrada');
+        if(datos.nombre && datos.nombre !== existente.nombre && await areaRepository.buscarPorNombre(datos.nombre))
+            throw new Error('Ya existe un área con ese nombre');
         const area = new Area(datos);
         area.validar();
-        if(!this.obtenerAreaPorId(id)) throw new Error('Área no encontrada');
-        if(await areaRepository.buscarPorNombre(area.nombre)) throw new Error('Ya existe un área con ese nombre');
-        return await areaRepository.actualizar(id, datos);
+        return await areaRepository.modificarNombre(id, datos);
     },
 
     async eliminarArea(id){

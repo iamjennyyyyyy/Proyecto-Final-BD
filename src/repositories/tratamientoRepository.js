@@ -98,8 +98,8 @@ class TratamientoRepository {
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM tratamientos WHERE LOWER(nombre) LIKE LOWER($1)', [`%${nombre}%`]);
-        return result.rows;
+        const result = await pool.query('SELECT * FROM tratamientos WHERE nombre = $1', [nombre]);
+        return result.rows[0];
     }
 
     async eliminar(id) {

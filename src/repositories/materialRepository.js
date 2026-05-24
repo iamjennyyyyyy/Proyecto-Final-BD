@@ -12,7 +12,7 @@ class materialRepository{
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre){
+    async buscarPorNombre(nombre) {
         const result = await pool.query('SELECT * FROM materiales WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
@@ -67,11 +67,6 @@ class materialRepository{
         const query = `UPDATE materiales SET ${sets.join(', ')} WHERE idmaterial = $${contador} RETURNING *`;
         
         const result = await pool.query(query, valores);
-        return result.rows[0];
-    }
-
-    async aumentarCantidad(id, cantidad){
-        const result = await pool.query('UPDATE materiales SET cantidad = $1 WHERE idmaterial = $2 RETURNING *', [cantidad, id]);
         return result.rows[0];
     }
 

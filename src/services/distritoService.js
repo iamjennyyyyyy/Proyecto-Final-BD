@@ -20,10 +20,12 @@ class DistritoService {
   }
 
   async actualizarDistrito(id, datos) {
+    const existente = await distritoRepository.buscarPorId(id);
+    if(!existente) throw new Error('Distrito no encontrado');
+    if(datos.nombre && datos.nombre !== existente.nombre && await distritoRepository.buscarPorNombre(datos.nombre))
+      throw new Error('Ya existe un distrito con ese nombre');
     const distrito = new Distrito(datos);
     distrito.validar();
-    if(!this.obtenerDistritoPorId(id)) throw new Error('Distrito no encontrado');
-    if(await distritoRepository.buscarPorNombre(distrito.nombre)) throw new Error('Ya existe un distrito con ese nombre');
     return await distritoRepository.actualizar(id, datos);
   }
 

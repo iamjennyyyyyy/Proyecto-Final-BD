@@ -5,7 +5,6 @@ class Paquete {
         this.nombre = datos.nombre || '';
         this.precio = datos.precio || 0;
         this.duraciontotal = datos.duraciontotal || 0;
-        this.descuento = datos.descuento || 0;
     }
 
     validar() {
@@ -26,9 +25,6 @@ class Paquete {
         }
         if (this.duraciontotal > 480) {
             throw new Error('La duración total no puede superar las 8 horas');
-        }
-        if (this.descuento < 0 || this.descuento > 100) {
-            throw new Error('El descuento debe estar entre 0 y 100');
         }
         return true;
     }

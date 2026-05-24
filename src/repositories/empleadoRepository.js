@@ -12,7 +12,7 @@ class empleadoRepository{
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre){
+    async buscarPorNombre(nombre) {
         const result = await pool.query('SELECT * FROM empleados WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
@@ -118,7 +118,7 @@ class empleadoRepository{
             contador++;
         }
         
-        if (datos.iddistrito !== undefined) {
+        if (datos.idDistrito !== undefined) {
             sets.push(`iddistrito = $${contador}`);
             valores.push(datos.iddistrito);
             contador++;

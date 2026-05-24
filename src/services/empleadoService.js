@@ -15,14 +15,18 @@ class EmpleadoService {
     async crearEmpleado(datos) {
         const empleado = new Empleado(datos);
         empleado.validar();
+        if(await empleadoRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un empleado con ese nombre');
+        if(await empleadoRepository.buscarPorDNI(datos.dni)) throw new Error('Ya existe un empleado con ese DNI');
         return await empleadoRepository.crear(datos);
     }
 
     async actualizarEmpleado(id, datos) {
+        const existente = await empleadoRepository.buscarPorId(id);
+        if(!existente) throw new Error('Empleado no encontrado');
+        if(datos.nombre && datos.nombre !== existente.nombre && await empleadoRepository.buscarPorNombre(datos.nombre))
+            throw new Error('Ya existe un empleado con ese nombre');
         const empleado = new Empleado(datos);
         empleado.validar();
-        const existe = await this.obtenerEmpleadoPorId(id);
-        if(!existe) throw new Error('Empleado no encontrado');
         return await empleadoRepository.actualizar(id, datos);
     }
 

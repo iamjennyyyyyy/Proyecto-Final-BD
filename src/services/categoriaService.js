@@ -14,6 +14,7 @@ const categoriaService = {
         },
 
         async crearCategoria(datos){
+            if(await categoriaRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe una categoría con ese nombre');
             const area = await areaRepository.buscarPorId(datos.idarea);
             if(!area) throw new Error('El área especificada no existe');
             return await categoriaRepository.crear(datos);
@@ -22,6 +23,8 @@ const categoriaService = {
         async actualizarCategoria(id, datos){
             const cat = await categoriaRepository.buscarPorId(id);
             if(!cat) throw new Error('Categoría no encontrada');
+            if(datos.nombre && datos.nombre !== cat.nombre && await categoriaRepository.buscarPorNombre(datos.nombre))
+                throw new Error('Ya existe una categoría con ese nombre');
             return await categoriaRepository.actualizar(id, datos);
         },
 

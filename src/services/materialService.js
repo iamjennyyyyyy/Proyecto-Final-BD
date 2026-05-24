@@ -14,12 +14,15 @@ const materialService = {
     async crearMaterial(datos){
         if(!datos.nombre || datos.nombre.trim().length < 3)
             throw new Error('El nombre del material debe tener al menos 3 caracteres');
+        if(await materialRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un material con ese nombre');
         return await materialRepository.crear(datos);
     },
 
     async actualizarMaterial(id, datos){
         const mat = await materialRepository.buscarPorId(id);
         if(!mat) throw new Error('Material no encontrado');
+        if(datos.nombre && datos.nombre !== mat.nombre && await materialRepository.buscarPorNombre(datos.nombre))
+            throw new Error('Ya existe un material con ese nombre');
         return await materialRepository.actualizar(id, datos);
     },
 
