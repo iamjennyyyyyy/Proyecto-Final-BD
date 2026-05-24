@@ -1,34 +1,35 @@
 const paqueteVendidoRepository = require('../repositories/paqueteVendidoRepository');
-const PaqueteVendido = require('../models/PaqueteVendido');
+import PaqueteVendido from '../models/PaqueteVendido';
 
-class PaqueteVendidoService {
-  async listarVendidos() {
-    return await paqueteVendidoRepository.listarTodos();
-  }
+const paqueteVendidoService = {
 
-  async obtenerVendidoPorId(id) {
-    const item = await paqueteVendidoRepository.buscarPorId(id);
-    if (!item) throw new Error('Paquete vendido no encontrado');
-    return item;
-  }
+    async listarPaquetesV(){
+        return await paqueteVendidoRepository.listarTodos();
+    },
 
-  async crearVendido(datos) {
-    const pv = new PaqueteVendido(datos);
-    pv.validar();
-    return await paqueteVendidoRepository.crear(datos);
-  }
+    async obtenerPaquetesVPorId(id){
+        const paquete = await paqueteVendidoRepository.buscarPorId(id);
+        if(!paquete) throw new Error('Paquete no encontrado');
+        return paquete;
+    },
 
-  async actualizarVendido(id, datos) {
-    await this.obtenerVendidoPorId(id);
-    const pv = new PaqueteVendido(datos);
-    pv.validar();
-    return await paqueteVendidoRepository.actualizar(id, datos);
-  }
+    async crearPaquete(datos){
+        const paquete = new PaqueteVendido(datos);
+        paquete.validar();
+        return await paqueteVendidoRepository.crear(datos);
+    },
 
-  async eliminarVendido(id) {
-    await this.obtenerVendidoPorId(id);
-    await paqueteVendidoRepository.eliminar(id);
-  }
+    async actualizarPaqueteV(id, datos){
+        const existente = await paqueteVendidoRepository.buscarPorId(id);
+        if(!existente) throw new Error('Paquete no encontrado');
+        const paquete = new PaqueteVendido(datos);
+        paquete.validar();
+        return await paqueteVendidoRepository.actualizar(id, datos);
+    },
+
+    async eliminarPaqueteV(id){
+        await paqueteVendidoRepository.eliminar(id);
+    }
 }
 
-module.exports = new PaqueteVendidoService();
+module.exports = paqueteVendidoService;
