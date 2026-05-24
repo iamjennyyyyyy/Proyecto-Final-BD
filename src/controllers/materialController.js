@@ -14,7 +14,7 @@ const materialController = {
     async obtenerPorId(req, res) {
         try {
             const id = parseInt(req.params.id);
-            const material = await materialService.obtenerMaterial(id);
+            const material = await materialService.obtenerMaterialPorId(id);
             res.json({success: true, data: material});
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
@@ -32,17 +32,8 @@ const materialController = {
 
     async actualizar(req, res) {
         try {
-            const material = await materialService.modificarMaterial(ParseInt(req.params.id), req.body);
-            res.status(201).json({success: true, data: material});
-        } catch (error) {
-            res.status(400).json({ success: false, error: error.message });
-        }
-    },
-
-    async aumentarCantidad(req, res) {
-        try {
-            const material = await materialService.crearMaterial(req.body);
-            res.status(201).json({success: true, data: material});
+            const material = await materialService.actualizarMaterial(parseInt(req.params.id), req.body);
+            res.json({success: true, data: material});
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });
         }
@@ -51,7 +42,7 @@ const materialController = {
     async eliminar(req, res) {
         try {
             await materialService.eliminarMaterial(parseInt(req.params.id));
-            res.json({success: true, message: 'Material eliminada'});
+            res.json({success: true, message: 'Material eliminado'});
         }
         catch(error){
             res.status(404).json({ success: false, error: error.message });

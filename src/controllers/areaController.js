@@ -13,7 +13,7 @@ const areaController = {
     async obtenerPorId(req, res) {
         try {
             const id = parseInt(req.params.id);
-            const area = await areaService.obtenerArea(id);
+            const area = await areaService.obtenerAreaPorId(id);
             res.json({success: true, data: area});
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
@@ -28,6 +28,17 @@ const areaController = {
             res.status(400).json({ success: false, error: error.message });
         }
     },
+
+    async actualizar(req,res){
+            try{
+                const id = parseInt(req.params.id);
+                const area = await areaService.actualizarArea(id, req.body);
+                res.json({success: true, data: area});
+            }
+            catch(error){
+                res.status(500).json({success: false, error: error.message});
+            }
+        },
 
     async eliminar(req, res) {
         try {

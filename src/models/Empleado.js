@@ -1,15 +1,15 @@
 // models/Empleado.js (versión mejorada)
 class Empleado {
     constructor(datos = {}) {
-        this.idEmpleado = datos.idEmpleado || null;
+        this.idempleado = datos.idempleado || null;
         this.nombre = datos.nombre || '';
         this.especialidad = datos.especialidad || '';
-        this.horasTrabajo = datos.horasTrabajo || 0;
+        this.horastrabajo = datos.horastrabajo || 0;
         this.direccion = datos.direccion || '';
-        this.CI = datos.CI || '';
+        this.dni = datos.dni || '';
         this.telefono = datos.telefono || '';
-        this.idDistrito = datos.idDistrito || null;
-        this.esFijo = datos.esFijo !== undefined ? datos.esFijo : false;
+        this.iddistrito = datos.iddistrito || null;
+        this.esfijo = datos.esfijo !== undefined ? datos.esfijo : false;
     }
 
     validar() {
@@ -24,10 +24,10 @@ class Empleado {
             throw new Error('La especialidad es obligatoria');
         }
 
-        if (this.horasTrabajo <= 0) {
+        if (this.horastrabajo <= 0) {
             throw new Error('Las horas de trabajo deben ser mayores a 0');
         }
-        if (this.horasTrabajo > 40) {
+        if (this.horastrabajo > 40) {
             throw new Error('Las horas de trabajo no pueden superar las 40 semanales');
         }
 
@@ -35,17 +35,17 @@ class Empleado {
             throw new Error('La dirección es obligatoria');
         }
 
-        if (!this.CI || this.CI.trim() === '') {
+        if (!this.dni || this.dni.trim() === '') {
             throw new Error('La cédula es obligatoria');
         }
-        const ciLimpio = this.CI.toString().replace(/[\s\.\-]/g, '');
-        if (!/^\d+$/.test(ciLimpio)) {
+        const dniLimpio = this.dni.toString().replace(/[\s\.\-]/g, '');
+        if (!/^\d+$/.test(dniLimpio)) {
             throw new Error('La cédula debe contener solo números');
         }
-        if (ciLimpio.length != 11) {
+        if (dniLimpio.length != 11) {
             throw new Error('La cédula debe tener 11 dígitos');
         }
-        this.CI = ciLimpio;
+        this.dni = ciLimpio;
 
         if (!this.telefono || this.telefono.trim() === '') {
             throw new Error('El teléfono es obligatorio');
@@ -56,11 +56,11 @@ class Empleado {
         }
         this.telefono = telLimpio;
 
-        if (!this.idDistrito) {
+        if (!this.iddistrito) {
             throw new Error('El distrito es obligatorio');
         }
 
-        if (typeof this.esFijo !== 'boolean') {
+        if (typeof this.esfijo !== 'boolean') {
             throw new Error('El campo esFijo debe ser true o false');
         }
 

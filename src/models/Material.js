@@ -1,7 +1,7 @@
 // models/Material.js
 class Material {
     constructor(datos = {}) {
-        this.idMaterial = datos.idMaterial || null;
+        this.idmaterial = datos.idmaterial || null;
         this.nombre = datos.nombre || '';
         this.cantidad = datos.cantidad || 0;
     }
@@ -13,9 +13,8 @@ class Material {
         if (this.nombre.trim().length < 3) {
             throw new Error('El nombre del material debe tener al menos 3 caracteres');
         }
-        if (this.cantidad < 0) {
-            throw new Error('El stock no puede ser negativo');
-        }
+        if(this.cantidad !== undefined && (isNaN(this.cantidad) || this.cantidad < 0))
+            throw new Error('La cantidad del material debe ser un número no negativo');
         return true;
     }
 }

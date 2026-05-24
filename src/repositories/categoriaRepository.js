@@ -12,7 +12,7 @@ class CategoriaRepository{
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre){
+    async buscarPorNombre(nombre) {
         const result = await pool.query('SELECT * FROM categorias WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }

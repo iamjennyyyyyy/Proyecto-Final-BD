@@ -26,17 +26,17 @@ const categoriaController = {
     async crear(req,res){
         try{
             const categoria = await categoriaService.crearCategoria(req.body);
-            res.json({success: true, count: categorias.length, data: categorias});
+            res.json({success: true, data: categoria});
         }
         catch(error){
             res.status(500).json({success: false, error: error.message});
         }
     },
 
-    async modificar(req,res){
+    async actualizar(req,res){
         try{
             const id = parseInt(req.params.id);
-            const categoria = await categoriaService.modificarCategoria(id, req.body);
+            const categoria = await categoriaService.actualizarCategoria(id, req.body);
             res.json({success: true, data: categoria});
         }
         catch(error){
@@ -46,7 +46,7 @@ const categoriaController = {
 
     async eliminar(req,res){
         try{
-            await categoriaService.eliminarCategoria(ParseInt(req.params.id));
+            await categoriaService.eliminarCategoria(parseInt(req.params.id));
             res.json({success: true, message: 'Categoría eliminada'});
         }
         catch(error){

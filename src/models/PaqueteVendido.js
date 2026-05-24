@@ -13,16 +13,16 @@ class PaqueteVendido {
     }
 
     validar() {
-        if (!this.idPaquete) {
+        if (!this.idpaquete) {
             throw new Error('El paquete es obligatorio');
         }
-        if (!this.idCliente) {
+        if (!this.idcliente) {
             throw new Error('El cliente es obligatorio');
         }
-        if (!this.fechaCompra) {
+        if (!this.fechacompra) {
             throw new Error('La fecha de compra es obligatoria');
         }
-        if (!this.fechaInicio) {
+        if (!this.fechainicio) {
             throw new Error('La fecha de inicio es obligatoria');
         }
          if (!this.precio) {
@@ -32,26 +32,26 @@ class PaqueteVendido {
             throw new Error('La fecha de fin es obligatoria');
         }
 
-        const fechaCompra = dayjs(this.fechaCompra);
-        const fechaInicio = dayjs(this.fechaInicio);
-        const fechaFin = dayjs(this.fechaFin);
+        const fechacompra = dayjs(this.fechacompra);
+        const fechainicio = dayjs(this.fechainicio);
+        const fechafin = dayjs(this.fechafin);
 
-        if (!fechaCompra.isValid()) {
+        if (!fechacompra.isValid()) {
             throw new Error('Fecha de compra no válida');
         }
-        if (!fechaInicio.isValid()) {
+        if (!fechainicio.isValid()) {
             throw new Error('Fecha de inicio no válida');
         }
-        if (!fechaFin.isValid()) {
+        if (!fechafin.isValid()) {
             throw new Error('Fecha de fin no válida');
         }
-        if (fechaInicio.isBefore(fechaCompra)) {
+        if (fechainicio.isBefore(fechacompra)) {
             throw new Error('La fecha de inicio no puede ser anterior a la fecha de compra');
         }
-        if (fechaFin.isBefore(fechaInicio)) {
+        if (fechafin.isBefore(fechainicio)) {
             throw new Error('La fecha de fin no puede ser anterior a la fecha de inicio');
         }
-        if (fechaInicio.isBefore(dayjs())) {
+        if (fechainicio.isBefore(dayjs())) {
             throw new Error('La fecha de inicio no puede ser pasada');
         }
 

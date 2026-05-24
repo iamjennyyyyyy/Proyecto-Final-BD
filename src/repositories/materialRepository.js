@@ -12,7 +12,7 @@ class materialRepository{
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre){
+    async buscarPorNombre(nombre) {
         const result = await pool.query('SELECT * FROM materiales WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
@@ -70,14 +70,9 @@ class materialRepository{
         return result.rows[0];
     }
 
-    async aumentarCantidad(id, cantidad){
-        const result = await pool.query('UPDATE materiales SET cantidad = $1 WHERE idmaterial = $2 RETURNING *', [cantidad, id]);
-        return result.rows[0];
-    }
-
     async eliminar(id){
         await pool.query('DELETE FROM materiales WHERE idmaterial = $1', [id]);
     }
 }
 
-module.exports = new MaterialRepository();
+module.exports = new materialRepository();
