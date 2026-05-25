@@ -12,7 +12,9 @@ const ENT = {
     ],
     form: (d) => `
       <div class="f-group"><label>Nombre <span class="req">*</span></label>
-      <input name="nombre" required minlength="3" value="${d?.nombre||''}" placeholder="Ej: Masajes, Facial"></div>`,
+      <input name="nombre" required minlength="3" value="${d?.nombre||''}" placeholder="Ej: Masajes, Facial"></div>
+      <div class="f-group"><label>Cantidad Personal Fijo</label>
+      <input name="cantidadpersonalfijo" type="number" min="0" value="${d?.cantidadpersonalfijo||''}" placeholder="Ej: 5"></div>`,
     btn: 'Área', api: 'areas'
   },
   categorias: {
@@ -112,11 +114,11 @@ const ENT = {
     label: 'Distrito', labelP: 'Distritos', icon: '📍',
     id: 'iddistrito',
     cols: [
-      { h: 'Nombre', v: r => `<strong>${r.nombredistrito||''}</strong>` }
+      { h: 'Nombre', v: r => `<strong>${r.nombre||''}</strong>` }
     ],
     form: (d) => `
       <div class="f-group"><label>Nombre del Distrito <span class="req">*</span></label>
-      <input name="nombreDistrito" required minlength="3" value="${d?.nombredistrito||''}" placeholder="Ej: Miraflores"></div>`,
+      <input name="nombre" required minlength="3" value="${d?.nombre||''}" placeholder="Ej: Miraflores"></div>`,
     btn: 'Distrito', api: 'distritos'
   },
   materiales: {
@@ -138,8 +140,7 @@ const ENT = {
     id: 'idpaquete',
     cols: [
       { h: 'Nombre', v: r => `<strong>${r.nombre||''}</strong>` },
-      { h: 'Precio', v: r => `<span class="precio">$${Number(r.precio).toFixed(2)}</span>` },
-      { h: 'Duración', v: r => `${r.duraciontotal||0} min` },
+      { h: 'Precio', v: r => `<span class="precio">$${Number(r.precio).toFixed(2)}</span>` }
     ],
     form: (d) => `
       <div class="f-group"><label>Nombre <span class="req">*</span></label>
@@ -147,11 +148,7 @@ const ENT = {
       <div class="f-row">
         <div class="f-group"><label>Precio ($) <span class="req">*</span></label>
         <input name="precio" type="number" step="0.01" required min="1" max="10000" value="${d?.precio||''}" placeholder="120"></div>
-        <div class="f-group"><label>Duración total (min)</label>
-        <input name="duraciontotal" type="number" min="1" max="480" required value="${d?.duraciontotal||''}" placeholder="120"></div>
-      </div>,
-      <div class="f-group"><label>Descuento (%)</label>
-      <input name="descuento" type="number" step="0.01" min="0" max="100" value="${d?.descuento||''}" placeholder="10"></div>`,
+      </div>`,
     btn: 'Paquete', api: 'paquetes'
   },
   'paquetes-vendidos': {
@@ -180,6 +177,50 @@ const ENT = {
         <input name="fechafin" type="date" required value="${d?.fechafin||''}"></div>
       </div>`,
     btn: 'Venta', api: 'paquetes-vendidos'
+  },
+  citas: {
+    label: 'Cita', labelP: 'Citas', icon: '📅',
+    id: 'idcita',
+    cols: [
+      { h: 'Cliente', v: r => `<strong>${r.cliente_nombre||'-'}</strong>` },
+      { h: 'Tratamiento', v: r => r.tratamiento_nombre||'-' },
+      { h: 'Fecha', v: r => r.fecha ? new Date(r.fecha).toLocaleDateString() : '-' },
+      { h: 'Hora', v: r => r.hora || '-' },
+      { h: 'Empleado', v: r => r.empleado_nombre || '-' },
+      { h: 'Estado', v: r => {
+        const estados = { pendiente: 'badge-warning', realizada: 'badge-info', cancelada: 'badge-danger' };
+        return `<span class="badge ${estados[r.estado] || 'badge-warning'}">${r.estado || 'pendiente'}</span>`;
+      } }
+    ],
+    form: (d) => `
+      <div class="f-row">
+        <div class="f-group"><label>ID Cliente <span class="req">*</span></label>
+        <input name="idcliente" type="number" required value="${d?.idcliente||''}" placeholder="1"></div>
+        <div class="f-group"><label>ID Tratamiento <span class="req">*</span></label>
+        <input name="idtratamiento" type="number" required value="${d?.idtratamiento||''}" placeholder="1"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><label>Fecha <span class="req">*</span></label>
+        <input name="fecha" type="date" required value="${d?.fecha||''}"></div>
+        <div class="f-group"><label>Hora <span class="req">*</span></label>
+        <input name="hora" type="time" required value="${d?.hora||''}"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><label>ID Empleado</label>
+        <input name="idempleado" type="number" value="${d?.idempleado||''}" placeholder="Opcional"></div>
+        <div class="f-group"><label>ID Paquete Vendido</label>
+        <input name="idpaquetevendido" type="number" value="${d?.idpaquetevendido||''}" placeholder="Opcional"></div>
+      </div>
+      <div class="f-group"><label>Estado</label>
+        <select name="estado" style="padding:8px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:13.5px">
+          <option value="pendiente" ${d?.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+          <option value="realizada" ${d?.estado === 'realizada' ? 'selected' : ''}>Realizada</option>
+          <option value="cancelada" ${d?.estado === 'cancelada' ? 'selected' : ''}>Cancelada</option>
+        </select>
+      </div>
+      <div class="f-group"><label>Observaciones</label>
+      <textarea name="observaciones" rows="2" placeholder="Opcional">${d?.observaciones||''}</textarea></div>`,
+    btn: 'Cita', api: 'citas'
   }
 };
 
@@ -217,7 +258,7 @@ async function loadDashboard() {
   if (!ct) return;
   ct.innerHTML = loadSpin();
   try {
-    const [ar, tr, cl, di, ca, ma, em, pa, pv] = await Promise.all([
+    const [ar, tr, cl, di, ca, ma, em, pa, pv, ci] = await Promise.all([
       fetch('/api/areas').then(r=>r.json()),
       fetch('/api/tratamientos').then(r=>r.json()),
       fetch('/api/clientes').then(r=>r.json()),
@@ -226,9 +267,10 @@ async function loadDashboard() {
       fetch('/api/materiales').then(r=>r.json()),
       fetch('/api/empleados').then(r=>r.json()),
       fetch('/api/paquetes').then(r=>r.json()),
-      fetch('/api/paquetes-vendidos').then(r=>r.json())
+      fetch('/api/paquetes-vendidos').then(r=>r.json()),
+      fetch('/api/citas').then(r=>r.json())
     ]);
-    const a = ar.data||[], t = tr.data||[], c = cl.data||[], d = di.data||[], cats = ca.data||[], mats = ma.data||[], emps = em.data||[], paqs = pa.data||[], pvs = pv.data||[];
+    const a = ar.data||[], t = tr.data||[], c = cl.data||[], d = di.data||[], cats = ca.data||[], mats = ma.data||[], emps = em.data||[], paqs = pa.data||[], pvs = pv.data||[], citas = ci.data||[];
     ct.innerHTML = `
       <div class="stat-grid">
         <div class="stat-c"><div class="stat-i">🏢</div><div class="stat-l">Áreas</div><div class="stat-v">${a.length}</div></div>
@@ -240,6 +282,7 @@ async function loadDashboard() {
         <div class="stat-c"><div class="stat-i">🧴</div><div class="stat-l">Materiales</div><div class="stat-v">${mats.length}</div></div>
         <div class="stat-c"><div class="stat-i">📦</div><div class="stat-l">Paquetes</div><div class="stat-v">${paqs.length}</div></div>
         <div class="stat-c"><div class="stat-i">🛒</div><div class="stat-l">Paq. Vendidos</div><div class="stat-v">${pvs.length}</div></div>
+        <div class="stat-c"><div class="stat-i">📅</div><div class="stat-l">Citas</div><div class="stat-v">${citas.length}</div></div>
       </div>
       <div class="dash-flex">
         <div class="dash-c"><div class="dash-ch">Áreas</div><div class="dash-cb">${listRender(a,'nombre','cantidadpersonalfijo')}</div></div>
@@ -247,7 +290,7 @@ async function loadDashboard() {
       </div>
       <div class="dash-flex" style="margin-top:16px">
         <div class="dash-c"><div class="dash-ch">Tratamientos</div><div class="dash-cb">${listRender(t,'nombre','precio',v=>'$'+Number(v).toFixed(2))}</div></div>
-        <div class="dash-c"><div class="dash-ch">Paquetes</div><div class="dash-cb">${listRender(paqs,'nombre','duraciontotal',v=>v+' min')}</div></div>
+        <div class="dash-c"><div class="dash-ch">Citas Recientes</div><div class="dash-cb">${listRender(citas,'cliente_nombre','fecha',v=>v?new Date(v).toLocaleDateString():'-')}</div></div>
       </div>
       <div class="dash-flex" style="margin-top:16px">
         <div class="dash-c"><div class="dash-ch">Paquetes Vendidos</div><div class="dash-cb">${listRender(pvs,'paquete_nombre','cliente_nombre')}</div></div>
@@ -285,7 +328,7 @@ async function loadEntity(e) {
           <button class="btn btn-p btn-s" onclick="editar('${e}',${id})">Editar</button>
           <button class="btn btn-d btn-s" onclick="eliminar('${e}',${id})">Eliminar</button>
         </td>
-      </tr>`;
+      </table>`;
     }).join('');
 
     const table = items.length

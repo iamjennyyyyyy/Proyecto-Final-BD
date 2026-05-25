@@ -1,5 +1,5 @@
 const paqueteRepository = require('../repositories/paqueteRepository');
-import Paquete from '../models/Paquete';
+const Paquete = require('../models/Paquete');  // ← Cambiado de import a require
 
 const paqueteService = {
 

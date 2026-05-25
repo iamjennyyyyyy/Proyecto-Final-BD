@@ -83,4 +83,6 @@ class paqueteRepository{
     async eliminar(id){
         await pool.query('DELETE FROM paquetes WHERE idpaquete = $1', [id]);
     }
+    
 }
+module.exports = new paqueteRepository();  // ✅ Exporta una instancia

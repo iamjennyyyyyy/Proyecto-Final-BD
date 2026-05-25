@@ -1,6 +1,6 @@
 const categoriaRepository = require('../repositories/categoriaRepository');
 const areaRepository = require('../repositories/areaRepository');
-import Categoria from '../models/Categoria';
+const Categoria = require('../models/Categoria');
 
 const categoriaService = {
 
