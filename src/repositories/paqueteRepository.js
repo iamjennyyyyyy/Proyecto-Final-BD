@@ -2,27 +2,17 @@ const pool = require('../config/database');
 
 class PaqueteRepository{
     async listarTodos(){
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes');
+        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes WHERE idpaquete = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes WHERE nombre = $1', [nombre]);
-        return result.rows[0];
-    }
-
-    async buscarPorId(id){
-        const result = await pool.query('SELECT nombre AS "Nombre", precio AS "Precio", duraciontotal AS "Duracion Total" FROM paquetes WHERE idpaquete = $1', [id]);
-        return result.rows[0];
-    }
-
-    async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT nombre AS "Nombre", precio AS "Precio", duraciontotal AS "Duracion Total" FROM paquetes WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -91,7 +81,7 @@ class PaqueteRepository{
     }
 
     async eliminar(id){
-        await pool.query('DELETE FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('DELETE FROM paquetes WHERE idpaquete = $1', [id]);
         return result.rows[0];
     }
     

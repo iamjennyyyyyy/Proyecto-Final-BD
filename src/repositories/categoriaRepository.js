@@ -86,7 +86,7 @@ class CategoriaRepository{
     }
 
     async eliminar(id){
-        await pool.query('DELETE FROM categorias WHERE idcategoria = $1', [id]);
+        const result = await pool.query('DELETE FROM categorias WHERE idcategoria = $1', [id]);
         return result.rows[0];
     }
 }

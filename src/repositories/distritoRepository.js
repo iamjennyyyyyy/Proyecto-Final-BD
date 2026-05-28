@@ -60,7 +60,7 @@ class DistritoRepository {
 	}
 
 	async eliminar(id) {
-		await pool.query('DELETE FROM distritos WHERE iddistrito = $1', [id]);
+		const result = await pool.query('DELETE FROM distritos WHERE iddistrito = $1', [id]);
 		return result.rows[0];
 	}
 }

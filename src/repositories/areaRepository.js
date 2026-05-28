@@ -72,7 +72,7 @@ class AreaRepository {
     }
 
     async eliminar(id){
-        await pool.query('DELETE FROM areas WHERE idarea = $1', [id]);
+        const result = await pool.query('DELETE FROM areas WHERE idarea = $1', [id]);
         return result.rows[0];
     }
 }
