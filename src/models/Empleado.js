@@ -45,7 +45,7 @@ class Empleado {
         if (dniLimpio.length != 11) {
             throw new Error('La cédula debe tener 11 dígitos');
         }
-        this.dni = ciLimpio;
+        this.dni = dniLimpio;
 
         if (!this.telefono || this.telefono.trim() === '') {
             throw new Error('El teléfono es obligatorio');

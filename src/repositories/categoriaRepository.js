@@ -3,17 +3,32 @@ const pool = require('../config/database');
 class CategoriaRepository{
 
     async listarTodos(){
-        const result = await pool.query('SELECT * FROM categorias');
+        const result = await pool.query(
+            `SELECT c.idcategoria, c.nombre, c.idarea,
+            a.nombre AS area_nombre
+            FROM categorias c
+            INNER JOIN areas a ON c.idarea = a.idarea`
+        );
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT * FROM categorias WHERE idcategoria = $1', [id]);
+        const result = await pool.query(
+            `SELECT c.idcategoria, c.nombre, c.idarea,
+            a.nombre AS area_nombre
+            FROM categorias c
+            INNER JOIN areas a ON c.idarea = a.idarea
+            WHERE idcategoria = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM categorias WHERE nombre = $1', [nombre]);
+        const result = await pool.query(
+            `SELECT c.idcategoria, c.nombre, c.idarea,
+            a.nombre AS area_nombre
+            FROM categorias c
+            INNER JOIN areas a ON c.idarea = a.idarea
+            WHERE c.nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
@@ -72,6 +87,7 @@ class CategoriaRepository{
 
     async eliminar(id){
         await pool.query('DELETE FROM categorias WHERE idcategoria = $1', [id]);
+        return result.rows[0];
     }
 }
 

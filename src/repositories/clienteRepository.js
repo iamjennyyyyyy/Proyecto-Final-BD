@@ -2,12 +2,18 @@ const pool = require('../config/database');
 
 class ClienteRepository {
     async listarTodos() {
-        const result = await pool.query('SELECT * FROM clientes ORDER BY idcliente');
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email
+            FROM clientes
+            ORDER BY idcliente`);
         return result.rows;
     }
 
     async buscarPorId(id) {
-        const result = await pool.query('SELECT * FROM clientes WHERE idcliente = $1', [id]);
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email
+            FROM clientes
+            WHERE idcliente = $1`, [id]);
         return result.rows[0];
     }
 
@@ -22,17 +28,17 @@ class ClienteRepository {
         }
 
         if (datos.dni !== undefined) {
-            sets.push(`dni = $${contador}`);
+            campos.push(`dni = $${contador}`);
             valores.push(datos.dni);
         }
 
         if (datos.email !== undefined) {
-            sets.push(`email = $${contador}`);
+            campos.push(`email = $${contador}`);
             valores.push(datos.email);
         }
 
         if (datos.telefono !== undefined) {
-            sets.push(`telefono = $${contador}`);
+            campos.push(`telefono = $${contador}`);
             valores.push(datos.telefono);
         }
         
@@ -89,12 +95,16 @@ class ClienteRepository {
     }
         
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM clientes WHERE nombre = $1', [nombre]);
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email
+            FROM clientes
+            WHERE nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
     async eliminar(id) {
         await pool.query('DELETE FROM clientes WHERE idcliente = $1', [id]);
+        return result.rows[0];
     }
 }
 

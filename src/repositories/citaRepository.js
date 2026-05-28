@@ -2,27 +2,111 @@ const pool = require('../config/database');
 
 class CitaRepository {
     async listarTodos() {
-        const result = await pool.query('SELECT * FROM citas');
+        const result = await pool.query(
+            `SELECT c.idcita,
+            t.nombre AS tratamiento_nombre,
+            cl.nombre AS cliente_nombre,
+            c.fecha,
+            c.hora,
+            e.nombre AS empleado_nombre,
+            c.observaciones,
+            c.precio,
+            p.nombre AS paquete_nombre,
+            c.estado
+            FROM citas c
+            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+            LEFT JOIN empleados e ON e.idempleado = c.idempleado
+            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
+            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
+            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete`);
         return result.rows;
     }
 
     async buscarPorId(id) {
-        const result = await pool.query('SELECT * FROM citas WHERE idcita = $1', [id]);
+        const result = await pool.query(
+            `SELECT c.idcita,
+            t.nombre AS tratamiento_nombre,
+            cl.nombre AS cliente_nombre,
+            c.fecha,
+            c.hora,
+            e.nombre AS empleado_nombre,
+            c.observaciones,
+            c.precio,
+            p.nombre AS paquete_nombre,
+            c.estado
+            FROM citas c
+            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+            LEFT JOIN empleados e ON e.idempleado = c.idempleado
+            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
+            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
+            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
+            WHERE c.idcita = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorCliente(idCliente) {
-        const result = await pool.query('SELECT * FROM citas WHERE idcliente = $1', [idCliente]);
+        const result = await pool.query(
+            `SELECT c.idcita,
+            t.nombre AS tratamiento_nombre,
+            cl.nombre AS cliente_nombre,
+            c.fecha,
+            c.hora,
+            e.nombre AS empleado_nombre,
+            c.observaciones,
+            c.precio,
+            p.nombre AS paquete_nombre,
+            c.estado
+            FROM citas c
+            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+            LEFT JOIN empleados e ON e.idempleado = c.idempleado
+            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
+            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
+            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
+            WHERE c.idcliente = $1`, [idCliente]);
         return result.rows;
     }
 
     async buscarPorEmpleado(idEmpleado) {
-        const result = await pool.query('SELECT * FROM citas WHERE idempleado = $1', [idEmpleado]);
+        const result = await pool.query(
+            `SELECT c.idcita,
+            t.nombre AS tratamiento_nombre,
+            cl.nombre AS cliente_nombre,
+            c.fecha,
+            c.hora,
+            e.nombre AS empleado_nombre,
+            c.observaciones,
+            c.precio,
+            p.nombre AS paquete_nombre,
+            c.estado
+            FROM citas c
+            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+            LEFT JOIN empleados e ON e.idempleado = c.idempleado
+            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
+            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
+            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
+            WHERE c.idempleado = $1`, [idEmpleado]);
         return result.rows;
     }
 
     async buscarPorFecha(fecha) {
-        const result = await pool.query('SELECT * FROM citas WHERE fecha = $1', [fecha]);
+        const result = await pool.query(
+            `SELECT c.idcita,
+            t.nombre AS tratamiento_nombre,
+            cl.nombre AS cliente_nombre,
+            c.fecha,
+            c.hora,
+            e.nombre AS empleado_nombre,
+            c.observaciones,
+            c.precio,
+            p.nombre AS paquete_nombre,
+            c.estado
+            FROM citas c
+            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+            LEFT JOIN empleados e ON e.idempleado = c.idempleado
+            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
+            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
+            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
+            WHERE c.fecha = $1`, [fecha]);
         return result.rows;
     }
 
@@ -70,6 +154,11 @@ class CitaRepository {
             valores.push(datos.estado);
         }
 
+        if (datos.precio !== undefined) {
+            campos.push('precio');
+            valores.push(datos.precio);
+        }
+
         if (campos.length === 0) {
             throw new Error('No hay datos para crear la cita');
         }
@@ -81,7 +170,7 @@ class CitaRepository {
         return result.rows[0];
     }
 
-    async modificar(id, datos) {
+    async actualizar(id, datos) {
         const valores = [];
         const sets = [];
         let contador = 1;
@@ -134,6 +223,12 @@ class CitaRepository {
             contador++;
         }
 
+        if (datos.precio !== undefined) {
+            sets.push(`precio = $${contador}`);
+            valores.push(datos.precio);
+            contador++;
+        }
+
         if (sets.length === 0) {
             throw new Error('No hay datos para actualizar');
         }
@@ -146,7 +241,8 @@ class CitaRepository {
     }
 
     async eliminar(id) {
-        await pool.query('DELETE FROM citas WHERE idcita = $1', [id]);
+        const result = await pool.query('DELETE FROM citas WHERE idcita = $1', [id]);
+        return result.rows[0];
     }
 }
 

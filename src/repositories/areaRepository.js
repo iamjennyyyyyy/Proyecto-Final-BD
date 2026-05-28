@@ -3,17 +3,17 @@ const pool = require('../config/database');
 class AreaRepository {
 
     async listarTodos() {
-        const result = await pool.query('SELECT * FROM areas');
+        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT * FROM areas WHERE idarea = $1', [id]);
+        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas WHERE idarea = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM areas WHERE LOWER(nombre) LIKE LOWER($1)', [`%${nombre}%`]);
+        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -73,6 +73,7 @@ class AreaRepository {
 
     async eliminar(id){
         await pool.query('DELETE FROM areas WHERE idarea = $1', [id]);
+        return result.rows[0];
     }
 }
 

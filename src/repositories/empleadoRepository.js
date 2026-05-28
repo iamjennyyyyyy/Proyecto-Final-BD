@@ -1,24 +1,58 @@
 const pool = require('../config/database');
 
-class empleadoRepository{
-
+class EmpleadoRepository{
     async listarTodos() {
-        const result = await pool.query('SELECT * FROM empleados');
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
+            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
+            d.nombre AS distrito_nombre,
+            a.nombre AS area_nombre
+            FROM empleados e
+            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
+            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
+            LEFT JOIN areas a ON a.idarea = epa.idarea`);
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT * FROM empleados WHERE idempleado = $1', [id]);
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
+            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
+            d.nombre AS distrito_nombre,
+            a.nombre AS area_nombre
+            FROM empleados e
+            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
+            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
+            LEFT JOIN areas a ON a.idarea = epa.idarea
+            WHERE e.idempleado = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM empleados WHERE nombre = $1', [nombre]);
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
+            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
+            d.nombre AS distrito_nombre,
+            a.nombre AS area_nombre
+            FROM empleados e
+            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
+            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
+            LEFT JOIN areas a ON a.idarea = epa.idarea
+            WHERE e.nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
     async buscarPorDNI(dni) {
-        const result = await pool.query('SELECT * FROM empleados WHERE dni = $1', [dni]);
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
+            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
+            d.nombre AS distrito_nombre,
+            a.nombre AS area_nombre
+            FROM empleados e
+            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
+            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
+            LEFT JOIN areas a ON a.idarea = epa.idarea
+            WHERE e.dni = $1`, [dni]);
         return result.rows[0];
     }
 
@@ -118,7 +152,7 @@ class empleadoRepository{
             contador++;
         }
         
-        if (datos.idDistrito !== undefined) {
+        if (datos.iddistrito !== undefined) {
             sets.push(`iddistrito = $${contador}`);
             valores.push(datos.iddistrito);
             contador++;
@@ -140,6 +174,11 @@ class empleadoRepository{
         const result = await pool.query(query, valores);
         return result.rows[0];
     }
+
+    async eliminar(id){
+        const result = await pool.query(`DELETE FROM empleados WHERE idempleado = $1 RETURNING *`, [id]);
+        return result.rows[0];
+    }
 }
 
-module.exports = new empleadoRepository();
+module.exports = new EmpleadoRepository();

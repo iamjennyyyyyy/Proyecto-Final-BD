@@ -12,7 +12,7 @@ class Cita {
         this.fecha = datos.fecha || null;
         this.hora = datos.hora || null;
         this.estado = datos.estado || 'pendiente';
-        this.precio = datos.precio || null;
+        this.precio = precio || 5;
     }
 
     validar() {
@@ -31,8 +31,9 @@ class Cita {
         if (!this.hora) {
             throw new Error('La hora es obligatoria');
         }
-         if (!precio) {
-            throw new Error('El precio no puede ser null');
+
+        if (!this.precio) {
+            throw new Error('El precio es obligatorio');
         }
 
         const fechaCita = dayjs(`${this.fecha} ${this.hora}`);
@@ -58,6 +59,11 @@ class Cita {
         if (!estadosValidos.includes(this.estado)) {
             throw new Error('Estado de cita no válido');
         }
+
+        if (this.precio < 5) {
+            throw new Error('El precio no puede ser tan bajo');
+        }
+
         return true;
     }
 }

@@ -1,19 +1,19 @@
 const pool = require('../config/database');
 
-class materialRepository{
+class MaterialRepository{
 
     async listarTodos() {
-        const result = await pool.query('SELECT * FROM materiales');
+        const result = await pool.query('SELECT idmaterial, nombre, cantidad FROM materiales');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT * FROM materiales WHERE idmaterial = $1', [id]);
+        const result = await pool.query('SELECT idmaterial, nombre, cantidad FROM materiales WHERE idmaterial = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM materiales WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT idmaterial, nombre, cantidad FROM materiales WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -72,7 +72,8 @@ class materialRepository{
 
     async eliminar(id){
         await pool.query('DELETE FROM materiales WHERE idmaterial = $1', [id]);
+        return result.rows[0];
     }
 }
 
-module.exports = new materialRepository();
+module.exports = new MaterialRepository();

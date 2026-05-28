@@ -3,17 +3,17 @@ const pool = require('../config/database');
 class DistritoRepository {
 
 	async listarTodos() {
-		const result = await pool.query('SELECT * FROM distritos ORDER BY iddistrito');
+		const result = await pool.query('SELECT iddistrito, nombre AS nombredistrito FROM distritos ORDER BY iddistrito');
 		return result.rows;
 	}
 
 	async buscarPorId(id) {
-		const result = await pool.query('SELECT * FROM distritos WHERE iddistrito = $1', [id]);
+		const result = await pool.query('SELECT iddistrito, nombre AS nombredistrito FROM distritos WHERE iddistrito = $1', [id]);
 		return result.rows[0];
 	}
 
 	async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM distritos WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT iddistrito, nombre AS nombredistrito FROM distritos WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -61,6 +61,7 @@ class DistritoRepository {
 
 	async eliminar(id) {
 		await pool.query('DELETE FROM distritos WHERE iddistrito = $1', [id]);
+		return result.rows[0];
 	}
 }
 

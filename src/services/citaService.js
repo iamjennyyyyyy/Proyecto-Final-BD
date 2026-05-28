@@ -63,10 +63,10 @@ const citaService = {
             throw new Error('Las observaciones no pueden superar los 500 caracteres');
         }
 
-        return await citaRepository.guardar(datos);
+        return await citaRepository.crear(datos);
     },
 
-    async modificarCita(id, datos) {
+    async actualizarCita(id, datos) {
         const cita = await citaRepository.buscarPorId(id);
         if (!cita) throw new Error('Cita no encontrada');
 

@@ -3,13 +3,13 @@ const dayjs = require('dayjs');
 
 class PaqueteVendido {
     constructor(datos = {}) {
-        this.idPaqueteVendido = datos.idPaqueteVendido || null;
-        this.idPaquete = datos.idPaquete || null;
-        this.idCliente = datos.idCliente || null;
-        this.fechaCompra = datos.fechaCompra || null;
-        this.fechaInicio = datos.fechaInicio || null;
-        this.fechaFin = datos.fechaFin || null;
-        this.precio = datos.precio || null;
+        this.idpaquetevendido = datos.idpaquetevendido || null;
+        this.idpaquete = datos.idpaquete || null;
+        this.idcliente = datos.idcliente || null;
+        this.fechacompra = datos.fechacompra || null;
+        this.fechainicio = datos.fechainicio || null;
+        this.fechafin = datos.fechafin || null;
+        this.precio = datos.precio || 5;
     }
 
     validar() {
@@ -25,11 +25,11 @@ class PaqueteVendido {
         if (!this.fechainicio) {
             throw new Error('La fecha de inicio es obligatoria');
         }
-         if (!this.precio) {
-            throw new Error('El precio no puede ser null');
-        }
-        if (!this.fechaFin) {
+        if (!this.fechafin) {
             throw new Error('La fecha de fin es obligatoria');
+        }
+        if (!this.precio) {
+            throw new Error('El precio es obligatorio');
         }
 
         const fechacompra = dayjs(this.fechacompra);
@@ -53,6 +53,10 @@ class PaqueteVendido {
         }
         if (fechainicio.isBefore(dayjs())) {
             throw new Error('La fecha de inicio no puede ser pasada');
+        }
+
+        if (this.precio < 5) {
+            throw new Error('El precio no puede ser tan bajo');
         }
 
         return true;
