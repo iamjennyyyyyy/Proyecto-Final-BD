@@ -15,7 +15,7 @@ class TratamientoService {
   async crearTratamiento(datos) {
     const tratamiento = new Tratamiento(datos);
     tratamiento.validar();
-    if(await tratamientoRepository.buscarPorNombre(tratemiento.nombre)) throw new Error('Ya existe un tratamiento con ese nombre');
+    if(await tratamientoRepository.buscarPorNombre(tratamiento.nombre)) throw new Error('Ya existe un tratamiento con ese nombre');
     return await tratamientoRepository.crear(datos);
   }
 
@@ -30,7 +30,7 @@ class TratamientoService {
   }
 
   async eliminarTratamiento(id) {
-    await this.obtenerTratamiento(id);
+    await this.obtenerTratamientoPorId(id);
     await tratamientoRepository.eliminar(id);
   }
 }

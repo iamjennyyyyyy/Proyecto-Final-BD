@@ -13,7 +13,7 @@ const paqueteVendidoService = {
         return paquete;
     },
 
-    async crearPaquete(datos){
+    async crearPaqueteV(datos){
         const paquete = new PaqueteVendido(datos);
         paquete.validar();
         return await paqueteVendidoRepository.crear(datos);
