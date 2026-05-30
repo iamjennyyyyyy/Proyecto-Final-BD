@@ -13,7 +13,7 @@ const paqueteController = {
 	async obtenerPorId(req, res) {
 		try {
 			const id = parseInt(req.params.id);
-			const paquete = await paqueteService.obtenerPaquetePorId(id);
+			const paquete = await paqueteService.obtenerPaquetesPorId(id);
 			res.json({ success: true, data: paquete });
 		} catch (error) {
 			res.status(404).json({ success: false, error: error.message });

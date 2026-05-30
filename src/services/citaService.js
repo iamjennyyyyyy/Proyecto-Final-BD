@@ -34,10 +34,10 @@ const citaService = {
     },
 
     async crearCita(datos) {
-        if (!datos.idCliente) throw new Error('El cliente es obligatorio');
-        if (!datos.idTratamiento) throw new Error('El tratamiento es obligatorio');
-        if (!datos.fecha) throw new Error('La fecha es obligatoria');
-        if (!datos.hora) throw new Error('La hora es obligatoria');
+
+        const cita = new Cita(datos);
+        cita.validar();
+     
 
         const cliente = await clienteRepository.buscarPorId(datos.idCliente);
         if (!cliente) throw new Error('El cliente no existe');
@@ -55,51 +55,50 @@ const citaService = {
             if (!paquete) throw new Error('El paquete vendido no existe');
         }
 
-        if (datos.estado && !['pendiente', 'realizada', 'cancelada'].includes(datos.estado)) {
-            throw new Error('Estado no válido. Debe ser: pendiente, realizada o cancelada');
-        }
-
-        if (datos.observaciones && datos.observaciones.length > 500) {
-            throw new Error('Las observaciones no pueden superar los 500 caracteres');
-        }
 
         return await citaRepository.crear(datos);
     },
 
     async actualizarCita(id, datos) {
-        const cita = await citaRepository.buscarPorId(id);
-        if (!cita) throw new Error('Cita no encontrada');
+  
+    const existente = await citaRepository.buscarPorId(id);
+    if (!existente) throw new Error('Cita no encontrada');
 
-        if (datos.idCliente) {
-            const cliente = await clienteRepository.buscarPorId(datos.idCliente);
-            if (!cliente) throw new Error('El cliente no existe');
-        }
+  
+    if (existente.estado === 'realizada') {
+        throw new Error('No se puede modificar una cita ya realizada');
+    }
+    if (existente.estado === 'cancelada') {
+        throw new Error('No se puede modificar una cita cancelada');
+    }
 
-        if (datos.idTratamiento) {
-            const tratamiento = await tratamientoRepository.buscarPorId(datos.idTratamiento);
-            if (!tratamiento) throw new Error('El tratamiento no existe');
-        }
+    if (datos.idCliente && datos.idCliente !== existente.idCliente) {
+        const cliente = await clienteRepository.buscarPorId(datos.idCliente);
+        if (!cliente) throw new Error('El cliente no existe');
+    }
 
-        if (datos.idEmpleado) {
-            const empleado = await empleadoRepository.buscarPorId(datos.idEmpleado);
-            if (!empleado) throw new Error('El empleado no existe');
-        }
+    if (datos.idTratamiento && datos.idTratamiento !== existente.idTratamiento) {
+        const tratamiento = await tratamientoRepository.buscarPorId(datos.idTratamiento);
+        if (!tratamiento) throw new Error('El tratamiento no existe');
+    }
 
-        if (datos.idPaqVendido) {
-            const paquete = await paqueteVendidoRepository.buscarPorId(datos.idPaqVendido);
-            if (!paquete) throw new Error('El paquete vendido no existe');
-        }
+    if (datos.idEmpleado && datos.idEmpleado !== existente.idEmpleado) {
+        const empleado = await empleadoRepository.buscarPorId(datos.idEmpleado);
+        if (!empleado) throw new Error('El empleado no existe');
+    }
 
-        if (datos.estado && !['pendiente', 'realizada', 'cancelada'].includes(datos.estado)) {
-            throw new Error('Estado no válido. Debe ser: pendiente, realizada o cancelada');
-        }
+    if (datos.idPaqVendido && datos.idPaqVendido !== existente.idPaqVendido) {
+        const paquete = await paqueteVendidoRepository.buscarPorId(datos.idPaqVendido);
+        if (!paquete) throw new Error('El paquete vendido no existe');
+    }
 
-        if (datos.observaciones && datos.observaciones.length > 500) {
-            throw new Error('Las observaciones no pueden superar los 500 caracteres');
-        }
+   
+    const cita = new Cita(datos);
+    cita.validar();
 
-        return await citaRepository.actualizar(id, datos);
-    },
+   
+    return await citaRepository.actualizar(id, datos);
+},
 
     async eliminarCita(id) {
         const cita = await citaRepository.buscarPorId(id);

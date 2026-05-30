@@ -12,7 +12,7 @@ class Cita {
         this.fecha = datos.fecha || null;
         this.hora = datos.hora || null;
         this.estado = datos.estado || 'pendiente';
-        this.precio = precio || 5;
+        this.precio = precio;
     }
 
     validar() {
@@ -60,8 +60,12 @@ class Cita {
             throw new Error('Estado de cita no válido');
         }
 
-        if (this.precio < 5) {
-            throw new Error('El precio no puede ser tan bajo');
+        if (this.precio < 0) {
+            throw new Error('El precio no puede ser negativo');
+        }
+
+         if (this.observaciones && this.observaciones.length > 500) {
+            throw new Error('Las observaciones no pueden superar los 500 caracteres');
         }
 
         return true;
