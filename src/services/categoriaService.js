@@ -9,13 +9,13 @@ const categoriaService = {
     },
 
     async obtenerCategoriaPorId(id){
-        const categoria = await categoriaRepository.obtenerPorId(id);
+        const categoria = await categoriaRepository.buscarPorId(id);
         if(!categoria) throw new Error('Categoría no encontrada');
         return categoria;
     },
 
     async crearCategoria(datos){
-        const area = await areaRepository.obtenerCategoriaPorId(datos.idarea);
+        const area = await areaRepository.buscarPorId(datos.idarea);
         if(!area) throw new Error('El área de la categoría no existe');
         const categoria = new Categoria(datos);
         categoria.validar();
@@ -32,7 +32,7 @@ const categoriaService = {
     },
 
     async eliminarCategoria(id){
-        await categoriaRepository.obtenerPorId(id);
+        await categoriaRepository.buscarPorId(id);
         await categoriaRepository.eliminar(id);
     }
 }

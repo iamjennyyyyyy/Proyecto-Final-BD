@@ -17,6 +17,11 @@ class MaterialRepository{
         return result.rows[0];
     }
 
+    async buscarPorIntervaloCantidad(cantidadMin, cantidadMax) {
+        const result = await pool.query('SELECT idmaterial, nombre, cantidad FROM materiales WHERE cantidad BETWEEN $1 AND $2', [cantidadMin, cantidadMax]);
+        return result.rows;
+    }
+
     async crear(datos) {
         const valores = [];
         const campos = [];
@@ -71,7 +76,7 @@ class MaterialRepository{
     }
 
     async eliminar(id){
-        await pool.query('DELETE FROM materiales WHERE idmaterial = $1', [id]);
+        const result = await pool.query('DELETE FROM materiales WHERE idmaterial = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

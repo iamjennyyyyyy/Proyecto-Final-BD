@@ -2,10 +2,11 @@ const pool = require('../config/database');
 
 class materialesPorTratamientoRepository{
 
-    async materialesNecesariosPorTratamiento(idTratamiento){
+    async buscarMaterialesPorTratamiento(idTratamiento){
         const result = await pool.query(
-            `SELECT m.nombre AS "Material",
-            mat.cantidad AS "Cantidad"
+            `SELECT m.idmaterial,
+            m.nombre as nombrematerial,
+            mat.cantidad
             FROM materiales m
             INNER JOIN materialesportratamiento mpt ON mpt.idmaterial = m.idmaterial
             WHERE mpt.idtratamiento = $1
@@ -14,10 +15,11 @@ class materialesPorTratamientoRepository{
         return result.rows;
     }
 
-    async tratamientosQueNecesitanElMaterial(idMaterial){
+    async buscarTratamientosPorMaterial(idMaterial){
         const result = await pool.query(
-            `SELECT t.nombre AS "Nombre",
-            mat.cantidad AS "Cantidad Necesaria"
+            `SELECT t.idtratamiento,
+            t.nombre as nombretratamiento,
+            mat.cantidad
             FROM tratamientos t
             INNER JOIN materialesportratamiento mpt ON mpt.idtratamiento = t.idtratamiento
             WHERE mpt.idmaterial = $1

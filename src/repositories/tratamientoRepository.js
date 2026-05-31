@@ -3,21 +3,91 @@ const pool = require('../config/database');
 class TratamientoRepository {
     async listarTodos() {
         const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
-            ORDER BY idtratamiento`);
+            `SELECT * FROM vw_tratamientos`);
         return result.rows;
     }
 
     async buscarPorId(id) {
         const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
+            `SELECT * FROM vw_tratamientos
             WHERE idtratamiento = $1`, [id]);
+        return result.rows[0];
+    }
+
+    async buscarPorNombre(nombre) {
+        const result = await pool.query(
+            `SELECT * FROM vw_tratamientos
+            WHERE nombre = $1`, [nombre]);
+        return result.rows[0];
+    }
+
+    async buscarPorCategoria(idcategoria) {
+        const result = await pool.query(
+            `SELECT * FROM vw_tratamientos
+            WHERE idcategoria = $1`, [idcategoria]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloPrecio(precioMin, precioMax) {
+        const result = await pool.query(
+            `SELECT * FROM vw_tratamientos
+            WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloDuracion(duracionMin, duracionMax) {
+        const result = await pool.query(
+            `SELECT * FROM vw_tratamientos
+            WHERE duracion BETWEEN $1 AND $2`, [duracionMin, duracionMax]);
+        return result.rows;
+    }
+
+    //RELACION EMPLEADOSFIJOSPORTRATAMIENTO / TRATAMIENTO - EMPLEADOS
+    async buscarEmpleadosPorTratamiento(idTratamiento){
+        const result = await pool.query(
+            `SELECT idempleado, nombre, dni, especialidad, esfijo, horastrabajo, direccion, telefono
+            FROM empleados e
+            INNER JOIN empleadosFijosPorTratamiento ept ON ept.idempleado = e.idempleado
+            WHERE ept.idtratamiento = $1
+            ORDER BY e.nombre`, [idTratamiento]
+        );
+        return result.rows;
+    }
+
+    async buscarTratamientosPorEmpleadoAsignado(idEmpleado){
+        const result = await pool.query(
+            `SELECT t.nombre as tratamientonombre, c.nombre as categorianombre, t.precio, t.duracion, t.descripcion
+            FROM tratamientos t
+            INNER JOIN categorias c ON c.idcategoria = t.idcategoria
+            INNER JOIN empleadosfijosportratamiento eft ON eft.idtratamiento = t.idtratamiento
+            WHERE eft.idempleado = $1
+            ORDER BY t.nombre`, [idEmpleado]
+        );
+        return result.rows;
+    }
+
+    async asignarEmpleadoAUnTratamiento(idEmpleado, idTratamiento){
+        const result = await pool.query(
+            `INSERT INTO empleadosfijosportratamiento (idempleado, idTratamiento)
+            VALUES ($1, $2) RETURNING *`, [idEmpleado, idTratamiento]
+        );
+        return result.rows[0];
+    }
+
+    async desasignarEmpleadoDeUnTratamiento(idEmpleado, idTratamiento){
+        const result = await pool.query(
+            `DELETE FROM empleadosfijosportratamiento
+            WHERE idempleado = $1 AND idtratamiento = $2 RETURNING *`, [idEmpleado, idTratamiento]
+        );
+        return result.rows[0];
+    }
+
+    async existeRelacion(idEmpleado, idTratamiento){
+        const result = await pool.query(
+            `SELECT *
+            FROM empleadosfijosportratamiento
+            WHERE idempleado = $1 AND idtratamiento = $2`, [idEmpleado, idTratamiento]
+        );
         return result.rows[0];
     }
 
@@ -107,18 +177,8 @@ class TratamientoRepository {
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre) {
-        const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
-            WHERE nombre = $1`, [nombre]);
-        return result.rows[0];
-    }
-
     async eliminar(id) {
-        const result = await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1', [id]);
+        const result = await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

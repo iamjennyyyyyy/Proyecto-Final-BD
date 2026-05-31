@@ -3,110 +3,70 @@ const pool = require('../config/database');
 class CitaRepository {
     async listarTodos() {
         const result = await pool.query(
-            `SELECT c.idcita,
-            t.nombre AS tratamiento_nombre,
-            cl.nombre AS cliente_nombre,
-            c.fecha,
-            c.hora,
-            e.nombre AS empleado_nombre,
-            c.observaciones,
-            c.precio,
-            p.nombre AS paquete_nombre,
-            c.estado
-            FROM citas c
-            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
-            LEFT JOIN empleados e ON e.idempleado = c.idempleado
-            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
-            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
-            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete`);
+            `SELECT * from vw_citas`);
         return result.rows;
     }
 
     async buscarPorId(id) {
         const result = await pool.query(
-            `SELECT c.idcita,
-            t.nombre AS tratamiento_nombre,
-            cl.nombre AS cliente_nombre,
-            c.fecha,
-            c.hora,
-            e.nombre AS empleado_nombre,
-            c.observaciones,
-            c.precio,
-            p.nombre AS paquete_nombre,
-            c.estado
-            FROM citas c
-            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
-            LEFT JOIN empleados e ON e.idempleado = c.idempleado
-            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
-            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
-            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-            WHERE c.idcita = $1`, [id]);
+            `SELECT * from vw_citas
+            WHERE idcita = $1`, [id]);
         return result.rows[0];
+    }
+
+    async buscarPorTratamiento(idTratamiento) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE idtratamiento = $1`, [idTratamiento]);
+        return result.rows;
+    }
+
+    async buscarPorPaquete(idPaqueteVendido) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE idpaquetevendido = $1`, [idPaqueteVendido]);
+        return result.rows;
+    }
+
+    async buscarPorEstado(estado) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE LOWER(estado) = LOWER($1)`, [estado]);
+        return result.rows;
     }
 
     async buscarPorCliente(idCliente) {
         const result = await pool.query(
-            `SELECT c.idcita,
-            t.nombre AS tratamiento_nombre,
-            cl.nombre AS cliente_nombre,
-            c.fecha,
-            c.hora,
-            e.nombre AS empleado_nombre,
-            c.observaciones,
-            c.precio,
-            p.nombre AS paquete_nombre,
-            c.estado
-            FROM citas c
-            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
-            LEFT JOIN empleados e ON e.idempleado = c.idempleado
-            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
-            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
-            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-            WHERE c.idcliente = $1`, [idCliente]);
+            `SELECT * from vw_citas
+            WHERE idcliente = $1`, [idCliente]);
         return result.rows;
     }
 
     async buscarPorEmpleado(idEmpleado) {
         const result = await pool.query(
-            `SELECT c.idcita,
-            t.nombre AS tratamiento_nombre,
-            cl.nombre AS cliente_nombre,
-            c.fecha,
-            c.hora,
-            e.nombre AS empleado_nombre,
-            c.observaciones,
-            c.precio,
-            p.nombre AS paquete_nombre,
-            c.estado
-            FROM citas c
-            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
-            LEFT JOIN empleados e ON e.idempleado = c.idempleado
-            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
-            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
-            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-            WHERE c.idempleado = $1`, [idEmpleado]);
+            `SELECT * from vw_citas
+            WHERE idempleado = $1`, [idEmpleado]);
         return result.rows;
     }
 
     async buscarPorFecha(fecha) {
         const result = await pool.query(
-            `SELECT c.idcita,
-            t.nombre AS tratamiento_nombre,
-            cl.nombre AS cliente_nombre,
-            c.fecha,
-            c.hora,
-            e.nombre AS empleado_nombre,
-            c.observaciones,
-            c.precio,
-            p.nombre AS paquete_nombre,
-            c.estado
-            FROM citas c
-            LEFT JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
-            LEFT JOIN empleados e ON e.idempleado = c.idempleado
-            LEFT JOIN clientes cl ON cl.idcliente = c.idcliente
-            LEFT JOIN paquetevendido pv ON pv.idpaquetevendido = c.idpaquetevendido
-            LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-            WHERE c.fecha = $1`, [fecha]);
+            `SELECT * from vw_citas
+            WHERE fecha = $1`, [fecha]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloFechas(fecha1, fecha2) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE fecha BETWEEN $1 AND $2`, [fecha1, fecha2]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloPrecio(precioMin, precioMax) {
+        const result = await pool.query(
+            `SELECT * FROM vw_citas
+            WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
         return result.rows;
     }
 
@@ -241,7 +201,7 @@ class CitaRepository {
     }
 
     async eliminar(id) {
-        const result = await pool.query('DELETE FROM citas WHERE idcita = $1', [id]);
+        const result = await pool.query('DELETE FROM citas WHERE idcita = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

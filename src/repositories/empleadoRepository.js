@@ -3,56 +3,28 @@ const pool = require('../config/database');
 class EmpleadoRepository{
     async listarTodos() {
         const result = await pool.query(
-            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
-            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
-            d.nombre AS distrito_nombre,
-            a.nombre AS area_nombre
-            FROM empleados e
-            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
-            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
-            LEFT JOIN areas a ON a.idarea = epa.idarea`);
+            `SELECT * from vw_empleados`);
         return result.rows;
     }
 
     async buscarPorId(id){
         const result = await pool.query(
-            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
-            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
-            d.nombre AS distrito_nombre,
-            a.nombre AS area_nombre
-            FROM empleados e
-            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
-            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
-            LEFT JOIN areas a ON a.idarea = epa.idarea
-            WHERE e.idempleado = $1`, [id]);
+            `SELECT * from vw_empleados
+            WHERE idempleado = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
         const result = await pool.query(
-            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
-            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
-            d.nombre AS distrito_nombre,
-            a.nombre AS area_nombre
-            FROM empleados e
-            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
-            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
-            LEFT JOIN areas a ON a.idarea = epa.idarea
-            WHERE e.nombre = $1`, [nombre]);
+            `SELECT * from vw_empleados
+            WHERE nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
-    async buscarPorDNI(dni) {
+    async buscarPorDNI(dni_v) {
         const result = await pool.query(
-            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo,
-            e.horastrabajo, e.direccion, e.telefono, e.iddistrito,
-            d.nombre AS distrito_nombre,
-            a.nombre AS area_nombre
-            FROM empleados e
-            LEFT JOIN distritos d ON d.iddistrito = e.iddistrito
-            LEFT JOIN empleadosporarea epa ON epa.idempleado = e.idempleado
-            LEFT JOIN areas a ON a.idarea = epa.idarea
-            WHERE e.dni = $1`, [dni]);
+            `SELECT * from vw_empleados
+            WHERE dni = $1`, [dni_v]);
         return result.rows[0];
     }
 

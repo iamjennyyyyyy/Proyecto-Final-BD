@@ -2,27 +2,73 @@ const pool = require('../config/database');
 
 class PaqueteRepository{
     async listarTodos(){
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes');
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE idpaquete = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT idpaquete, nombre, precio, duraciontotal FROM paquetes WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
-    async buscarPorId(id){
-        const result = await pool.query('SELECT nombre AS "Nombre", precio AS "Precio", duraciontotal AS "Duracion Total" FROM paquetes WHERE idpaquete = $1', [id]);
+    //RELACION CONTENIDOPAQUETE /PAQUETE - TRATAMIENTOS
+    async buscarTratamientosPorPaquete(idPaquete){
+        const result = await pool.query(
+            `SELECT t.idtratamiento,
+            t.nombre as tratamientonombre,
+            c.nombre as categorianombre,
+            t.precio,
+            t.duracion,
+            t.descripcion
+            FROM tratamientos t
+            INNER JOIN contenidopaquete cp ON cp.idtratamiento = t.idtratamiento
+            INNER JOIN categorias c ON c.idcategoria = t.idcategoria
+            WHERE cp.idpaquete = $1
+            ORDER BY t.nombre`, [idPaquete]
+        );
+        return result.rows;
+    }
+
+    async buscarPaquetesConTratamiento(idTratamiento){
+        const result = await pool.query(
+            `SELECT p.idpaquete,
+            p.nombre as paquetenombre,
+            p.precio,
+            p.duraciontotal
+            FROM paquetes p
+            INNER JOIN contenidopaquete cp ON cp.idpaquete = p.idpaquete
+            WHERE cp.idtratamiento = $1
+            ORDER BY p.nombre`, [idTratamiento]
+        );
+        return result.rows;
+    }
+
+    async asignarTratamientoAlPaquete(idTratamiento, idPaquete){
+        const result = await pool.query(
+            `INSERT INTO contenidopaquete (idtratamiento, idpaquete)
+            VALUES ($1, $2) RETURNING *`, [idTratamiento, idPaquete]
+        );
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT nombre AS "Nombre", precio AS "Precio", duraciontotal AS "Duracion Total" FROM paquetes WHERE nombre = $1', [nombre]);
+    async desasignarTratamientoDelPaquete(idTratamiento, idPaquete){
+        const result = await pool.query(
+            `DELETE FROM contenidopaquete
+            WHERE idtratamiento = $1 AND idpaquete = $2 RETURNING *`, [idTratamiento, idPaquete]
+        );
+        return result.rows[0];
+    }
+
+    async existeRelacion(idTratamiento, idPaquete){
+        const result = await pool.query(
+            `SELECT * FROM contenidopaquete
+            WHERE idtratamiento = $1 AND idpaquete = $2`, [idTratamiento, idPaquete]
+        );
         return result.rows[0];
     }
 
@@ -91,7 +137,7 @@ class PaqueteRepository{
     }
 
     async eliminar(id){
-        await pool.query('DELETE FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('DELETE FROM paquetes WHERE idpaquete = $1 RETURNING *', [id]);
         return result.rows[0];
     }
     

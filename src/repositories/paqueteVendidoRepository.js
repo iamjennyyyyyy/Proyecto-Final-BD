@@ -3,28 +3,71 @@ const pool = require('../config/database');
 class PaqueteVendidoRepository {
   async listarTodos() {
     const result = await pool.query(`
-      SELECT pv.idpaquetevendido, pv.idpaquete, pv.idcliente,
-      p.nombre AS paquete_nombre, p.duraciontotal, p.precio,
-      c.nombre AS cliente_nombre,
-      pv.fechacompra, pv.fechainicio, pv.fechafin
-      FROM paquetevendido pv
-      LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-      LEFT JOIN clientes c ON pv.idcliente = c.idcliente
-      ORDER BY pv.idpaquetevendido`);
+      SELECT * FROM vw_paquete_vendido_con_tratamientos`);
     return result.rows;
   }
 
   async buscarPorId(id) {
     const result = await pool.query(`
-      SELECT pv.idpaquetevendido, pv.idpaquete, pv.idcliente,
-      p.nombre AS paquete_nombre, p.duraciontotal, p.precio,
-      c.nombre AS cliente_nombre,
-      pv.fechacompra, pv.fechainicio, pv.fechafin
-      FROM paquetevendido pv
-      LEFT JOIN paquetes p ON pv.idpaquete = p.idpaquete
-      LEFT JOIN clientes c ON pv.idcliente = c.idcliente
-      WHERE pv.idpaquetevendido = $1`, [id]);
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE idpaquetevendido = $1`, [id]);
     return result.rows[0];
+  }
+
+  async buscarPorIntervaloPrecio(precioMin, precioMax) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
+    return result.rows;
+  }
+
+  async buscarPorDuracionTotal(duracion) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE duraciontotal = $1`, [duracion]);
+    return result.rows;
+  }
+
+  async buscarPorFechaInicio(fechaInicio) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechainicio = $1`, [fechaInicio]);
+    return result.rows;
+  }
+
+  async buscarPorFechaCompra(fechaCompra) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechacompra = $1`, [fechaCompra]);
+    return result.rows;
+  }
+
+  async buscarPorFechaFin(fechaFin) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechafin = $1`, [fechaFin]);
+    return result.rows;
+  }
+
+  async buscarPorIntervaloFechasInicio(fecha1, fecha2) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechainicio BETWEEN $1 AND $2`, [fecha1, fecha2]);
+    return result.rows;
+  }
+
+  async buscarPorIntervaloFechasFin(fecha1, fecha2) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechafin BETWEEN $1 AND $2`, [fecha1, fecha2]);
+    return result.rows;
+  }
+
+  async buscarPorIntervaloFechasCompra(fecha1, fecha2) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechacompra BETWEEN $1 AND $2`, [fecha1, fecha2]);
+    return result.rows;
   }
 
   async crear(datos) {
@@ -125,7 +168,7 @@ class PaqueteVendidoRepository {
   }
 
   async eliminar(id) {
-    const result = await pool.query('DELETE FROM paquetevendido WHERE idpaquetevendido = $1', [id]);
+    const result = await pool.query('DELETE FROM paquetevendido WHERE idpaquetevendido = $1 RETURNING *', [id]);
     return result.rows[0];
   }
 }
