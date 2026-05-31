@@ -11,27 +11,41 @@ class PaqueteVendidoRepository {
     const result = await pool.query(`
       SELECT * FROM vw_paquete_vendido_con_tratamientos
       WHERE idpaquetevendido = $1`, [id]);
+    return result.rows[0];
+  }
+
+  async buscarPorIntervaloPrecio(precioMin, precioMax) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
     return result.rows;
   }
 
-  async buscarPorFechaInicio(fechaI) {
+  async buscarPorDuracionTotal(duracion) {
     const result = await pool.query(`
       SELECT * FROM vw_paquete_vendido_con_tratamientos
-      WHERE fechainicio = $1`, [fechaI]);
+      WHERE duraciontotal = $1`, [duracion]);
     return result.rows;
   }
 
-  async buscarPorFechaCompra(fechaC) {
+  async buscarPorFechaInicio(fechaInicio) {
     const result = await pool.query(`
       SELECT * FROM vw_paquete_vendido_con_tratamientos
-      WHERE fechacompra = $1`, [fechaC]);
+      WHERE fechainicio = $1`, [fechaInicio]);
     return result.rows;
   }
 
-  async buscarPorFechaFin(fechaF) {
+  async buscarPorFechaCompra(fechaCompra) {
     const result = await pool.query(`
       SELECT * FROM vw_paquete_vendido_con_tratamientos
-      WHERE fechafin = $1`, [fechaF]);
+      WHERE fechacompra = $1`, [fechaCompra]);
+    return result.rows;
+  }
+
+  async buscarPorFechaFin(fechaFin) {
+    const result = await pool.query(`
+      SELECT * FROM vw_paquete_vendido_con_tratamientos
+      WHERE fechafin = $1`, [fechaFin]);
     return result.rows;
   }
 

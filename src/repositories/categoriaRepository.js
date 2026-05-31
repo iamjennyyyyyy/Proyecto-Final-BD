@@ -4,7 +4,7 @@ class CategoriaRepository{
 
     async listarTodos(){
         const result = await pool.query(
-            `SELECT c.idcategoria, c.nombre, a.nombre AS area_nombre
+            `SELECT c.idcategoria, c.nombre as categorianombre, a.nombre AS areanombre
             FROM categorias c
             INNER JOIN areas a ON c.idarea = a.idarea`
         );
@@ -13,7 +13,7 @@ class CategoriaRepository{
 
     async buscarPorId(id){
         const result = await pool.query(
-            `SELECT c.idcategoria, c.nombre, a.nombre AS area_nombre
+            `SELECT c.idcategoria, c.nombre as categorianombre, a.nombre AS areanombre
             FROM categorias c
             INNER JOIN areas a ON c.idarea = a.idarea
             WHERE idcategoria = $1`, [id]);
@@ -22,11 +22,20 @@ class CategoriaRepository{
 
     async buscarPorNombre(nombre) {
         const result = await pool.query(
-            `SELECT c.idcategoria, c.nombre, a.nombre AS area_nombre
+            `SELECT c.idcategoria, c.nombre as categorianombre, a.nombre AS areanombre
             FROM categorias c
             INNER JOIN areas a ON c.idarea = a.idarea
             WHERE c.nombre = $1`, [nombre]);
         return result.rows[0];
+    }
+
+    async buscarPorCategoria(idCategoria) {
+        const result = await pool.query(
+            `SELECT c.idcategoria, c.nombre as categorianombre, a.nombre AS areanombre
+            FROM categorias c
+            INNER JOIN areas a ON c.idarea = a.idarea
+            WHERE c.idcategoria = $1`, [idCategoria]);
+        return result.rows;
     }
 
     async crear(datos) {

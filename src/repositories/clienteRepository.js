@@ -26,7 +26,6 @@ class ClienteRepository {
     }
 
     async crear(datos) {
-
         const valores = [];
         const campos = [];
     
@@ -35,18 +34,18 @@ class ClienteRepository {
             valores.push(datos.nombre);
         }
 
-        if (datos.dni !== undefined) {
-            campos.push(`dni = $${contador}`);
-            valores.push(datos.dni);
+        if (datos.ci !== undefined) {
+            campos.push(`ci`);
+            valores.push(datos.ci);
         }
 
         if (datos.email !== undefined) {
-            campos.push(`email = $${contador}`);
+            campos.push(`email`);
             valores.push(datos.email);
         }
 
         if (datos.telefono !== undefined) {
-            campos.push(`telefono = $${contador}`);
+            campos.push(`telefono`);
             valores.push(datos.telefono);
         }
         
@@ -73,9 +72,9 @@ class ClienteRepository {
             contador++;
         }
 
-        if (datos.dni !== undefined) {
-            sets.push(`dni = $${contador}`);
-            valores.push(datos.dni);
+        if (datos.ci !== undefined) {
+            sets.push(`ci = $${contador}`);
+            valores.push(datos.ci);
             contador++;
         }
 
@@ -103,7 +102,7 @@ class ClienteRepository {
     }
 
     async eliminar(id) {
-        await pool.query('DELETE FROM clientes WHERE idcliente = $1 RETURNING *', [id]);
+        const result = await pool.query('DELETE FROM clientes WHERE idcliente = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

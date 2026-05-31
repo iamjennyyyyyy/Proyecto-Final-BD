@@ -14,6 +14,27 @@ class CitaRepository {
         return result.rows[0];
     }
 
+    async buscarPorTratamiento(idTratamiento) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE idtratamiento = $1`, [idTratamiento]);
+        return result.rows;
+    }
+
+    async buscarPorPaquete(idPaqueteVendido) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE idpaquetevendido = $1`, [idPaqueteVendido]);
+        return result.rows;
+    }
+
+    async buscarPorEstado(estado) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE LOWER(estado) = LOWER($1)`, [estado]);
+        return result.rows;
+    }
+
     async buscarPorCliente(idCliente) {
         const result = await pool.query(
             `SELECT * from vw_citas
@@ -32,6 +53,20 @@ class CitaRepository {
         const result = await pool.query(
             `SELECT * from vw_citas
             WHERE fecha = $1`, [fecha]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloFechas(fecha1, fecha2) {
+        const result = await pool.query(
+            `SELECT * from vw_citas
+            WHERE fecha BETWEEN $1 AND $2`, [fecha1, fecha2]);
+        return result.rows;
+    }
+
+    async buscarPorIntervaloPrecio(precioMin, precioMax) {
+        const result = await pool.query(
+            `SELECT * FROM vw_citas
+            WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
         return result.rows;
     }
 
