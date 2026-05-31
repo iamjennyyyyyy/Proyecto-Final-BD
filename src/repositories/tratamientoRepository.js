@@ -3,21 +3,21 @@ const pool = require('../config/database');
 class TratamientoRepository {
     async listarTodos() {
         const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
-            ORDER BY idtratamiento`);
+            `SELECT * FROM vw_tratamientos`);
         return result.rows;
     }
 
     async buscarPorId(id) {
         const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
+            `SELECT * FROM vw_tratamientos
             WHERE idtratamiento = $1`, [id]);
+        return result.rows[0];
+    }
+
+    async buscarPorNombre(nombre) {
+        const result = await pool.query(
+            `SELECT * FROM vw_tratamientos
+            WHERE nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
@@ -107,18 +107,8 @@ class TratamientoRepository {
         return result.rows[0];
     }
 
-    async buscarPorNombre(nombre) {
-        const result = await pool.query(
-            `SELECT t.idtratamiento, t.nombre, t.precio, t.duracion, t.descripcion,
-            c.nombre AS categoria_nombre
-            FROM tratamientos t
-            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
-            WHERE nombre = $1`, [nombre]);
-        return result.rows[0];
-    }
-
     async eliminar(id) {
-        const result = await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1', [id]);
+        const result = await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

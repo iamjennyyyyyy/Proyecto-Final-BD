@@ -4,15 +4,7 @@ class empleadosPorArea{
 
     async empleadosPorArea(idArea){
         const result = await pool.query(
-            `SELECT e.nombre AS "Nombre",
-            e.dni AS "Carnet de Identidad",
-            e.especialidad AS "Especialidad",
-            e.esfijo AS "Es Fijo",
-            e.horastrabajo AS "Horas de Trabajo",
-            d.nombre AS "Distrito"
-            FROM empleados e
-            INNER JOIN empleadosPorArea epa ON epa.idempleado = e.idempleado
-            INNER JOIN distritos d ON d.iddistrito = e.iddistrito
+            `SELECT nombre, dni, especialidad, esfijo, horastrabajo, direccion, telefono, area_nombre
             WHERE epa.idarea = $1
             ORDER BY e.nombre`, [idArea]
         );
@@ -21,7 +13,7 @@ class empleadosPorArea{
 
     async areasDeUnEmpleado(idEmpleado){
         const result = await pool.query(
-            `SELECT a.nombre AS "Nombre"
+            `SELECT a.nombre
             FROM areas a
             INNER JOIN empleadosPorArea epa ON epa.idarea = a.idarea
             WHERE epa.idempleado = $1

@@ -71,7 +71,7 @@ class MaterialRepository{
     }
 
     async eliminar(id){
-        const result = wait pool.query('DELETE FROM materiales WHERE idmaterial = $1', [id]);
+        const result = await pool.query('DELETE FROM materiales WHERE idmaterial = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }

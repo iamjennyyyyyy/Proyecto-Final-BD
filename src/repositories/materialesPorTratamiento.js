@@ -4,8 +4,8 @@ class materialesPorTratamientoRepository{
 
     async materialesNecesariosPorTratamiento(idTratamiento){
         const result = await pool.query(
-            `SELECT m.nombre AS "Material",
-            mat.cantidad AS "Cantidad"
+            `SELECT m.nombre,
+            mat.cantidad
             FROM materiales m
             INNER JOIN materialesportratamiento mpt ON mpt.idmaterial = m.idmaterial
             WHERE mpt.idtratamiento = $1

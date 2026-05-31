@@ -2,17 +2,17 @@ const pool = require('../config/database');
 
 class PaqueteRepository{
     async listarTodos(){
-        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes');
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos');
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE idpaquete = $1', [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT nombre, precio, duraciontotal FROM paquetes WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE nombre = $1', [nombre]);
         return result.rows[0];
     }
 
@@ -81,7 +81,7 @@ class PaqueteRepository{
     }
 
     async eliminar(id){
-        const result = await pool.query('DELETE FROM paquetes WHERE idpaquete = $1', [id]);
+        const result = await pool.query('DELETE FROM paquetes WHERE idpaquete = $1 RETURNING *', [id]);
         return result.rows[0];
     }
     

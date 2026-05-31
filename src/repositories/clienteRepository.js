@@ -17,6 +17,14 @@ class ClienteRepository {
         return result.rows[0];
     }
 
+    async buscarPorNombre(nombre) {
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email
+            FROM clientes
+            WHERE nombre = $1`, [nombre]);
+        return result.rows[0];
+    }
+
     async crear(datos) {
 
         const valores = [];
@@ -93,17 +101,9 @@ class ClienteRepository {
         const result = await pool.query(query, valores);
         return result.rows[0];
     }
-        
-    async buscarPorNombre(nombre) {
-        const result = await pool.query(
-            `SELECT idcliente, nombre, ci, telefono, email
-            FROM clientes
-            WHERE nombre = $1`, [nombre]);
-        return result.rows[0];
-    }
 
     async eliminar(id) {
-        await pool.query('DELETE FROM clientes WHERE idcliente = $1', [id]);
+        await pool.query('DELETE FROM clientes WHERE idcliente = $1 RETURNING *', [id]);
         return result.rows[0];
     }
 }
