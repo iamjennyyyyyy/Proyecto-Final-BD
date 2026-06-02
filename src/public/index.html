@@ -3,59 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belleza y Relajación</title>
+  <title>Belleza & Relax — SPA Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/es.js"></script>
   <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Poppins', 'sans-serif'] },
+          colors: {
+            menta: { 50: '#e8faf0', 100: '#d1f5e0', 200: '#a3ebc2', 300: '#74e1a3', 400: '#46d785', DEFAULT: '#2ecc71', 500: '#2ecc71', 600: '#27ae60', 700: '#1e8449', 800: '#145932', 900: '#0b2f1a' },
+            spa: { 50: '#f3eef8', 100: '#e8ddf1', 200: '#d1bce3', 300: '#b99ad5', 400: '#a279c7', DEFAULT: '#9b59b6', 500: '#9b59b6', 600: '#7d3c98', 700: '#5e2e72', 800: '#3e1f4c', 900: '#1f0f26' },
+            lavender: { 50: '#f5f0ff', 100: '#ede7f6', 200: '#d5c4e8', 300: '#bca0da', 400: '#a47dcc', DEFAULT: '#8e6bbf' },
+            blush: { 50: '#fef5f7', 100: '#fcecf0', 200: '#f7d6e0', 300: '#f2c0d0', DEFAULT: '#e8a0b8' },
+            turquesa: { 50: '#f0faf8', 100: '#e1f5f2', 200: '#c3ebe4', 300: '#8ed1c6', DEFAULT: '#6bc5b8' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .sidebar-transition { transition: width 0.3s ease, transform 0.3s ease; }
+    .content-transition { transition: margin-left 0.3s ease; }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    .slide-up { animation: slideUp 0.3s ease; }
+    .scale-in { animation: scaleIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    input, select, textarea { transition: all 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #2ecc71 !important; box-shadow: 0 0 0 3px rgba(46,204,113,0.15) !important; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: 8px; }
+    @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; display: inline-block; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #d1d5db; border-radius: 24px; transition: 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: #2ecc71; }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .toast-enter { animation: toastEnter 0.3s ease; }
+    @keyframes toastEnter { from { opacity: 0; transform: translateX(100%) scale(0.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    .toast-exit { animation: toastExit 0.3s ease forwards; }
+    @keyframes toastExit { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+    .pill-active { background: #2ecc71; color: white; }
+    @media (max-width: 768px) { .mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 40; animation: fadeIn 0.2s ease; } }
+    .btn { transition: all 0.2s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn:active { transform: translateY(0); }
+    .card-hover { transition: all 0.25s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+    .status-bar { width: 4px; border-radius: 0 4px 4px 0; flex-shrink: 0; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
 </head>
-<body>
+<body class="bg-[#f5f7fa] min-h-screen">
 
-  <aside class="sidebar">
-    <div class="sidebar-h">
-      <h1>Belleza &amp; Relax</h1>
-      <p>SPA Manager</p>
+  <!-- ========== LOGIN SCREEN ========== -->
+  <div id="loginScreen" class="hidden min-h-screen flex items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 30%, #9b59b6 70%, #8e44ad 100%);">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl"></div>
+      <div class="absolute top-1/3 left-1/4 w-64 h-64 bg-spa-300/10 rounded-full blur-2xl"></div>
+      <div class="absolute bottom-1/4 right-1/3 w-48 h-48 bg-turquesa/10 rounded-full blur-2xl"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+        <svg class="w-full h-full opacity-[0.03]" viewBox="0 0 1440 800" xmlns="http://www.w3.org/2000/svg"><path d="M0,400 C240,600 480,200 720,400 C960,600 1200,200 1440,400 L1440,800 L0,800 Z" fill="white"/></svg>
+      </div>
     </div>
-    <nav class="sidebar-nav">
-      <a href="#/" class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">📊</span> <span>Dashboard</span>
-      </a>
-      <a href="#/areas" class="nav-item" data-page="areas">
-        <span class="nav-icon">🏢</span> <span>Áreas</span>
-      </a>
-      <a href="#/tratamientos" class="nav-item" data-page="tratamientos">
-        <span class="nav-icon">💆</span> <span>Tratamientos</span>
-      </a>
-      <a href="#/categorias" class="nav-item" data-page="categorias">
-        <span class="nav-icon">📂</span> <span>Categorías</span>
-      </a>
-      <a href="#/empleados" class="nav-item" data-page="empleados">
-        <span class="nav-icon">👨‍💼</span> <span>Empleados</span>
-      </a>
-      <a href="#/clientes" class="nav-item" data-page="clientes">
-        <span class="nav-icon">👤</span> <span>Clientes</span>
-      </a>
-      <a href="#/distritos" class="nav-item" data-page="distritos">
-        <span class="nav-icon">📍</span> <span>Distritos</span>
-      </a>
-      <a href="#/materiales" class="nav-item" data-page="materiales">
-        <span class="nav-icon">🧴</span> <span>Materiales</span>
-      </a>
-      <a href="#/paquetes" class="nav-item" data-page="paquetes">
-        <span class="nav-icon">📦</span> <span>Paquetes</span>
-      </a>
-      <a href="#/paquetes-vendidos" class="nav-item" data-page="paquetes-vendidos">
-        <span class="nav-icon">🛒</span> <span>Paquetes Vendidos</span>
-      </a>
-      <a href="#/citas" class="nav-item" data-page="citas">
-        <span class="nav-icon">📅</span> <span>Citas</span>
-      </a>
-    </nav>
-  </aside>
 
-  <main class="main">
-    <header class="content-h">
-      <h2 id="pageTitle">Dashboard</h2>
-    </header>
-    <div id="pageContent" class="content-b"></div>
-  </main>
+    <div class="relative z-10 w-full max-w-md mx-4 fade-in">
+      <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/40 scale-in">
+        <div class="text-center mb-8">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-menta-400 to-spa-500 flex items-center justify-center shadow-lg">
+            <i class="fa-solid fa-spa text-white text-3xl"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-[#2c3e50]">Belleza & Relax</h1>
+          <p class="text-[#6b7280] text-sm mt-1 font-light">Tu espacio de calma, cuidado y bienestar</p>
+          <div class="w-16 h-0.5 bg-gradient-to-r from-menta to-spa mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-[#6b7280] mb-1.5">Usuario</label>
+            <div class="relative">
+              <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] text-sm"></i>
+              <input type="text" name="username" required placeholder="Ingresa tu usuario"
+                class="w-full pl-10 pr-4 py-3 bg-[#f9fafb] border border-[#e8ecf1] rounded-xl text-sm text-[#2c3e50] placeholder-[#b0b7c3] focus:outline-none focus:border-menta focus:ring-2 focus:ring-menta/20 transition-all">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-[#6b7280] mb-1.5">Contraseña</label>
+            <div class="relative">
+              <i class="fa-regular fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] text-sm"></i>
+              <input type="password" name="contrasena" required placeholder="Ingresa tu contraseña" id="loginPassword"
+                class="w-full pl-10 pr-10 py-3 bg-[#f9fafb] border border-[#e8ecf1] rounded-xl text-sm text-[#2c3e50] placeholder-[#b0b7c3] focus:outline-none focus:border-menta focus:ring-2 focus:ring-menta/20 transition-all">
+              <button type="button" onclick="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#6b7280] text-sm">
+                <i class="fa-regular fa-eye" id="passIcon"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" id="loginBtn" class="w-full py-3 bg-gradient-to-r from-menta to-menta-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+            <span>Iniciar Sesión</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+          <div id="loginError" class="hidden text-center text-sm text-red-500 bg-red-50 rounded-xl py-2.5 px-4 border border-red-100">
+            <i class="fa-solid fa-circle-exclamation mr-1.5"></i>
+            <span>Credenciales inválidas</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP LAYOUT ========== -->
+  <div id="appLayout" class="hidden min-h-screen flex">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full bg-white shadow-[2px_0_12px_rgba(0,0,0,0.04)] z-30 flex flex-col overflow-hidden" style="width: 260px;">
+      <div class="flex items-center gap-3 px-5 h-[64px] border-b border-[#e8ecf1] flex-shrink-0">
+        <button onclick="toggleSidebar()" class="text-[#6b7280] hover:text-[#2c3e50] text-lg transition-colors flex-shrink-0">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-menta to-spa-500 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-spa text-white text-sm"></i>
+          </div>
+          <span id="sidebarBrand" class="font-semibold text-[#2c3e50] text-sm whitespace-nowrap sidebar-text">SPA Belleza</span>
+        </div>
+      </div>
+      <nav id="sidebarNav" class="flex-1 overflow-y-auto px-3 py-4 space-y-1 hide-scrollbar"></nav>
+      <div class="px-3 pb-4 border-t border-[#e8ecf1] pt-3">
+        <button onclick="logout()" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[#6b7280] hover:text-red-500 hover:bg-red-50 transition-all text-sm">
+          <i class="fa-solid fa-right-from-bracket w-5 text-center text-base"></i>
+          <span class="sidebar-text">Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebarOverlay" class="mobile-overlay hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="content-transition flex-1 min-h-screen flex flex-col" style="margin-left: 260px;">
+      <!-- Header -->
+      <header class="bg-white/90 backdrop-blur-md border-b border-[#e8ecf1] h-14 flex items-center justify-between px-6 sticky top-0 z-20">
+        <h2 id="pageTitle" class="text-base font-semibold text-[#2c3e50]">Inicio</h2>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-menta to-menta-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm" id="userAvatar">A</div>
+            <span id="userName" class="text-sm font-medium text-[#2c3e50] hidden sm:block"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main id="pageContent" class="flex-1 p-6 lg:p-8 overflow-y-auto"></main>
+    </div>
+  </div>
+
+  <!-- Modal Container -->
+  <div id="modalContainer" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);" onclick="closeModal(event)">
+    <div id="modalBody" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto scale-in" onclick="event.stopPropagation()"></div>
+  </div>
+
+  <!-- Confirm Container -->
+  <div id="confirmContainer" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.35);" onclick="closeConfirm(event)">
+    <div id="confirmBody" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 scale-in" onclick="event.stopPropagation()"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
   <script src="/js/api.js"></script>
   <script src="/js/app.js"></script>

@@ -6,7 +6,7 @@ class materialesPorTratamientoRepository{
         const result = await pool.query(
             `SELECT m.idmaterial,
             m.nombre as nombrematerial,
-            mat.cantidad
+            mpt.cantidad
             FROM materiales m
             INNER JOIN materialesportratamiento mpt ON mpt.idmaterial = m.idmaterial
             WHERE mpt.idtratamiento = $1
@@ -19,7 +19,7 @@ class materialesPorTratamientoRepository{
         const result = await pool.query(
             `SELECT t.idtratamiento,
             t.nombre as nombretratamiento,
-            mat.cantidad
+            mpt.cantidad
             FROM tratamientos t
             INNER JOIN materialesportratamiento mpt ON mpt.idtratamiento = t.idtratamiento
             WHERE mpt.idmaterial = $1
