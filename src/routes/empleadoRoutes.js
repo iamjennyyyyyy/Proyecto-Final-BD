@@ -3,9 +3,10 @@ const router = express.Router();
 const empleadoController = require('../controllers/empleadoController');
 
 router.get('/', empleadoController.listarTodos);
-router.get('/:id', empleadoController.obtenerPorId);
+router.get('/:idEmpleado', empleadoController.obtenerPorId);
+router.get('/dni', empleadoController.obtenerPorDNI);
 router.post('/', empleadoController.crear);
-router.put('/:id', empleadoController.actualizar);
-router.delete('/:id', empleadoController.eliminar);
+router.put('/:idEmpleado', empleadoController.actualizar);
+router.delete('/:idEmpleado', empleadoController.eliminar);
 
 module.exports = router;

@@ -12,8 +12,18 @@ const clienteController = {
 
     async obtenerPorId(req, res) {
         try {
-        const id = parseInt(req.params.id);
-        const cliente = await clienteService.obtenerClientePorId(id);
+        const idCliente = parseInt(req.params.idCliente);
+        const cliente = await clienteService.obtenerClientePorId(idCliente);
+        res.json({ success: true, data: cliente });
+        } catch (error) {
+        res.status(404).json({ success: false, error: error.message });
+        }
+    },
+
+    async obtenerPorDNI(req, res) {
+        try {
+        const {dni} = req.query;
+        const cliente = await clienteService.obtenerPorDNI(dni);
         res.json({ success: true, data: cliente });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
@@ -30,19 +40,19 @@ const clienteController = {
     },
 
     async actualizar(req,res){
-            try{
-                const id = parseInt(req.params.id);
-                const cliente = await clienteService.actualizarCliente(id, req.body);
-                res.json({success: true, data: cliente});
-            }
-            catch(error){
-                res.status(500).json({success: false, error: error.message});
-            }
-        },
+        try{
+            const idCliente = parseInt(req.params.idCliente);
+            const cliente = await clienteService.actualizarCliente(idCliente, req.body);
+            res.json({success: true, data: cliente});
+        }
+        catch(error){
+            res.status(500).json({success: false, error: error.message});
+        }
+    },
 
     async eliminar(req, res) {
         try {
-        await clienteService.eliminarCliente(parseInt(req.params.id));
+        await clienteService.eliminarCliente(parseInt(req.params.idCliente));
         res.json({ success: true, message: 'Cliente eliminado' });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });

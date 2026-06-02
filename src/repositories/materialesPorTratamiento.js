@@ -44,7 +44,7 @@ class materialesPorTratamientoRepository{
         return result.rows[0];
     }
 
-    async actualizarCantidad(idMaterial, idTratamiento, cant){
+    async actualizarCantidadMaterial(idMaterial, idTratamiento, cant){
         const result = await pool.query(
             `UPDATE materialesportratamiento
             SET cantidad = $1

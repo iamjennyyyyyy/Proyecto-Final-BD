@@ -68,7 +68,6 @@ class AreaRepository {
     async crear(datos) {
         const valores = [];
         const campos = [];
-        let contador = 1;
         
         if (datos.nombre !== undefined) {
             campos.push(`nombre`);

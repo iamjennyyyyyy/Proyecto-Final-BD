@@ -29,12 +29,12 @@ class CategoriaRepository{
         return result.rows[0];
     }
 
-    async buscarPorCategoria(idCategoria) {
+    async buscarPorArea(idArea) {
         const result = await pool.query(
             `SELECT c.idcategoria, c.nombre as categorianombre, a.nombre AS areanombre
             FROM categorias c
             INNER JOIN areas a ON c.idarea = a.idarea
-            WHERE c.idcategoria = $1`, [idCategoria]);
+            WHERE c.idarea = $1`, [idArea]);
         return result.rows;
     }
 

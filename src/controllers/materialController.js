@@ -13,8 +13,8 @@ const materialController = {
 
     async obtenerPorId(req, res) {
         try {
-            const id = parseInt(req.params.id);
-            const material = await materialService.obtenerMaterialPorId(id);
+            const idMaterial = parseInt(req.params.idMaterial);
+            const material = await materialService.obtenerMaterialPorId(idMaterial);
             res.json({success: true, data: material});
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
@@ -32,7 +32,8 @@ const materialController = {
 
     async actualizar(req, res) {
         try {
-            const material = await materialService.actualizarMaterial(parseInt(req.params.id), req.body);
+            const idMaterial = parseInt(req.params.idMaterial);
+            const material = await materialService.actualizarMaterial(idMaterial, req.body);
             res.json({success: true, data: material});
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });
@@ -41,7 +42,7 @@ const materialController = {
 
     async eliminar(req, res) {
         try {
-            await materialService.eliminarMaterial(parseInt(req.params.id));
+            await materialService.eliminarMaterial(parseInt(req.params.idMaterial));
             res.json({success: true, message: 'Material eliminado'});
         }
         catch(error){

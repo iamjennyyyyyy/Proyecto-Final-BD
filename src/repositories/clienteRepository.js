@@ -25,6 +25,13 @@ class ClienteRepository {
         return result.rows[0];
     }
 
+    async buscarPorDNI(dni_v) {
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email from clientes
+            WHERE ci = $1`, [dni_v]);
+        return result.rows[0];
+    }
+
     async crear(datos) {
         const valores = [];
         const campos = [];

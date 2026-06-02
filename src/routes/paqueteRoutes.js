@@ -3,9 +3,13 @@ const router = express.Router();
 const paqueteController = require('../controllers/paqueteController');
 
 router.get('/', paqueteController.listarTodos);
-router.get('/:id', paqueteController.obtenerPorId);
+router.get('/:idPaquete', paqueteController.obtenerPorId);
+router.get('/:idPaquete/tratamientos', paqueteController.obtenerTratamientosPorPaquete);
+router.get('/tratamiento/:idTratamiento/paquetes', paqueteController.obtenerPaquetesPorTratamiento);
+router.post('/:idPaquete/tratamientos/:idTratamiento', paqueteController.asignarTratamiento);
+router.delete('/:idPaquete/tratamientos/:idTratamiento', paqueteController.desasignarTratamiento);
 router.post('/', paqueteController.crear);
-router.put('/:id', paqueteController.actualizar);
-router.delete('/:id', paqueteController.eliminar);
+router.put('/:idPaquete', paqueteController.actualizar);
+router.delete('/:idPaquete', paqueteController.eliminar);
 
 module.exports = router;

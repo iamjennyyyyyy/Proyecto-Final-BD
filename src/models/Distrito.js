@@ -14,6 +14,18 @@ class Distrito {
         }
         return true;
     }
+
+    static validarActualizacion(datos) {
+        if (datos.nombre !== undefined) {
+            if (!datos.nombre || datos.nombre.trim() === '') {
+                throw new Error('El nombre del distrito es obligatorio');
+            }
+            if (datos.nombre.trim().length < 3) {
+                throw new Error('El nombre del distrito debe tener al menos 3 caracteres');
+            }
+        }
+        return true;
+    }
 }
 
 module.exports = Distrito;

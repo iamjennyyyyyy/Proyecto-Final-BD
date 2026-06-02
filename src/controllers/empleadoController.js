@@ -12,8 +12,18 @@ const empleadoController = {
 
     async obtenerPorId(req, res) {
         try {
-            const id = parseInt(req.params.id);
-            const empleado = await empleadoService.obtenerEmpleadoPorId(id);
+            const idEmpleado = parseInt(req.params.idEmpleado);
+            const empleado = await empleadoService.obtenerEmpleadoPorId(idEmpleado);
+            res.json({ success: true, data: empleado });
+        } catch (error) {
+            res.status(404).json({ success: false, error: error.message });
+        }
+    },
+
+    async obtenerPorDNI(req, res) {
+        try {
+            const {dni} = req.query;
+            const empleado = await empleadoService.obtenerEmpleadoPorDNI(dni);
             res.json({ success: true, data: empleado });
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
@@ -31,8 +41,8 @@ const empleadoController = {
 
     async actualizar(req,res){
         try{
-            const id = parseInt(req.params.id);
-            const empleado = await empleadoService.actualizarEmpleado(id, req.body);
+            const idEmpleado = parseInt(req.params.idEmpleado);
+            const empleado = await empleadoService.actualizarEmpleado(idEmpleado, req.body);
             res.json({success: true, data: empleado});
         }
         catch(error){
@@ -42,7 +52,7 @@ const empleadoController = {
 
     async eliminar(req, res) {
         try {
-        await empleadoService.eliminarEmpleado(parseInt(req.params.id));
+        await empleadoService.eliminarEmpleado(parseInt(req.params.idEmpleado));
         res.json({ success: true, message: 'Empleado eliminado' });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
