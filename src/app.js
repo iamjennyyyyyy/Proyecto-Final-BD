@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
-const app = express();
+const app = require('express')();
+const cors = require('cors');
 
 const areaRoutes = require('./routes/areaRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
@@ -12,43 +13,46 @@ const paqueteRoutes = require('./routes/paqueteRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const paqueteVendidoRoutes = require('./routes/paqueteVendidoRoutes');
 const citaRoutes = require('./routes/citaRoutes');
+const authRoutes = require('./routes/authRoutes');
+
+const { verificarToken } = require('./middlewares/authMiddleware');
 
 app.use(express.json());
+app.use(cors());
 
-// ===== LOGGING DE TODAS LAS PETICIONES =====
 app.use((req, res, next) => {
     console.log(`📢 ${req.method} ${req.url}`);
     next();
 });
 
-// ===== SERVIR FRONTEND =====
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ===== RUTAS API =====
-app.use('/api/areas', areaRoutes);
-app.use('/api/categorias', categoriaRoutes);
-app.use('/api/clientes', clienteRoutes);
-app.use('/api/distritos', distritoRoutes);
-app.use('/api/empleados', empleadoRoutes);
-app.use('/api/materiales', materialRoutes);
-app.use('/api/paquetes', paqueteRoutes);
-app.use('/api/tratamientos', tratamientoRoutes);
-app.use('/api/paquetes-vendidos', paqueteVendidoRoutes);
-app.use('/api/citas', citaRoutes);
+app.use('/api/auth', authRoutes);
 
-// ===== MANEJADOR DE ERRORES GLOBAL =====
+app.use('/api/areas', verificarToken, areaRoutes);
+app.use('/api/categorias', verificarToken, categoriaRoutes);
+app.use('/api/clientes', verificarToken, clienteRoutes);
+app.use('/api/distritos', verificarToken, distritoRoutes);
+app.use('/api/empleados', verificarToken, empleadoRoutes);
+app.use('/api/materiales', verificarToken, materialRoutes);
+app.use('/api/paquetes', verificarToken, paqueteRoutes);
+app.use('/api/tratamientos', verificarToken, tratamientoRoutes);
+app.use('/api/paquetes-vendidos', verificarToken, paqueteVendidoRoutes);
+app.use('/api/citas', verificarToken, citaRoutes);
+
 app.use((err, req, res, next) => {
-    console.error('❌ ERROR DETALLADO:', err);
-    res.status(500).json({ 
+    console.error('ERROR:', err);
+    res.status(500).json({
         error: err.message,
-        stack: err.stack 
+        stack: err.stack
     });
 });
 
-app.listen(3000, () => {
-    console.log('Servidor corriendo en http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
