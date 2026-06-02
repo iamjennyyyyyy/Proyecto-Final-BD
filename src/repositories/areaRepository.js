@@ -20,7 +20,7 @@ class AreaRepository {
     //RELACION EMPLEADOS POR AREA / AREA - EMPLEADOS
     async buscarEmpleadosPorArea(idArea){
         const result = await pool.query(
-            `SELECT idempleado, nombre, dni, especialidad, esfijo, horastrabajo, direccion, telefono
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo, e.horastrabajo, e.direccion, e.telefono
             FROM empleados e
             INNER JOIN empleadosPorArea epa ON epa.idempleado = e.idempleado
             WHERE epa.idarea = $1
@@ -68,7 +68,6 @@ class AreaRepository {
     async crear(datos) {
         const valores = [];
         const campos = [];
-        let contador = 1;
         
         if (datos.nombre !== undefined) {
             campos.push(`nombre`);

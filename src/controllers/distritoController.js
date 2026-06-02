@@ -12,8 +12,8 @@ const distritoController = {
 
     async obtenerPorId(req, res) {
         try {
-        const id = parseInt(req.params.id);
-        const distrito = await distritoService.obtenerDistritoPorId(id);
+        const idDistrito = parseInt(req.params.idDistrito);
+        const distrito = await distritoService.obtenerDistritoPorId(idDistrito);
         res.json({ success: true, data: distrito });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
@@ -30,19 +30,19 @@ const distritoController = {
     },
 
     async actualizar(req,res){
-            try{
-                const id = parseInt(req.params.id);
-                const distrito = await distritoService.actualizarDistrito(id, req.body);
-                res.json({success: true, data: distrito});
-            }
-            catch(error){
-                res.status(500).json({success: false, error: error.message});
-            }
-        },
+        try{
+            const idDistrito = parseInt(req.params.idDistrito);
+            const distrito = await distritoService.actualizarDistrito(idDistrito, req.body);
+            res.json({success: true, data: distrito});
+        }
+        catch(error){
+            res.status(500).json({success: false, error: error.message});
+        }
+    },
 
     async eliminar(req, res) {
         try {
-        await distritoService.eliminarDistrito(parseInt(req.params.id));
+        await distritoService.eliminarDistrito(parseInt(req.params.idDistrito));
         res.json({ success: true, message: 'Distrito eliminado' });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });

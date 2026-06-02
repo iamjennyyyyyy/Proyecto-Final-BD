@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const materialController = require('../controllers/materialController');
 
-router.get('/', materialController.listarTodos);      // ← Cambiado
-router.get('/:id', materialController.obtenerPorId);  // ← Cambiado
-router.post('/', materialController.crear);           // ← Cambiado
-router.put('/:id', materialController.actualizar);    // ← Esto ya estaba bien
-router.delete('/:id', materialController.eliminar);   // ← Cambiado
+router.get('/', materialController.listarTodos);
+router.get('/:idMaterial', materialController.obtenerPorId);
+router.post('/', materialController.crear);
+router.put('/:idMaterial', materialController.actualizar);
+router.delete('/:idMaterial', materialController.eliminar);
 
 module.exports = router;

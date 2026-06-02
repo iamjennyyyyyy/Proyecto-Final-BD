@@ -29,15 +29,15 @@ class materialesPorCitaRepository{
         return result.rows;
     }
 
-    async asignarMaterialACita(idCita, idMaterial, cantidadmaterialutilizado){
+    async asignarMaterialACita(idCita, idMaterial, cantidad){
         const result = await pool.query(
             `INSERT INTO materialesporcita (idcita, idmaterial, cantidadmaterialutilizado)
-            VALUES ($1, $2, $3) RETURNING *`, [idCita, idMaterial, cantidadmaterialutilizado]
+            VALUES ($1, $2, $3) RETURNING *`, [idCita, idMaterial, cantidad]
         );
         return result.rows[0];
     }
 
-    async desasignarMaterialDeCita(idMaterial, idCita){
+    async desasignarMaterialACita(idCita, idMaterial){
         const result = await pool.query(
             `DELETE FROM materialesporcita
             WHERE idmaterial = $1 AND idcita = $2 RETURNING *`, [idMaterial, idCita]
@@ -45,16 +45,16 @@ class materialesPorCitaRepository{
         return result.rows[0];
     }
 
-    async actualizarCantidadMaterial(idMaterial, idCita, cantidadmaterialutilizado){
+    async actualizarCantidadMaterial(idCita, idMaterial, cantidad){
         const result = await pool.query(
             `UPDATE materialesporcita
             SET cantidadmaterialutilizado = $1
-            WHERE idmaterial = $2 AND idcita = $3 RETURNING *`, [cantidadmaterialutilizado, idMaterial, idCita]
+            WHERE idmaterial = $2 AND idcita = $3 RETURNING *`, [cantidad, idMaterial, idCita]
         );
         return result.rows[0];
     }
 
-    async existeRelacion(idMaterial, idCita){
+    async existeRelacion(idCita, idMaterial){
         const result = await pool.query(
             `SELECT *
             FROM materialesporcita

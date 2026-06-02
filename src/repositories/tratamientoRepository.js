@@ -47,7 +47,7 @@ class TratamientoRepository {
         const result = await pool.query(
             `SELECT idempleado, nombre, dni, especialidad, esfijo, horastrabajo, direccion, telefono
             FROM empleados e
-            INNER JOIN empleadosFijosPorTratamiento ept ON ept.idempleado = e.idempleado
+            INNER JOIN empleadosFijosPorTratamiento ept ON ept.idempleadofijo = e.idempleado
             WHERE ept.idtratamiento = $1
             ORDER BY e.nombre`, [idTratamiento]
         );
@@ -60,7 +60,7 @@ class TratamientoRepository {
             FROM tratamientos t
             INNER JOIN categorias c ON c.idcategoria = t.idcategoria
             INNER JOIN empleadosfijosportratamiento eft ON eft.idtratamiento = t.idtratamiento
-            WHERE eft.idempleado = $1
+            WHERE eft.idempleadofijo = $1
             ORDER BY t.nombre`, [idEmpleado]
         );
         return result.rows;
@@ -68,7 +68,7 @@ class TratamientoRepository {
 
     async asignarEmpleadoAUnTratamiento(idEmpleado, idTratamiento){
         const result = await pool.query(
-            `INSERT INTO empleadosfijosportratamiento (idempleado, idTratamiento)
+            `INSERT INTO empleadosfijosportratamiento (idempleadofijo, idTratamiento)
             VALUES ($1, $2) RETURNING *`, [idEmpleado, idTratamiento]
         );
         return result.rows[0];
@@ -77,7 +77,7 @@ class TratamientoRepository {
     async desasignarEmpleadoDeUnTratamiento(idEmpleado, idTratamiento){
         const result = await pool.query(
             `DELETE FROM empleadosfijosportratamiento
-            WHERE idempleado = $1 AND idtratamiento = $2 RETURNING *`, [idEmpleado, idTratamiento]
+            WHERE idempleadofijo = $1 AND idtratamiento = $2 RETURNING *`, [idEmpleado, idTratamiento]
         );
         return result.rows[0];
     }

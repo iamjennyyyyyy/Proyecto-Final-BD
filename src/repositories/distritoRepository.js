@@ -3,7 +3,13 @@ const pool = require('../config/database');
 class DistritoRepository {
 
 	async listarTodos() {
-		const result = await pool.query('SELECT * FROM distritos ORDER BY iddistrito');
+		const result = await pool.query(
+			`SELECT d.iddistrito, d.nombre, COUNT(e.idempleado)::int AS empleados
+			 FROM distritos d
+			 LEFT JOIN empleados e ON e.iddistrito = d.iddistrito
+			 GROUP BY d.iddistrito, d.nombre
+			 ORDER BY d.iddistrito`
+		);
 		return result.rows;
 	}
 

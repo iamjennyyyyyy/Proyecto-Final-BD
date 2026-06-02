@@ -14,9 +14,20 @@ const categoriaController = {
 
     async obtenerPorId(req,res){
         try{
-            const id = parseInt(req.params.id);
-            const categoria = await categoriaService.obtenerCategoriaPorId(id);
+            const idCategoria = parseInt(req.params.idCategoria);
+            const categoria = await categoriaService.obtenerCategoriaPorId(idCategoria);
             res.json({success: true, data: categoria});
+        }
+        catch(error){
+            res.status(500).json({success: false, error: error.message});
+        }
+    },
+
+    async obtenerCategoriasPorArea(req,res){
+        try{
+            const idArea = parseInt(req.params.idArea);
+            const categorias = await categoriaService.obtenerCategoriasPorArea(idArea);
+            res.json({success: true, count: categorias.length, data: categorias});
         }
         catch(error){
             res.status(500).json({success: false, error: error.message});
@@ -35,8 +46,8 @@ const categoriaController = {
 
     async actualizar(req,res){
         try{
-            const id = parseInt(req.params.id);
-            const categoria = await categoriaService.actualizarCategoria(id, req.body);
+            const idCategoria = parseInt(req.params.idCategoria);
+            const categoria = await categoriaService.actualizarCategoria(idCategoria, req.body);
             res.json({success: true, data: categoria});
         }
         catch(error){
@@ -46,7 +57,7 @@ const categoriaController = {
 
     async eliminar(req,res){
         try{
-            await categoriaService.eliminarCategoria(parseInt(req.params.id));
+            await categoriaService.eliminarCategoria(parseInt(req.params.idCategoria));
             res.json({success: true, message: 'Categoría eliminada'});
         }
         catch(error){
