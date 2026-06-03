@@ -3,8 +3,12 @@ const clienteService = require('../services/clienteService');
 const clienteController = {
     async listarTodos(req, res) {
         try {
-        const clientes = await clienteService.listarClientes();
-        res.json({ success: true, count: clientes.length, data: clientes });
+            if (req.query.q) {
+                const clientes = await clienteService.buscarClientes(req.query.q);
+                return res.json({ success: true, count: clientes.length, data: clientes });
+            }
+            const clientes = await clienteService.listarClientes();
+            res.json({ success: true, count: clientes.length, data: clientes });
         } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         }
@@ -23,7 +27,7 @@ const clienteController = {
     async obtenerPorDNI(req, res) {
         try {
         const {dni} = req.query;
-        const cliente = await clienteService.obtenerPorDNI(dni);
+        const cliente = await clienteService.obtenerClientePorDNI(dni);
         res.json({ success: true, data: cliente });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });

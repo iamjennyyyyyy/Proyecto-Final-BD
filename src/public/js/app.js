@@ -1,5 +1,5 @@
 /* SPA Belleza & Relax */
-dayjs.locale('es');
+try{dayjs.locale('es')}catch(e){} // CDN fallback
 const $=id=>document.getElementById(id);
 const qq=sel=>document.querySelectorAll(sel);
 let user=null,token=null,sidebarCollapsed=false,currentPage='';
@@ -8,13 +8,17 @@ const $$=n=>'$'+Number(n||0).toFixed(2);
 function cap(s){return s?s[0].toUpperCase()+s.slice(1):''}
 function todayStr(){return dayjs().format('YYYY-MM-DD')}
 function today(){return dayjs().format('DD [de] MMMM [de] YYYY')}
-const EST={pendiente:'bg-amber-100 text-amber-700 border-amber-200',realizada:'bg-menta-100 text-menta-700 border-menta-200',cancelada:'bg-red-100 text-red-600 border-red-200'};
+function formatDate(d){return d?dayjs(d).format('DD [de] MMMM [de] YYYY'):'-'}
+function formatDateShort(d){return d?dayjs(d).format('DD/MM/YYYY'):'-'}
+function formatTime(t){return t?t.slice(0,5):'-'}
+function togglePassword(){const pwd=$('loginPassword'),ico=$('passIcon');if(!pwd||!ico)return;const isPassword=pwd.type==='password';pwd.type=isPassword?'text':'password';ico.className=isPassword?'fa-regular fa-eye-slash':'fa-regular fa-eye'}
+const EST={pendiente:'bg-amber-100 text-amber-700 border-amber-200',realizada:'bg-mentaverde-100 text-mentaverde-700 border-mentaverde-200',cancelada:'bg-red-100 text-red-600 border-red-200'};
 function sc(e){return EST[e]||'bg-gray-100 text-gray-600'}
-function sb(e){return{pendiente:'#f59e0b',realizada:'#2ecc71',cancelada:'#ef4444'}[e]||'#9ca3af'}
+function sb(e){return{pendiente:'#f59e0b',realizada:'#34d399',cancelada:'#ef4444'}[e]||'#9ca3af'}
 function toast(msg,ok=true){
   const c=$('toastContainer');if(!c)return;
   const t=document.createElement('div');
-  t.className='toast-enter pointer-events-auto flex items-center gap-2.5 px-5 py-3 rounded-xl shadow-lg border text-sm font-medium '+(ok?'bg-white text-[#2c3e50] border-menta-200':'bg-white text-red-600 border-red-200');
+  t.className='toast-enter pointer-events-auto flex items-center gap-2.5 px-5 py-3 rounded-xl shadow-lg border text-sm font-medium '+(ok?'bg-white text-[#2c3e50] border-mentaverde-200':'bg-white text-red-600 border-red-200');
   t.innerHTML=(ok?'<i class="fa-solid fa-circle-check text-menta"></i>':'<i class="fa-solid fa-circle-exclamation text-red-500"></i>')+msg;
   c.appendChild(t);setTimeout(()=>{t.className=t.className.replace('toast-enter','toast-exit');setTimeout(()=>t.remove(),300)},3000);
 }
@@ -50,32 +54,69 @@ $('loginForm').addEventListener('submit',async e=>{
   }catch(e){err.querySelector('span').textContent=e.message;err.classList.remove('hidden');btn.disabled=false;btn.innerHTML='<span>Iniciar Sesión</span><i class="fa-solid fa-arrow-right text-xs"></i>'}
 });
 function logout(){clearSession();user=null;token=null;$('appLayout').classList.add('hidden');$('loginScreen').classList.remove('hidden');$('loginScreen').style.display='flex';}
-function checkAuth(){token=getToken();user=getUser();if(token&&user){enterApp();return true}$('loginScreen').classList.remove('hidden');$('loginScreen').style.display='flex';return false;}
+async function checkAuth(){
+  // Always show login first; hide it if valid session confirmed
+  const ls=$('loginScreen');if(ls){ls.style.display='flex';ls.classList.remove('hidden');}
+  token=getToken();user=getUser();
+  if(token&&user){
+    try{await api.get('/api/tratamientos?limit=1');enterApp();return true}
+    catch(e){clearSession();}
+  }
+  return false;
+}
+if(location.search.includes('clear=1')&&clearSession)clearSession();
 function enterApp(){$('loginScreen').classList.add('hidden');$('loginScreen').style.display='none';$('appLayout').classList.remove('hidden');const init=user.rol==='administrador'?'admin-tratamientos':'inicio';$('userAvatar').textContent=(user.username||'U')[0].toUpperCase();$('userName').textContent=user.username;renderSidebar();navigate(init);window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h)navigate(h)});}
 
 // Sidebar & Navigation
 const MENU_DEP=[{id:'inicio',icon:'fa-house',label:'Inicio'},{id:'citas',icon:'fa-calendar-check',label:'Citas'},{id:'paquetes',icon:'fa-box',label:'Paquetes'},{id:'tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'mapa',icon:'fa-map-location-dot',label:'Mapa y Contactos'}];
-const MENU_ADM=[{id:'admin-tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'admin-paquetes',icon:'fa-box',label:'Paquetes'},{id:'admin-empleados',icon:'fa-user-tie',label:'Empleados'},{id:'admin-clientes',icon:'fa-users',label:'Clientes'},{id:'admin-materiales',icon:'fa-oil-can',label:'Materiales'},{id:'admin-distritos',icon:'fa-map-pin',label:'Distritos'},{id:'admin-areas',icon:'fa-building',label:'Áreas'},{id:'admin-reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'admin-informe-ingresos',icon:'fa-file-invoice-dollar',label:'Informe Ingresos'},{id:'admin-informe-discrepancia',icon:'fa-file-excel',label:'Informe Discrepancia'}];
-const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia'};
+const MENU_ADM=[{id:'admin-tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'admin-paquetes',icon:'fa-box',label:'Paquetes'},{id:'admin-empleados',icon:'fa-user-tie',label:'Empleados'},{id:'admin-clientes',icon:'fa-users',label:'Clientes'},{id:'admin-materiales',icon:'fa-oil-can',label:'Materiales'},{id:'admin-categorias',icon:'fa-tags',label:'Categorías'},{id:'admin-distritos',icon:'fa-map-pin',label:'Distritos'},{id:'admin-areas',icon:'fa-building',label:'Áreas'},{id:'admin-reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'admin-informe-ingresos',icon:'fa-file-invoice-dollar',label:'Informe Ingresos'},{id:'admin-informe-discrepancia',icon:'fa-file-excel',label:'Informe Discrepancia'}];
+const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia'};
 const SCREENS={};
 function renderSidebar(){const nav=$('sidebarNav');if(!nav)return;const items=user?.rol==='administrador'?MENU_ADM:MENU_DEP;nav.innerHTML=items.map(i=>'<a href="#'+i.id+'" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all '+(currentPage===i.id?'bg-menta text-white font-medium shadow-sm':'text-[#6b7280] hover:bg-lavender-50 hover:text-[#2c3e50]')+'"><i class="fa-solid '+i.icon+' w-5 text-center text-base"></i><span class="sidebar-text">'+i.label+'</span></a>').join('');}
 function toggleSidebar(){const sb=$('sidebar'),mc=$('mainContent');if(window.innerWidth<=768){sb.style.transform=sb.style.transform==='translateX(0%)'?'translateX(-100%)':'translateX(0%)';$('sidebarOverlay').classList.toggle('hidden')}else{sidebarCollapsed=!sidebarCollapsed;sb.style.width=sidebarCollapsed?'70px':'260px';mc.style.marginLeft=sidebarCollapsed?'70px':'260px';qq('.sidebar-text').forEach(el=>el.style.display=sidebarCollapsed?'none':'');$('sidebarBrand').style.display=sidebarCollapsed?'none':'';}}
 function navigate(page){currentPage=page;renderSidebar();$('pageTitle').textContent=TITLES[page]||'Inicio';location.hash='#'+page;expandedTratamiento=null;expandedDistrito=null;expandedArea=null;const fn=SCREENS[page];if(fn)fn();else if(user?.rol==='administrador')SCREENS['admin-tratamientos']();else SCREENS.inicio();}
 document.addEventListener('click',e=>{if(window.innerWidth>768)return;const sb=$('sidebar');if(!sb?.contains(e.target)){sb.style.transform='translateX(-100%)';$('sidebarOverlay')?.classList.add('hidden')}});
-document.addEventListener('DOMContentLoaded',checkAuth);
+document.addEventListener('DOMContentLoaded',()=>checkAuth());
 
 // Screen: Citas
+let citasFilterFechaDesde='',citasFilterFechaHasta='',citasFilterPrecioMin='',citasFilterPrecioMax='';
 SCREENS.citas=async()=>{
   const ct=$('pageContent');
   ct.innerHTML=showLoading();
   try{
-    const d=await api.get('/api/citas');
+    // Build the API call with backend filtering
+    let url='/api/citas';
+    if(citasFilterEstado!=='todas'||citasFilterFechaDesde||citasFilterFechaHasta||citasFilterPrecioMin||citasFilterPrecioMax){
+      const params=[];
+      if(citasFilterEstado!=='todas')params.push('estado='+encodeURIComponent(citasFilterEstado));
+      if(citasFilterPrecioMin||citasFilterPrecioMax)params.push('precioMin='+(citasFilterPrecioMin||'0')+'&precioMax='+(citasFilterPrecioMax||'999999'));
+      if(citasFilterFechaDesde&&citasFilterFechaHasta)params.push('fecha1='+encodeURIComponent(citasFilterFechaDesde)+'&fecha2='+encodeURIComponent(citasFilterFechaHasta));
+      else if(citasFilterFechaDesde)params.push('fecha='+encodeURIComponent(citasFilterFechaDesde));
+      else if(citasFilterFechaHasta)params.push('fecha='+encodeURIComponent(citasFilterFechaHasta));
+      // Try to use the most specific endpoint
+      if(citasFilterEstado!=='todas'&&!citasFilterFechaDesde&&!citasFilterFechaHasta&&!citasFilterPrecioMin&&!citasFilterPrecioMax)
+        url='/api/citas/estado?estado='+encodeURIComponent(citasFilterEstado);
+      else if(citasFilterFechaDesde&&citasFilterFechaHasta&&!citasFilterPrecioMin&&!citasFilterPrecioMax&&citasFilterEstado==='todas')
+        url='/api/citas/intervalo/fechas?fecha1='+encodeURIComponent(citasFilterFechaDesde)+'&fecha2='+encodeURIComponent(citasFilterFechaHasta);
+      else if(citasFilterPrecioMin||citasFilterPrecioMax){
+        // Use all data and filter client-side for combined filters
+        url='/api/citas';
+      }
+    }
+    const d=await api.get(url);
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-calendar-xmark','Sin datos','No se pudieron cargar las citas.','Reintentar','navigate(\'citas\')');return;}
-    let citas=d.data.filter(c=>citasFilterEstado==='todas'||c.estado===citasFilterEstado).sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
-    const ctasHoy=d.data.filter(c=>c.fecha===todayStr()).length;
-    ct.innerHTML='<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='todas'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'todas\';SCREENS.citas()">Todas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='pendiente'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'pendiente\';SCREENS.citas()">Pendientes</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='realizada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'realizada\';SCREENS.citas()">Realizadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='cancelada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'cancelada\';SCREENS.citas()">Canceladas</button></div></div></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
+    let citas=d.data||[];
+    // Additional client-side filtering for combined filters
+    if(citasFilterEstado!=='todas'&&url==='/api/citas')citas=citas.filter(c=>c.estado===citasFilterEstado);
+    if(citasFilterFechaDesde)citas=citas.filter(c=>!c.fecha||c.fecha>=citasFilterFechaDesde);
+    if(citasFilterFechaHasta)citas=citas.filter(c=>!c.fecha||c.fecha<=citasFilterFechaHasta);
+    if(citasFilterPrecioMin)citas=citas.filter(c=>Number(c.precio||0)>=Number(citasFilterPrecioMin));
+    if(citasFilterPrecioMax)citas=citas.filter(c=>Number(c.precio||0)<=Number(citasFilterPrecioMax));
+    citas.sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
+    const filtrosActivos=citasFilterEstado!=='todas'||citasFilterFechaDesde||citasFilterFechaHasta||citasFilterPrecioMin||citasFilterPrecioMax;
+    ct.innerHTML='<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+citas.length+'</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='todas'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'todas\';SCREENS.citas()">Todas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='pendiente'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'pendiente\';SCREENS.citas()">Pendientes</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='realizada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'realizada\';SCREENS.citas()">Realizadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='cancelada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'cancelada\';SCREENS.citas()">Canceladas</button></div></div></div><div class="flex flex-wrap items-center gap-2 mb-4 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-filter text-xs text-[#6b7280]"></i><input type="date" id="filtroFechaDesde" value="'+citasFilterFechaDesde+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaDesde=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">a</span><input type="date" id="filtroFechaHasta" value="'+citasFilterFechaHasta+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaHasta=this.value;SCREENS.citas()"><input type="number" id="filtroPrecioMin" placeholder="Precio min" value="'+citasFilterPrecioMin+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMin=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">-</span><input type="number" id="filtroPrecioMax" placeholder="Precio max" value="'+citasFilterPrecioMax+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMax=this.value;SCREENS.citas()">'+(filtrosActivos?'<button onclick="citasFilterFechaDesde=\'\';citasFilterFechaHasta=\'\';citasFilterPrecioMin=\'\';citasFilterPrecioMax=\'\';citasFilterEstado=\'todas\';SCREENS.citas()" class="px-3 py-1.5 bg-gray-200 text-[#6b7280] text-xs font-medium rounded-lg hover:bg-gray-300">Limpiar</button>':'')+'</div><div class="flex justify-end mb-4"><button onclick="citaModal()" class="px-4 py-2 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agendar Cita</button></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
     if(citas.length){
-      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',renderTable([{label:'Fecha',render:c=>formatDateShort(c.fecha)}, {label:'Hora',render:c=>formatTime(c.hora)},{label:'Cliente',render:c=>c.clientenombre||'-'},{label:'Teléfono',render:c=>c.telefonocliente||'-'},{label:'Tratamiento',render:c=>c.tratamientonombre||'-'},{label:'Estado',render:c=>'<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+' cursor-pointer" onclick="cambioEstadoCita('+c.idcita+',\''+c.estado+'\')">'+cap(c.estado)+'</span>'},{label:'',render:c=>'<div class="flex gap-1.5 justify-end"><button onclick="verCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg transition-all" title="Ver"><i class="fa-regular fa-eye"></i></button><button onclick="cambioEstadoCita('+c.idcita+',\''+c.estado+'\')" class="p-1.5 text-[#6b7280] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Cambiar estado"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="eliminarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],citas));
+      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',renderTable([{label:'Fecha',render:c=>formatDateShort(c.fecha)},{label:'Hora',render:c=>formatTime(c.hora)},{label:'Cliente',render:c=>c.clientenombre||'-'},{label:'Teléfono',render:c=>c.telefonocliente||'-'},{label:'Tratamiento',render:c=>c.tratamientonombre||'-'},{label:'Precio',render:c=>$$(c.precio)},{label:'Estado',render:c=>'<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+' cursor-pointer" onclick="cambioEstadoCita('+c.idcita+',\''+c.estado+'\')">'+cap(c.estado)+'</span>'},{label:'',render:c=>'<div class="flex gap-1.5 justify-end"><button onclick="verCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg transition-all" title="Ver"><i class="fa-regular fa-eye"></i></button><button onclick="editarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="eliminarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],citas));
     }else{
       ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',showEmpty((citasFilterEstado==='todas'?'fa-regular fa-calendar-check':'fa-regular fa-filter'),(citasFilterEstado==='todas'?'No hay citas registradas':'No hay citas '+citasFilterEstado),'Agenda la primera cita para comenzar.','Agendar Cita','citaModal()'));
     }
@@ -86,7 +127,7 @@ async function verCita(id){
     const d=await api.get('/api/citas/'+id);
     if(!d.success)return toast(d.error||'Error',false);
     const c=d.data;
-    openModal('<div class="p-6" style="max-width: 520px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-regular fa-circle-info text-menta mr-2"></i>Detalle de Cita</h3><span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span></div><div class="space-y-3 text-sm"><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium text-[#2c3e50]">'+c.clientenombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Teléfono</span><span class="font-medium text-[#2c3e50]">'+c.telefonocliente+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Tratamiento</span><span class="font-medium text-[#2c3e50]">'+c.tratamientonombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Fecha</span><span class="font-medium text-[#2c3e50]">'+formatDate(c.fecha)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Hora</span><span class="font-medium text-[#2c3e50]">'+formatTime(c.hora)+'</span></div>'+(c.empleadonombre?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Empleado</span><span class="font-medium text-[#2c3e50]">'+c.empleadonombre+'</span></div>':'')+'</div><div class="flex gap-2 mt-6 justify-end"><button onclick="closeModal()" class="px-5 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button><button onclick="closeModal();cambioEstadoCita('+id+',\''+c.estado+'\')" class="px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Cambiar Estado</button></div></div>');
+    openModal('<div class="p-6" style="max-width: 520px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-regular fa-circle-info text-menta mr-2"></i>Detalle de Cita</h3><span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span></div><div class="space-y-3 text-sm"><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium text-[#2c3e50]">'+c.clientenombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Teléfono</span><span class="font-medium text-[#2c3e50]">'+c.telefonocliente+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Tratamiento</span><span class="font-medium text-[#2c3e50]">'+c.tratamientonombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-medium text-[#2c3e50]">'+$$(c.precio)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Fecha</span><span class="font-medium text-[#2c3e50]">'+formatDate(c.fecha)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Hora</span><span class="font-medium text-[#2c3e50]">'+formatTime(c.hora)+'</span></div>'+(c.empleadonombre?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Empleado</span><span class="font-medium text-[#2c3e50]">'+c.empleadonombre+'</span></div>':'')+(c.observaciones?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Observaciones</span><span class="font-medium text-[#2c3e50]">'+c.observaciones+'</span></div>':'')+'</div><div class="flex gap-2 mt-6 justify-end"><button onclick="closeModal()" class="px-5 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button><button onclick="closeModal();editarCita('+id+')" class="px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Editar</button></div></div>');
   }catch(e){toast('Error al cargar detalle',false)}
 }
 async function cambioEstadoCita(id,estadoActual){
@@ -99,7 +140,7 @@ async function aplicarCambioEstado(id,estado){
     const d=await api.put('/api/citas/'+id,{estado});
     if(!d.success)return toast(d.error||'Error al actualizar',false);
     toast('Estado actualizado a '+cap(estado));closeModal();SCREENS.citas();
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function eliminarCita(id){
   openConfirm('Eliminar Cita','¿Estás seguro de eliminar esta cita? Esta acción no se puede deshacer.',async()=>{
@@ -107,41 +148,103 @@ async function eliminarCita(id){
       const d=await api.del('/api/citas/'+id);
       if(!d.success)return toast(d.error||'Error',false);
       toast('Cita eliminada');SCREENS.citas();
-    }catch(e){toast('Error de conexión',false)}
+    }catch(e){toast(e.message||'Error de conexión',false)}
   });
 }
 async function citaModal(editData){
   editId=editData?.idcita||null;
   try{
-    const[t,emps]=await Promise.all([api.get('/api/tratamientos'),api.get('/api/empleados')]);
+    const t=await api.get('/api/tratamientos');
     if(!t.success){toast('Error al cargar tratamientos',false);return;}
-    let body='<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-calendar-plus text-menta mr-2"></i>'+(editData?'Editar Cita':'Agendar Cita')+'</h3>';
-    body+='<div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label><div class="relative"><input type="text" id="citaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" placeholder="Nombre del cliente" value="'+(editData?.clientenombre||'')+'"><input type="hidden" id="citaClienteId" name="idcliente" value="'+(editData?.idcliente||'')+'"><div id="clienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div></div></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label><select id="citaTratamiento" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all">'+t.data.map(tr=>'<option value="'+tr.idtratamiento+'"'+(editData?.idtratamiento==tr.idtratamiento?' selected':'')+'>'+tr.nombre+'</option>').join('')+'</select></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Fecha *</label><input type="date" id="citaFecha" value="'+(editData?.fecha||todayStr())+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label><input type="time" id="citaHora" value="'+(editData?.hora||'09:00')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado (opcional)</label><select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"><option value="">Sin asignar</option>'+(emps.success?emps.data.map(e=>'<option value="'+e.idempleado+'"'+(editData?.idempleado==e.idempleado?' selected':'')+'>'+e.nombre+'</option>').join(''):'')+'</select></div></div>';
-    body+='<div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarCita()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Agendar')+'</button></div></div>';
-    openModal(body,()=>{
-      const inp=$('citaClienteInput');
+    const loadEmps=async(tratId)=>{
+      var sel=$('citaEmpleado');
+      if(!tratId){if(sel)sel.innerHTML='<option value="">Selecciona un tratamiento primero</option>';return;}
+      try{
+        const e=await api.get('/api/tratamientos/'+tratId+'/empleados-fijos');
+        if(e.success&&e.data){
+          sel.innerHTML='';
+          if(!e.data.length){sel.innerHTML='<option value="">No hay empleados fijos para este tratamiento</option>';return;}
+          e.data.forEach(function(en){
+            var opt=document.createElement('option');opt.value=en.idempleado;
+            if(editData&&editData.idempleado==en.idempleado)opt.selected=true;
+            opt.textContent=en.nombre;sel.appendChild(opt);
+          });
+        }else{sel.innerHTML='<option value="">Error al cargar empleados</option>'}
+      }catch(e2){var sel2=$('citaEmpleado');if(sel2)sel2.innerHTML='<option value="">Error</option>'}
+    };
+    var tratOpts='';t.data.forEach(function(tr){tratOpts+='<option value="'+tr.idtratamiento+'" data-precio="'+tr.precio+'"'+(editData&&editData.idtratamiento==tr.idtratamiento?' selected':'')+'>'+tr.nombre+'</option>'});
+    var estadoHtml='';if(editData)estadoHtml='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Estado</label><select id="citaEstado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="pendiente"'+(editData.estado==='pendiente'?' selected':'')+'>Pendiente</option><option value="realizada"'+(editData.estado==='realizada'?' selected':'')+'>Realizada</option><option value="cancelada"'+(editData.estado==='cancelada'?' selected':'')+'>Cancelada</option></select></div>';
+    var obsVal=editData?editData.observaciones||'':'';
+    var body='<div class="p-6" style="max-width:520px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-calendar-plus text-menta mr-2"></i>'+(editData?'Editar Cita':'Agendar Cita')+'</h3>';
+    body+='<div class="space-y-3.5">';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label><div class="relative"><input type="text" id="citaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" placeholder="Nombre del cliente" value="'+(editData?editData.clientenombre||'':'')+'"><input type="hidden" id="citaClienteId" value="'+(editData?editData.idcliente||'':'')+'"><div id="clienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div></div></div>';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label><select id="citaTratamiento" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" onchange="autoFillPrecio()">'+tratOpts+'</select></div>';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio *</label><input type="number" step="0.01" min="0" id="citaPrecio" value="'+(editData?editData.precio||'':'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Fecha *</label><input type="date" id="citaFecha" value="'+(editData?editData.fecha||'':todayStr())+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label><input type="time" id="citaHora" value="'+(editData?editData.hora||'':'09:00')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Cargando...</option></select></div>';
+    body+=estadoHtml;
+    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Observaciones</label><textarea id="citaObservaciones" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+obsVal+'</textarea></div>';
+    body+='</div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarCita()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Agendar')+'</button></div></div>';
+    openModal(body,function(){
+      var inp=$('citaClienteInput');
       if(inp)inp.addEventListener('input',debounce(autocompleteClientes,300));
+      if(!editData)autoFillPrecio();
+      var selTrat=$('citaTratamiento');
+      if(selTrat&&selTrat.value)loadEmps(selTrat.value);
+      selTrat.addEventListener('change',function(){if(this.value)loadEmps(this.value)});
     });
-  }catch(e){toast('Error al cargar formulario',false)}
+  }catch(e){toast(e.message||'Error al cargar formulario',false)}
+}
+function autoFillPrecio(){
+  const sel=$('citaTratamiento');
+  if(!sel)return;
+  const opt=sel.options[sel.selectedIndex];
+  const precioInput=$('citaPrecio');
+  // Always fill price from treatment when field is empty OR when changed
+  if(opt&&opt.dataset.precio&&precioInput&&(!precioInput.value||precioInput.value==='0')){
+    precioInput.value=opt.dataset.precio;
+  }
+}
+async function editarCita(id){
+  try{
+    const d=await api.get('/api/citas/'+id);
+    if(!d.success)return toast(d.error||'Error al cargar cita',false);
+    citaModal(d.data);
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function autocompleteClientes(){
   const q=$('citaClienteInput')?.value;if(!q||q.length<2){$('clienteAutocomplete').classList.add('hidden');return;}
   try{
     const d=await api.get('/api/clientes?q='+encodeURIComponent(q));
     if(!d.success)return;
-    const ac=$('clienteAutocomplete');ac.innerHTML='<div class="p-2 space-y-1">'+(d.data.length?d.data.map(c=>'<div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-[#2c3e50] flex items-center justify-between" onclick="seleccionarCliente('+c.idcliente+',\''+c.nombre.replace(/'/g,"\\'")+'\')"><span>'+c.nombre+'</span><span class="text-xs text-[#6b7280]">'+c.telefono+'</span></div>').join(''):'<div class="px-3 py-2 text-sm text-[#9ca3af]">Sin resultados</div>')+'</div>';ac.classList.remove('hidden');
+    const ac=$('clienteAutocomplete');
+    let html='<div class="p-2 space-y-1">';
+    if(d.data.length){
+      html+=d.data.map(c=>'<div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-[#2c3e50] flex items-center justify-between" onclick="seleccionarCliente('+c.idcliente+',\''+c.nombre.replace(/'/g,"\\'")+'\')"><span>'+c.nombre+'</span><span class="text-xs text-[#6b7280]">'+c.telefono+'</span></div>').join('');
+    }else{
+      html+='<div class="px-3 py-2 text-sm text-[#9ca3af]">Sin resultados</div>';
+    }
+    html+='<div class="border-t border-[#e8ecf1] mt-1 pt-1"><div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-menta font-medium flex items-center gap-2" onclick="crearClienteRapido(\'cita\')"><i class="fa-solid fa-plus"></i> Agregar nuevo cliente</div></div></div>';
+    ac.innerHTML=html;ac.classList.remove('hidden');
   }catch(e){}
 }
 function seleccionarCliente(id,nombre){$('citaClienteId').value=id;$('citaClienteInput').value=nombre;$('clienteAutocomplete').classList.add('hidden');}
 async function guardarCita(){
-  const idcliente=$('citaClienteId').value,idtratamiento=$('citaTratamiento').value,fecha=$('citaFecha').value,hora=$('citaHora').value,idempleado=$('citaEmpleado').value;
-  if(!idcliente)return toast('Selecciona un cliente',false);if(!idtratamiento)return toast('Selecciona un tratamiento',false);if(!fecha)return toast('Selecciona una fecha',false);if(!hora)return toast('Selecciona una hora',false);
-  const data={idcliente:idcliente,idtratamiento:idtratamiento,fecha,hora};if(idempleado)data.idempleado=idempleado;
+  const idcliente=$('citaClienteId').value,idtratamiento=$('citaTratamiento').value,precio=parseFloat($('citaPrecio').value),fecha=$('citaFecha').value,hora=$('citaHora').value,idempleado=$('citaEmpleado').value,observaciones=$('citaObservaciones')?.value||'',estado=editId?($('citaEstado')?.value||null):null;
+  if(!idcliente)return toast('Selecciona un cliente',false);
+  if(!idtratamiento)return toast('Selecciona un tratamiento',false);
+  if(isNaN(precio))return toast('Ingresa un precio válido',false);
+  if(!fecha)return toast('Selecciona una fecha',false);
+  if(!hora)return toast('Selecciona una hora',false);
+  if(!idempleado)return toast('Selecciona un empleado',false);
+  const data={idcliente:Number(idcliente),idtratamiento:Number(idtratamiento),precio,fecha,hora,idempleado:Number(idempleado),observaciones};
+  if(estado)data.estado=estado;
   try{
     const d=editId?await api.put('/api/citas/'+editId,data):await api.post('/api/citas',data);
-    if(!d.success)return toast(d.error||'Error al guardar',false);
+    if(!d.success){toast(d.error||'Error al guardar',false);return;} // Keep modal open
     toast(editId?'Cita actualizada':'Cita agendada exitosamente');closeModal();SCREENS.citas();
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false);} // Keep modal open
 }
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)};}
 
@@ -151,7 +254,7 @@ SCREENS.tratamientos=async()=>{
   try{
     const d=await api.get('/api/tratamientos');
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-spa','Sin datos','No hay tratamientos disponibles.');return;}
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+d.data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-spa text-spa"></i></div><div class="min-w-0"><h4 class="font-semibold text-[#2c3e50] truncate">'+t.nombre+'</h4><p class="text-xs text-[#6b7280] mt-0.5 line-clamp-2">'+(t.descripcion||'Sin descripción')+'</p></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-[#e8ecf1]"><span class="text-lg font-bold text-menta">'+$$(t.precio)+'</span><span class="text-xs text-[#6b7280]">'+t.duracion+' min</span></div></div>').join('')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+d.data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-spa text-spa"></i></div><div class="min-w-0"><h4 class="font-semibold text-[#2c3e50] truncate">'+t.nombre+'</h4><p class="text-xs text-[#6b7280] mt-0.5 line-clamp-2">'+(t.descripcion||'Sin descripción')+'</p></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-[#e8ecf1]"><span class="text-lg font-bold text-menta">'+$$(t.precio)+'</span><div class="text-right"><span class="text-xs text-[#6b7280]">'+t.duracion+' min</span>'+(t.categorianombre?'<br><span class="text-xs text-menta font-medium">'+t.categorianombre+'</span>':'')+'</div></div></div>').join('')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar tratamientos.','Reintentar','navigate(\'tratamientos\')')}
 };
 // Dependiente: Paquetes (read-only w/ detail)
@@ -180,27 +283,52 @@ async function venderPaquete(id,nombre,precio){
       const inp=$('vtaClienteInput');
       if(inp)inp.addEventListener('input',debounce(function(){vtaAutocomplete()},300));
     });
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function vtaAutocomplete(){
-  const q=$('vtaClienteInput')?.value;if(!q||q.length<2){$('vtaClienteAutocomplete').classList.add('hidden');return;}
+  const q=$('vtaClienteInput')?.value;if(!q||q.length<2){$('vtaClienteAutocomplete')?.classList.add('hidden');return;}
   try{
-    const d=await api.get('/api/clientes');
+    const d=await api.get('/api/clientes?q='+encodeURIComponent(q));
     if(!d.success)return;
-    const filtrados=d.data.filter(c=>c.nombre.toLowerCase().includes(q.toLowerCase()));
-    const ac=$('vtaClienteAutocomplete');ac.innerHTML='<div class="p-2 space-y-1">'+(filtrados.length?filtrados.map(c=>'<div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-[#2c3e50] flex items-center justify-between" onclick="vtaSelCliente('+c.idcliente+',\''+c.nombre.replace(/'/g,"\\'")+'\')"><span>'+c.nombre+'</span><span class="text-xs text-[#6b7280]">'+c.telefono+'</span></div>').join(''):'<div class="px-3 py-2 text-sm text-[#9ca3af]">Sin resultados</div>')+'</div>';ac.classList.remove('hidden');
+    const filtrados=d.data||[];
+    const ac=$('vtaClienteAutocomplete');if(!ac)return;
+    let html='<div class="p-2 space-y-1">';
+    if(filtrados.length){
+      html+=filtrados.map(c=>'<div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-[#2c3e50] flex items-center justify-between" onclick="vtaSelCliente('+c.idcliente+',\''+c.nombre.replace(/'/g,"\\'")+'\')"><span>'+c.nombre+'</span><span class="text-xs text-[#6b7280]">'+(c.telefono||'')+'</span></div>').join('');
+    }else{
+      html+='<div class="px-3 py-2 text-sm text-[#9ca3af]">Sin resultados</div>';
+    }
+    html+='<div class="border-t border-[#e8ecf1] mt-1 pt-1"><div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-menta font-medium flex items-center gap-2" onclick="crearClienteRapido(\'vta\')"><i class="fa-solid fa-plus"></i> Agregar nuevo cliente</div></div></div>';
+    ac.innerHTML=html;ac.classList.remove('hidden');
   }catch(e){}
 }
 function vtaSelCliente(id,nombre){$('vtaClienteId').value=id;$('vtaClienteInput').value=nombre;$('vtaClienteAutocomplete').classList.add('hidden');}
+async function crearClienteRapido(origen){
+  openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-plus text-menta mr-2"></i>Nuevo Cliente</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" id="rapidClienteNombre" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">CI *</label><input type="text" id="rapidClienteCi" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Teléfono</label><input type="text" id="rapidClienteTelefono" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Email</label><input type="email" id="rapidClienteEmail" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarClienteRapido(\''+origen+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Crear Cliente</button></div></div>');
+}
+async function guardarClienteRapido(origen){
+  const nombre=$('rapidClienteNombre')?.value?.trim(),ci=$('rapidClienteCi')?.value?.trim(),telefono=$('rapidClienteTelefono')?.value?.trim(),email=$('rapidClienteEmail')?.value?.trim();
+  if(!nombre)return toast('El nombre es requerido',false);
+  if(!ci)return toast('La CI es requerida',false);
+  try{
+    const d=await api.post('/api/clientes',{nombre,ci,telefono:telefono||null,email:email||null});
+    if(!d.success){toast(d.error||'Error al crear cliente',false);return;}
+    toast('Cliente creado');closeModal();
+    if(origen==='cita'){$('citaClienteId').value=d.data.idcliente;$('citaClienteInput').value=d.data.nombre;const ac=$('clienteAutocomplete');if(ac)ac.classList.add('hidden');}
+    else if(origen==='vta'){$('vtaClienteId').value=d.data.idcliente;$('vtaClienteInput').value=d.data.nombre;const ac=$('vtaClienteAutocomplete');if(ac)ac.classList.add('hidden');}
+  }catch(e){toast(e.message||'Error de conexión',false)}
+}
 async function guardarVentaPaquete(){
   const idcliente=$('vtaClienteId').value,idpaquete=$('vtaPaqueteId').value;
   if(!idcliente)return toast('Selecciona un cliente',false);
   const hoy=todayStr(),fin=dayjs().add(30,'day').format('YYYY-MM-DD');
   try{
-    const d=await api.post('/api/paquetes-vendidos',{idpaquete,idcliente,fechacompra:hoy,fechainicio:hoy,fechafin:fin});
+    const pkg=await api.get('/api/paquetes/'+idpaquete);
+    if(!pkg.success)return toast('Error al obtener paquete',false);
+    const d=await api.post('/api/paquetes-vendidos',{idpaquete,idcliente,precio:pkg.data.precio,fechacompra:hoy,fechainicio:hoy,fechafin:fin});
     if(!d.success)return toast(d.error||'Error al registrar venta',false);
     toast('Paquete vendido correctamente');closeModal();SCREENS.paquetes();
-  }catch(e){toast('Error de conexión',false);closeModal();}
+  }catch(e){toast(e.message||'Error de conexión',false);}
 }
 // Reportes (dependiente + admin)
 SCREENS.reportes=async()=>{
@@ -233,9 +361,15 @@ SCREENS.mapa=async()=>{
   const ct=$('pageContent');
   ct.innerHTML=showLoading();
   try{
-    const d=await api.get('/api/distritos');
-    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-map','Sin datos','No se pudo cargar el mapa.');return;}
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-map-location-dot text-menta mr-2"></i>Mapa y Contactos</h3></div><div class="grid grid-cols-1 lg:grid-cols-5 gap-5"><div class="lg:col-span-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="bg-gradient-to-br from-menta-50 to-lavender-100 h-48 lg:h-64 flex items-center justify-center relative"><div class="absolute inset-0 opacity-10"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full"><path fill="#2ecc71" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.5,90,-16.2,88.6,-0.7C87.2,14.9,81.8,29.8,73.1,42.8C64.4,55.8,52.5,66.9,39,74.5C25.5,82.1,10.5,86.2,-3.8,83.5C-18.1,80.8,-31.6,71.3,-43.7,60.2C-55.9,49.1,-66.7,36.4,-73.1,21.5C-79.5,6.6,-81.5,-10.5,-76.1,-24.8C-70.8,-39.1,-58,-50.6,-44.1,-57.8C-30.2,-65.1,-15.1,-68.1,-0.2,-67.8C14.7,-67.5,30.6,-63.6,44.7,-76.4Z" transform="translate(100 100)" /></svg></div><div class="text-center relative z-10"><div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm"><i class="fa-solid fa-location-dot text-red-400 text-xl"></i></div><p class="font-semibold text-[#2c3e50]">Av. Principal 123, Santiago</p><p class="text-sm text-[#6b7280]">SPA Belleza & Relax</p></div></div><div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">'+d.data.filter(di=>di.nombre).slice(0,4).map(di=>'<div class="flex items-center gap-2 px-3 py-2 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-circle text-[6px] text-menta"></i><span class="text-sm text-[#2c3e50]">'+di.nombre+'</span><span class="text-xs text-[#6b7280] ml-auto">'+(di.empleados||0)+' emp.</span><button onclick="verDistritoDetalle('+di.iddistrito+')" class="text-xs text-menta hover:text-menta-600"><i class="fa-solid fa-chevron-right"></i></button></div>').join('')+'</div></div><div class="lg:col-span-2 space-y-4"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-4 flex items-center gap-2"><i class="fa-solid fa-address-card text-menta"></i>Contacto</h4><div class="space-y-3 text-sm"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-location-dot text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Dirección</p><p class="text-[#6b7280] text-xs">Av. Principal 123, Santiago, Chile</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-phone text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Teléfono</p><p class="text-[#6b7280] text-xs">+56 2 1234 5678</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-envelope text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Email</p><p class="text-[#6b7280] text-xs">spa@bellezarelax.com</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-clock text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Horario</p><p class="text-[#6b7280] text-xs">Lun – Sáb: 9:00 – 18:00</p></div></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-4 flex items-center gap-2"><i class="fa-solid fa-hashtag text-menta"></i>Redes Sociales</h4><div class="flex gap-3">'['instagram','facebook','whatsapp'].map(s=>'<div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center text-spa hover:bg-menta-50 hover:text-menta transition-all cursor-pointer"><i class="fa-brands fa-'+s+'"></i></div>').join('')+'</div></div></div></div></div>';
+    const redesHtml=['instagram','facebook','whatsapp'].map(s=>'<div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center text-spa hover:bg-menta-50 hover:text-menta transition-all cursor-pointer"><i class="fa-brands fa-'+s+'"></i></div>').join('');
+    let distritosHtml='';
+    try{
+      const d=await api.get('/api/distritos');
+      if(d.success&&d.data&&d.data.length){
+        distritosHtml=d.data.filter(di=>di.nombre).slice(0,4).map(di=>'<div class="flex items-center gap-2 px-3 py-2 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-circle text-[6px] text-menta"></i><span class="text-sm text-[#2c3e50]">'+di.nombre+'</span><span class="text-xs text-[#6b7280] ml-auto">'+(di.empleados||0)+' emp.</span></div>').join('');
+      }
+    }catch(e2){}
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-map-location-dot text-menta mr-2"></i>Mapa y Contactos</h3></div><div class="grid grid-cols-1 lg:grid-cols-5 gap-5"><div class="lg:col-span-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="bg-gradient-to-br from-menta-50 to-lavender-100 h-48 lg:h-64 flex items-center justify-center relative"><div class="absolute inset-0 opacity-10"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full"><path fill="#2ecc71" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.5,90,-16.2,88.6,-0.7C87.2,14.9,81.8,29.8,73.1,42.8C64.4,55.8,52.5,66.9,39,74.5C25.5,82.1,10.5,86.2,-3.8,83.5C-18.1,80.8,-31.6,71.3,-43.7,60.2C-55.9,49.1,-66.7,36.4,-73.1,21.5C-79.5,6.6,-81.5,-10.5,-76.1,-24.8C-70.8,-39.1,-58,-50.6,-44.1,-57.8C-30.2,-65.1,-15.1,-68.1,-0.2,-67.8C14.7,-67.5,30.6,-63.6,44.7,-76.4Z" transform="translate(100 100)" /></svg></div><div class="text-center relative z-10"><div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm"><i class="fa-solid fa-location-dot text-red-400 text-xl"></i></div><p class="font-semibold text-[#2c3e50]">Av. Principal 123, Santiago</p><p class="text-sm text-[#6b7280]">SPA Belleza & Relax</p></div></div>'+(distritosHtml?'<div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">'+distritosHtml+'</div>':'')+'</div><div class="lg:col-span-2 space-y-4"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-4 flex items-center gap-2"><i class="fa-solid fa-address-card text-menta"></i>Contacto</h4><div class="space-y-3 text-sm"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-location-dot text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Dirección</p><p class="text-[#6b7280] text-xs">Av. Principal 123, Santiago, Chile</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-phone text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Teléfono</p><p class="text-[#6b7280] text-xs">+56 2 1234 5678</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-envelope text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Email</p><p class="text-[#6b7280] text-xs">spa@bellezarelax.com</p></div></div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-menta-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-clock text-menta text-xs"></i></div><div><p class="font-medium text-[#2c3e50]">Horario</p><p class="text-[#6b7280] text-xs">Lun – Sáb: 9:00 – 18:00</p></div></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-4 flex items-center gap-2"><i class="fa-solid fa-hashtag text-menta"></i>Redes Sociales</h4><div class="flex gap-3">'+redesHtml+'</div></div></div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'mapa\')')}
 };
 // CRUD Builder
@@ -250,7 +384,7 @@ function crudScreen(opts){
       if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-database','Sin datos','No se pudieron cargar los datos.');return;}
       const data=d.data||[];
       const cols=customCols||[{label:entity,field:titleField,render:r=>r[titleField]||'-'},{label:'Acciones',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\''+page+'\','+r[Object.keys(r).find(k=>k.toLowerCase().includes('id'))]+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg transition-all" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\''+endpoint+'\','+r[Object.keys(r).find(k=>k.toLowerCase().includes('id'))]+',\''+page+'\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}];
-      ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">'+entity+'</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+(customRender?customRender(data):renderTable(cols,data))+'</div></div>';
+      ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">'+entity+'</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_'+page+'\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+(customRender?customRender(data):renderTable(cols,data))+'</div></div>';
     }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar.','Reintentar','navigate(\''+page+'\')')}
   };
   window['openModalCRUD_'+page]=()=>crudForm(page,endpoint,entity,fields,null,onCreated);
@@ -267,48 +401,81 @@ async function crudForm(page,endpoint,entity,fields,editData,onCreated){
   editId=editData?editData[Object.keys(editData).find(k=>k.toLowerCase().includes('id'))]:null;
   let body='<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-'+(editData?'pen-to-square':'square-plus')+' text-menta mr-2"></i>'+(editData?'Editar ':'Nuevo ')+entity+'</h3><form id="crudForm" class="space-y-3.5" onsubmit="return false">';
   fields.forEach(f=>{
-    const name=f.field||f.name,label=f.label||f.name,val=editData?editData[name]||'':'',type=f.type||'text';
+    const name=f.field||f.name,label=f.label||f.name,type=f.type||'text';
+    // Safely get edit value; handle boolean fields
+    let val='';
+    if(editData){
+      const raw=editData[name];
+      if(raw!==undefined&&raw!==null) val=raw;
+    }
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">'+label+(f.required?' *':'')+'</label>';
     if(type==='select'){
-      body+='<select name="'+name+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all">'+(f.options?f.options.map(o=>'<option value="'+o.value+'"'+(editData&&editData[name]===o.value?' selected':'')+'>'+o.label+'</option>').join(''):'')+'</select>';
+      body+='<select name="'+name+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all">'+(f.options?f.options.map(o=>'<option value="'+o.value+'"'+(editData&&String(editData[name])===String(o.value)?' selected':'')+'>'+o.label+'</option>').join(''):'')+'</select>';
+    }else if(type==='checkbox'){
+      // Proper boolean check: true, 1, 'true', 't' all mean checked
+      const isChecked=val===true||val===1||val==='true'||val==='1'||val==='t';
+      body+='<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="'+name+'"'+(isChecked?' checked':'')+' class="w-4 h-4 rounded border-[#d1d5db] text-menta focus:ring-menta/30"><span class="text-sm text-[#2c3e50]">Sí</span></label>';
     }else{
       body+='<input type="'+type+'" name="'+name+'" value="'+val+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"'+(f.required?' required':'')+(f.placeholder?' placeholder="'+f.placeholder+'"':'')+'>';
     }
     body+='</div>';
   });
-  body+='</form><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUD(\''+endpoint+'\',\''+page+'\','+(onCreated?'true':'false')+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear '+entity)+'</button></div></div>';
-  openModal(body,()=>{
-    if(onCreated)setTimeout(onCreated,50);
-  });
+  body+='</form><div id="crudFormError" class="hidden mt-2 text-sm text-red-500 bg-red-50 rounded-xl px-3 py-2 border border-red-100"></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUD(\''+endpoint+'\',\''+page+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear '+entity)+'</button></div></div>';
+  openModal(body,()=>{if(onCreated)setTimeout(onCreated,50);});
 }
 async function saveCRUD(endpoint,page,hasCallback){
   const form=$('crudForm');if(!form)return;
   const fd=new FormData(form);const data={};
   fd.forEach((v,k)=>{data[k]=v});
+  // Handle checkboxes: convert to proper boolean, not '0'/'1'
+  form.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    data[cb.name]=cb.checked;
+  });
+  // Convert numeric-looking fields to numbers
+  ['precio','duracion','cantidad','iddistrito','idcategoria','idarea','horastrabajo'].forEach(k=>{
+    if(data[k]!==undefined&&data[k]!=='')data[k]=isNaN(Number(data[k]))?data[k]:Number(data[k]);
+  });
   try{
     const d=editId?await api.put(endpoint+'/'+editId,data):await api.post(endpoint,data);
-    if(!d.success)return toast(d.error||'Error al guardar',false);
+    if(!d.success){toast(d.error||'Error al guardar',false);return;} // Keep modal open on error
     toast(editId?'Actualizado':'Creado exitosamente');closeModal();navigate(page);
-  }catch(e){toast('Error de conexión',false);closeModal();}
+  }catch(e){toast(e.message||'Error de conexión',false);} // Keep modal open on error
 }
 window.deleteCRUD=async(endpoint,id,page)=>{
-  openConfirm('Eliminar','¿Estás seguro de eliminar este registro?',async()=>{
+  openConfirm('Eliminar','¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.',async()=>{
     try{
       const d=await api.del(endpoint+'/'+id);
-      if(!d.success)return toast(d.error||'Error',false);
+      if(!d.success){
+        const msg=d.error||'';
+        if(/foreign key|llave foranea|referenced|constraint|violat|asociad/i.test(msg)){
+          toast('No se puede eliminar: este registro está siendo utilizado en otra parte del sistema. Elimina primero los registros relacionados.',false);
+        }else{
+          toast(msg||'Error al eliminar',false);
+        }
+        return;
+      }
       toast('Eliminado correctamente');navigate(page);
-    }catch(e){toast('Error de conexión',false)}
+    }catch(e){
+      const msg=e.message||'';
+      if(/foreign key|constraint|referenced|23503|23000/i.test(msg)){
+        toast('No se puede eliminar: tiene registros asociados que deben eliminarse primero.',false);
+      }else{
+        toast(msg||'Error de conexión',false);
+      }
+    }
   });
 };
 
 // Admin: Tratamientos (w/ expandible panel for materiales/empleados)
+let tratFilterCategoria='';
 SCREENS['admin-tratamientos']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading();
   try{
-    const d=await api.get('/api/tratamientos');
-    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-spa','Sin datos','No hay tratamientos registrados.','Agregar','openModalCRUD_admin-tratamientos()');return;}
-    const data=d.data||[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span></div><div class="space-y-3">'+data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleTratamiento('+t.idtratamiento+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-spa text-spa text-sm"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+t.nombre+'</h4><p class="text-xs text-[#6b7280]">'+$$(t.precio)+' | '+t.duracion+' min</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editTratamiento('+t.idtratamiento+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/tratamientos\','+t.idtratamiento+',\'admin-tratamientos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedTratamiento===t.idtratamiento?'rotate-180':'')+'"></i></div></div><div id="tratPanel_'+t.idtratamiento+'" class="'+(expandedTratamiento===t.idtratamiento?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="tratContent_'+t.idtratamiento+'">'+showLoading()+'</div></div></div>').join('')+'</div><button onclick="crudTratamientoForm(null)" class="mt-4 px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agregar Tratamiento</button></div>';
+    const[r,cat]=await Promise.all([api.get('/api/tratamientos'),api.get('/api/categorias')]);
+    if(!r.success){ct.innerHTML=showEmpty('fa-regular fa-spa','Sin datos','No hay tratamientos registrados.','Agregar','crudTratamientoForm(null)');return;}
+    const data=(r.data||[]).filter(t=>!tratFilterCategoria||t.idcategoria==tratFilterCategoria);
+    const catData=cat.success?cat.data||[]:[];
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><select id="tratFiltroCat" class="px-3 py-1.5 border border-[#d1d5db] rounded-lg text-xs" onchange="tratFilterCategoria=this.value;navigate(\'admin-tratamientos\')"><option value="">Todas las categorías</option>'+(catData.map(c=>'<option value="'+c.idcategoria+'"'+(tratFilterCategoria==c.idcategoria?' selected':'')+'>'+(c.categorianombre||c.nombre||'')+'</option>').join(''))+'</select><button onclick="crudTratamientoForm(null)" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="space-y-3">'+data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleTratamiento('+t.idtratamiento+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-spa text-spa text-sm"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+t.nombre+'</h4><p class="text-xs text-[#6b7280]">'+$$(t.precio)+' | '+t.duracion+' min</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editTratamiento('+t.idtratamiento+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/tratamientos\','+t.idtratamiento+',\'admin-tratamientos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedTratamiento===t.idtratamiento?'rotate-180':'')+'"></i></div></div><div id="tratPanel_'+t.idtratamiento+'" class="'+(expandedTratamiento===t.idtratamiento?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="tratContent_'+t.idtratamiento+'">'+showLoading()+'</div></div></div>').join('')+'</div></div>';
     if(expandedTratamiento)loadTratamientoPanel(expandedTratamiento);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-tratamientos\')')}
 };
@@ -333,75 +500,90 @@ async function editTratamiento(id){
     const d=await api.get('/api/tratamientos/'+id);
     if(!d.success)return toast(d.error,false);
     crudTratamientoForm(d.data);
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function crudTratamientoForm(editData){
   editId=editData?.idtratamiento||null;
   try{
     const[cat,area]=await Promise.all([api.get('/api/categorias'),api.get('/api/areas')]);
-    let body='<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-spa text-menta mr-2"></i>'+(editData?'Editar':'Nuevo')+' Tratamiento</h3><form id="crudForm" class="space-y-3.5" onsubmit="return false"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" name="nombre" value="'+(editData?.nombre||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Descripción</label><textarea name="descripcion" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all">'+(editData?.descripcion||'')+'</textarea></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio *</label><input type="number" step="0.01" name="precio" value="'+(editData?.precio||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Duración (min) *</label><input type="number" name="duracion" value="'+(editData?.duracion||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Categoría</label><select name="idcategoria" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"><option value="">Sin categoría</option>'+(cat.success?cat.data.map(c=>'<option value="'+c.idcategoria+'"'+(editData?.idcategoria==c.idcategoria?' selected':'')+'>'+c.categorianombre+'</option>').join(''):'')+'</select></div></form><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUDTratamiento()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear')+'</button></div></div>';
+    let body='<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-spa text-menta mr-2"></i>'+(editData?'Editar':'Nuevo')+' Tratamiento</h3><form id="crudForm" class="space-y-3.5" onsubmit="return false"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" name="nombre" value="'+(editData?.nombre||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Descripción</label><textarea name="descripcion" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all">'+(editData?.descripcion||'')+'</textarea></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio *</label><input type="number" step="0.01" name="precio" value="'+(editData?.precio||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Duración (min) *</label><input type="number" name="duracion" value="'+(editData?.duracion||'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" required></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Categoría *</label><select name="idcategoria" required class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all"><option value="">Seleccionar categoría</option>'+(cat.success?cat.data.map(c=>'<option value="'+c.idcategoria+'"'+(editData?.idcategoria==c.idcategoria?' selected':'')+'>'+(c.categorianombre||c.nombre||'Sin nombre')+'</option>').join(''):'')+'</select></div></form><div id="tratFormError" class="hidden mt-2 text-sm text-red-500 bg-red-50 rounded-xl px-3 py-2 border border-red-100"></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUDTratamiento()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear')+'</button></div></div>';
     openModal(body);
   }catch(e){toast('Error al cargar formulario',false)}
 }
 async function saveCRUDTratamiento(){
   const form=$('crudForm');if(!form)return;
   const fd=new FormData(form);const data={};
-  fd.forEach((v,k)=>{if(v)data[k]=v});
+  fd.forEach((v,k)=>{if(v!==''&&v!==undefined)data[k]=v});
+  // Convert to numbers where needed
+  if(data.precio)data.precio=Number(data.precio);
+  if(data.duracion)data.duracion=Number(data.duracion);
+  if(data.idcategoria)data.idcategoria=Number(data.idcategoria);
+  if(!data.nombre)return toast('El nombre es requerido',false);
+  if(!data.precio)return toast('El precio es requerido',false);
+  if(!data.duracion)return toast('La duración es requerida',false);
+  if(!data.idcategoria)return toast('Selecciona una categoría',false);
   try{
     const d=editId?await api.put('/api/tratamientos/'+editId,data):await api.post('/api/tratamientos',data);
-    if(!d.success)return toast(d.error||'Error al guardar',false);
+    if(!d.success){toast(d.error||'Error al guardar',false);return;} // keep modal open
     toast(editId?'Actualizado':'Creado exitosamente');closeModal();navigate('admin-tratamientos');
-  }catch(e){toast('Error de conexión',false);closeModal();}
+  }catch(e){toast(e.message||'Error de conexión',false);} // keep modal open
 }
 async function agregarMaterialTratamiento(idTrat){
   try{
     const mats=await api.get('/api/materiales');
     if(!mats.success)return toast('Error al cargar materiales',false);
-    openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-oil-can text-menta mr-2"></i>Agregar Material</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Material *</label><select id="matSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+mats.data.map(m=>'<option value="'+m.idmaterial+'">'+m.nombre+'</option>').join('')+'</select></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cantidad *</label><input type="number" id="matCantidad" value="1" min="1" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarMatTrat('+idTrat+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
-  }catch(e){toast('Error de conexión',false)}
+    if(!mats.data||!mats.data.length)return toast('No hay materiales registrados',false);
+    openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-oil-can text-menta mr-2"></i>Agregar Material</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Material *</label><select id="matSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Seleccionar material...</option>'+mats.data.map(m=>'<option value="'+m.idmaterial+'">'+m.nombre+'</option>').join('')+'</select></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cantidad *</label><input type="number" id="matCantidad" value="1" min="1" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarMatTrat('+idTrat+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function guardarMatTrat(idTrat){
   const idmaterial=$('matSelect')?.value,cantidad=$('matCantidad')?.value;
-  if(!idmaterial||!cantidad)return toast('Todos los campos son requeridos',false);
+  if(!idmaterial||idmaterial==='')return toast('Selecciona un material',false);
+  if(!cantidad||Number(cantidad)<1)return toast('Ingresa una cantidad válida',false);
   try{
     const d=await api.post('/api/tratamientos/'+idTrat+'/materiales/'+idmaterial,{cantidad:Number(cantidad)});
-    if(!d.success)return toast(d.error||'Error',false);
+    if(!d.success){toast(d.error||'Error',false);return;}
     toast('Material agregado');closeModal();loadTratamientoPanel(idTrat);
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function agregarEmpleadoTratamiento(idTrat){
   try{
-    const emps=await api.get('/api/empleados');
-    if(!emps.success)return toast('Error al cargar empleados',false);
-    openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-tie text-menta mr-2"></i>Agregar Empleado</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="empSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+emps.data.map(e=>'<option value="'+e.idempleado+'">'+e.nombre+'</option>').join('')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarEmpTrat('+idTrat+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
-  }catch(e){toast('Error de conexión',false)}
+    const emps=await api.get('/api/tratamientos/'+idTrat+'/empleados-fijos');
+    // Get all fixed employees and filter out already assigned ones
+    const todosEmps=await api.get('/api/empleados');
+    if(!todosEmps.success)return toast('Error al cargar empleados',false);
+    const yaAsignados=(emps.success?(emps.data||[]):[]).map(e=>e.idempleado);
+    const disponibles=(todosEmps.data||[]).filter(e=>(e.esfijo===true||e.esfijo===1||e.esfijo==='true'||e.esfijo==='t')&&!yaAsignados.includes(e.idempleado));
+    if(!disponibles.length)return toast('No hay empleados fijos disponibles para asignar',false);
+    openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-tie text-menta mr-2"></i>Agregar Empleado Fijo</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="empSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Seleccionar empleado...</option>'+disponibles.map(e=>'<option value="'+e.idempleado+'">'+e.nombre+'</option>').join('')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarEmpTrat('+idTrat+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function guardarEmpTrat(idTrat){
   const idempleado=$('empSelect')?.value;
-  if(!idempleado)return toast('Selecciona un empleado',false);
+  if(!idempleado||idempleado==='')return toast('Selecciona un empleado',false);
   try{
     const d=await api.post('/api/tratamientos/'+idTrat+'/empleados-fijos/'+idempleado);
-    if(!d.success)return toast(d.error||'Error',false);
+    if(!d.success){toast(d.error||'Error',false);return;}
     toast('Empleado agregado');closeModal();loadTratamientoPanel(idTrat);
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 
 // Admin: Paquetes
-crudScreen({page:'admin-paquetes',endpoint:'/api/paquetes',entity:'Paquetes',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'precio',label:'Precio',type:'number',required:true},{name:'duraciontotal',label:'Duración Total (min)',type:'number'}],titleField:'paquetenombre',customCols:[{label:'Nombre',render:r=>r.paquetenombre},{label:'Precio',render:r=>$$(r.precio)},{label:'Duración',render:r=>r.duraciontotal?r.duraciontotal+' min':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="window.verPaqueteAdmin('+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Contenido"><i class="fa-solid fa-list"></i></button><button onclick="editCRUD(\'admin-paquetes\','+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/paquetes\','+r.idpaquete+',\'admin-paquetes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
+crudScreen({page:'admin-paquetes',endpoint:'/api/paquetes',entity:'Paquetes',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'precio',label:'Precio',type:'number',required:true},{name:'duraciontotal',label:'Duración Total (min)',type:'number'}],titleField:'paquetenombre',customCols:[{label:'Nombre',render:r=>r.paquetenombre||r.nombre||'-'},{label:'Precio',render:r=>$$(r.precio)},{label:'Duración',render:r=>r.duraciontotal?r.duraciontotal+' min':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="window.verPaqueteAdmin('+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Contenido"><i class="fa-solid fa-list"></i></button><button onclick="editCRUD(\'admin-paquetes\','+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/paquetes\','+r.idpaquete+',\'admin-paquetes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
 window.verPaqueteAdmin=async(id)=>{
   try{
     const[pkg,trat]=await Promise.all([api.get('/api/paquetes/'+id),api.get('/api/paquetes/'+id+'/tratamientos')]);
     if(!pkg.success)return toast(pkg.error,false);
     const p=pkg.data;const tratList=trat.success?trat.data:[];
     openModal('<div class="p-6" style="max-width: 500px"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-gift text-amber-500 mr-2"></i>'+p.paquetenombre+'</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+$$(p.precio)+'</span></div><div class="mb-4"><div class="flex items-center justify-between mb-2"><p class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider">Tratamientos incluidos</p><button onclick="agregarTratamientoPaquete('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+(tratList.length?'<div class="space-y-1.5">'+tratList.map(t=>'<div class="flex items-center justify-between px-3 py-2.5 bg-lavender-50 rounded-xl text-sm"><span>'+t.tratamientonombre+' <span class="text-xs text-[#6b7280]">'+$$(t.precio)+'</span></span><button onclick="quitarTratamientoPaquete('+id+','+t.idtratamiento+',\''+t.tratamientonombre.replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-circle-xmark"></i></button></div>').join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin tratamientos asignados</p>')+'</div><div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button></div></div>');
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 };
 async function agregarTratamientoPaquete(idPaq){
   try{
     const tr=await api.get('/api/tratamientos');
     if(!tr.success)return toast('Error al cargar tratamientos',false);
     openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-spa text-menta mr-2"></i>Agregar Tratamiento</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label><select id="paqTratSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+tr.data.map(t=>'<option value="'+t.idtratamiento+'">'+t.nombre+' - '+$$(t.precio)+'</option>').join('')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarTratPaquete('+idPaq+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function guardarTratPaquete(idPaq){
   const idtratamiento=$('paqTratSelect')?.value;
@@ -410,7 +592,7 @@ async function guardarTratPaquete(idPaq){
     const d=await api.post('/api/paquetes/'+idPaq+'/tratamientos/'+idtratamiento);
     if(!d.success)return toast(d.error||'Error',false);
     toast('Tratamiento agregado');closeModal();window.verPaqueteAdmin(idPaq);
-  }catch(e){toast('Error de conexión',false);closeModal();}
+  }catch(e){toast(e.message||'Error de conexión',false);closeModal();}
 }
 async function quitarTratamientoPaquete(idPaq,idTrat,nombre){
   openConfirm('Quitar tratamiento','¿Quitar "'+nombre+'" del paquete?',async()=>{
@@ -418,22 +600,51 @@ async function quitarTratamientoPaquete(idPaq,idTrat,nombre){
       const d=await api.del('/api/paquetes/'+idPaq+'/tratamientos/'+idTrat);
       if(!d.success)return toast(d.error||'Error',false);
       toast('Tratamiento quitado');closeModal();window.verPaqueteAdmin(idPaq);
-    }catch(e){toast('Error de conexión',false)}
+    }catch(e){toast(e.message||'Error de conexión',false)}
   });
 }
 
 // Admin: Empleados
-crudScreen({page:'admin-empleados',endpoint:'/api/empleados',entity:'Empleados',titleField:'nombre',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'dni',label:'DNI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'especialidad',label:'Especialidad',type:'text'},{name:'horastrabajo',label:'Horas Trabajo',type:'number'},{name:'direccion',label:'Dirección',type:'text'},{name:'iddistrito',label:'ID Distrito',type:'number'},{name:'esfijo',label:'Es Fijo',type:'checkbox'}]});
+crudScreen({page:'admin-empleados',endpoint:'/api/empleados',entity:'Empleados',titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.nombre||'-'},{label:'DNI',render:r=>r.dni||'-'},{label:'Teléfono',render:r=>r.telefono||'-'},{label:'Especialidad',render:r=>r.especialidad||'-'},{label:'Fijo',render:r=>{const esFijo=r.esfijo===true||r.esfijo===1||r.esfijo==='true'||r.esfijo==='t';return esFijo?'<span class="text-menta"><i class="fa-solid fa-check"></i></span>':'<span class="text-[#d1d5db]"><i class="fa-solid fa-xmark"></i></span>'}},{label:'Distrito',render:r=>r.distritonombre||'-'},{label:'Horas',render:r=>r.horastrabajo!=null?r.horastrabajo+' h':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-empleados\','+r.idempleado+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/empleados\','+r.idempleado+',\'admin-empleados\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'dni',label:'DNI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'especialidad',label:'Especialidad',type:'text'},{name:'direccion',label:'Dirección',type:'text'},{name:'iddistrito',label:'Distrito',type:'select',loadEndpoint:'/api/distritos',optionValue:'iddistrito',optionLabel:'nombre'},{name:'esfijo',label:'Es Fijo',type:'checkbox'}]});
+// Custom modal for empleados to load distrito options
+const _empleadoFields=[
+  {name:'nombre',label:'Nombre',type:'text',required:true},{name:'dni',label:'DNI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'especialidad',label:'Especialidad',type:'text'},{name:'direccion',label:'Dirección',type:'text'},{name:'iddistrito',label:'Distrito',type:'select',options:[]},{name:'esfijo',label:'Es Fijo',type:'checkbox'}
+];
+async function _loadDistritoSelect(fields){try{const d=await api.get('/api/distritos');if(d.success&&d.data)return fields.map(f=>f.name==='iddistrito'?{...f,options:d.data.map(r=>({value:r.iddistrito,label:r.nombre}))}:f);}catch(e){}return fields;}
+async function _loadAreaSelect(fields){try{const d=await api.get('/api/areas');if(d.success&&d.data)return fields.map(f=>f.name==='idarea'?{...f,options:d.data.map(r=>({value:r.idarea,label:r.nombre}))}:f);}catch(e){}return fields;}
+const _origEditCRUD=window.editCRUD;
+window.editCRUD=async(p,id)=>{
+  const cfg=_crudConfigs[p];if(!cfg)return toast('Configuración no encontrada',false);
+  try{
+    const d=await api.get(cfg.endpoint+'/'+id);
+    if(!d.success)return toast(d.error||'Error',false);
+    let fields=cfg.fields;
+    if(p==='admin-empleados')fields=await _loadDistritoSelect(fields);
+    if(p==='admin-categorias')fields=await _loadAreaSelect(fields);
+    crudForm(p,cfg.endpoint,cfg.entity,fields,d.data,cfg.onCreated);
+  }catch(e){toast(e.message||'Error al cargar datos',false)}
+};
+const _origOpenEmpleados=window['openModalCRUD_admin-empleados'];
+window['openModalCRUD_admin-empleados']=async()=>{
+  try{
+    const d=await api.get('/api/distritos');
+    if(d.success&&d.data){
+      const fields=_empleadoFields.map(f=>f.name==='iddistrito'?{...f,options:d.data.map(r=>({value:r.iddistrito,label:r.nombre}))}:f);
+      crudForm('admin-empleados','/api/empleados','Empleados',fields,null);
+    }else _origOpenEmpleados();
+  }catch(e){_origOpenEmpleados()}
+};
 
 // Admin: Clientes
 crudScreen({page:'admin-clientes',endpoint:'/api/clientes',entity:'Cliente',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'ci',label:'CI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'email',label:'Email',type:'email'}],titleField:'nombre'});
+let clientesSearch='';
 SCREENS['admin-clientes']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading();
   try{
     const d=await api.get('/api/clientes');
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-users','Sin datos','No hay clientes registrados.');return;}
-    const data=d.data||[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([{label:'Nombre',render:r=>r.nombre},{label:'Teléfono',field:'telefono'},{label:'Email',field:'email'},{label:'Citas',render:r=>'<span class="px-2 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+(r.total_citas||0)+'</span>'},{label:'Gasto Total',render:r=>$$(r.total_gastado||0)},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="verHistorialCliente('+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Ver historial"><i class="fa-regular fa-clock"></i></button><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
+    const data=(d.data||[]).filter(c=>!clientesSearch||(c.nombre||'').toLowerCase().includes(clientesSearch.toLowerCase())||(c.ci||'').includes(clientesSearch));
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-clientes\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" id="clienteSearch" placeholder="Buscar por nombre o CI..." value="'+clientesSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="clientesSearch=this.value;clearTimeout(window._clienteSearchTimer);window._clienteSearchTimer=setTimeout(function(){const prevFocus=document.activeElement?.id;SCREENS[\'admin-clientes\']().then(function(){if(prevFocus){const el=document.getElementById(prevFocus);if(el){el.focus();const v=el.value;el.value=\'\';el.value=v;}}})},400)"></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([{label:'Nombre',render:r=>r.nombre},{label:'CI',render:r=>r.ci||'-'},{label:'Teléfono',field:'telefono'},{label:'Email',field:'email'},{label:'Citas',render:r=>'<span class="px-2 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+(r.total_citas||0)+'</span>'},{label:'Gasto Total',render:r=>$$(r.total_gastado||0)},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="verHistorialCliente('+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Ver historial"><i class="fa-regular fa-clock"></i></button><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-clientes\')')}
 };
 async function verHistorialCliente(id){
@@ -442,20 +653,39 @@ async function verHistorialCliente(id){
     if(!d.success)return toast(d.error,false);
     const c=d.data;const citas=c.citas||[];
     openModal('<div class="p-6" style="max-width: 520px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-regular fa-clock text-menta mr-2"></i>Historial: '+c.nombre+'</h3>'+(citas.length?'<div class="space-y-2">'+citas.map(ci=>'<div class="flex items-center justify-between px-3 py-2.5 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><div><p class="text-sm font-medium text-[#2c3e50]">'+ci.tratamientonombre+'</p><p class="text-xs text-[#6b7280]">'+formatDateShort(ci.fecha)+' a las '+formatTime(ci.hora)+'</p></div><span class="px-2 py-0.5 text-xs font-semibold rounded-full border '+sc(ci.estado)+'">'+cap(ci.estado)+'</span></div>').join('')+'</div>':'<p class="text-sm text-[#6b7280] py-4 text-center">Sin citas registradas</p>')+'<button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Cerrar</button></div>');
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 // Admin: Materiales
-crudScreen({page:'admin-materiales',endpoint:'/api/materiales',entity:'Materiales',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'cantidad',label:'Cantidad',type:'number',required:true}],titleField:'nombre'});
+crudScreen({page:'admin-materiales',endpoint:'/api/materiales',entity:'Materiales',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'cantidad',label:'Stock Inicial',type:'number',required:true}],titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.nombre||'-'},{label:'Stock',render:r=>'<span class="font-semibold '+(Number(r.cantidad||0)<=5?'text-red-500':'text-[#2c3e50]')+'">'+(r.cantidad||0)+'</span>'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-materiales\','+r.idmaterial+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/materiales\','+r.idmaterial+',\'admin-materiales\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
+
+// Admin: Categorías (with area select)
+const _catFields=[
+  {name:'nombre',label:'Nombre',type:'text',required:true},
+  {name:'idarea',label:'Área',type:'select',required:true,options:[]}
+];
+crudScreen({page:'admin-categorias',endpoint:'/api/categorias',entity:'Categoría',fields:_catFields,titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.categorianombre||r.nombre||'-'},{label:'Área',render:r=>r.areanombre||'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-categorias\','+r.idcategoria+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/categorias\','+r.idcategoria+',\'admin-categorias\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
+const _origOpenCats=window['openModalCRUD_admin-categorias'];
+window['openModalCRUD_admin-categorias']=async()=>{
+  try{
+    const d=await api.get('/api/areas');
+    if(d.success&&d.data){
+      const fields=_catFields.map(f=>f.name==='idarea'?{...f,options:d.data.map(r=>({value:r.idarea,label:r.nombre}))}:f);
+      crudForm('admin-categorias','/api/categorias','Categoría',fields,null);
+    }else _origOpenCats();
+  }catch(e){_origOpenCats()}
+};
 
 // Admin: Distritos
 crudScreen({page:'admin-distritos',endpoint:'/api/distritos',entity:'Distrito',fields:[{name:'nombre',label:'Nombre',type:'text',required:true}],titleField:'nombre'});
+let distritosSearch='';
 SCREENS['admin-distritos']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading();
   try{
     const d=await api.get('/api/distritos');
-    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-map-pin','Sin datos','No hay distritos registrados.','Agregar','openModalCRUD_admin-distritos()');return;}
-    const data=d.data||[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Distritos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span></div><div class="space-y-2">'+data.map(di=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleDistrito('+di.iddistrito+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-map-pin text-red-400"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+di.nombre+'</h4></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-distritos\','+di.iddistrito+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/distritos\','+di.iddistrito+',\'admin-distritos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedDistrito===di.iddistrito?'rotate-180':'')+'"></i></div></div><div id="distPanel_'+di.iddistrito+'" class="'+(expandedDistrito===di.iddistrito?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4 flex items-center gap-3 text-sm text-[#6b7280]"><i class="fa-solid fa-people-group text-menta"></i><span>Empleados asignados: <strong>'+(di.empleados||0)+'</strong></span></div></div></div>').join('')+'</div><button onclick="openModalCRUD_admin-distritos()" class="mt-4 px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agregar Distrito</button></div>';
+    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-map-pin','Sin datos','No hay distritos registrados.','Agregar','window[\'openModalCRUD_admin-distritos\']()');return;}
+    const allData=d.data||[];
+    const data=allData.filter(di=>!distritosSearch||(di.nombre||'').toLowerCase().includes(distritosSearch.toLowerCase()));
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Distritos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-distritos\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar distrito..." value="'+distritosSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="distritosSearch=this.value;navigate(\'admin-distritos\')"></div><div class="space-y-2">'+data.map(di=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleDistrito('+di.iddistrito+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-map-pin text-red-400"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+di.nombre+'</h4></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-distritos\','+di.iddistrito+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/distritos\','+di.iddistrito+',\'admin-distritos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedDistrito===di.iddistrito?'rotate-180':'')+'"></i></div></div><div id="distPanel_'+di.iddistrito+'" class="'+(expandedDistrito===di.iddistrito?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4 flex items-center gap-3 text-sm text-[#6b7280]"><i class="fa-solid fa-people-group text-menta"></i><span>Empleados asignados: <strong>'+(di.empleados||0)+'</strong></span></div></div></div>').join('')+'</div></div>';
     if(expandedDistrito){const p=$(('distPanel_'+expandedDistrito));if(p)p.classList.remove('hidden');}
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-distritos\')')}
 };
@@ -471,20 +701,23 @@ async function confirmarDeleteDistrito(id){
     const d=await api.del('/api/distritos/'+id+'?migrarA='+migrarA);
     if(!d.success)return toast(d.error||'Error',false);
     toast('Distrito eliminado y empleados reasignados');closeModal();navigate('admin-distritos');
-  }catch(e){toast('Error de conexión',false)}
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 // Patch delete button for distritos
 setTimeout(()=>{const oldDelete=window.deleteCRUD;if(!oldDelete)return;window.deleteCRUD=function(ep,id,page){if(ep==='/api/distritos'){const data=window._distritosData||[];const item=data.find(d=>d.iddistrito===id);if(item){deleteDistritoMigrar(id,item.nombre,data);return}}oldDelete(ep,id,page)};const scr=SCREENS['admin-distritos'];const orig=scr;SCREENS['admin-distritos']=async function(){const ct=$('pageContent');ct.innerHTML='<div class="flex items-center justify-center py-24"><div class="w-10 h-10 border-3 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';try{const d=await api.get('/api/distritos');if(d.success)window._distritosData=d.data;return orig.apply(this,arguments)}catch(e){return orig.apply(this,arguments)}}},100);
 
 // Admin: Áreas
-crudScreen({page:'admin-areas',endpoint:'/api/areas',entity:'Área',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'cantidadpersonalfijo',label:'Cantidad Personal',type:'number'}],titleField:'nombre'});
+// Admin: Áreas — solo nombre, cantidadpersonalfijo es automático
+crudScreen({page:'admin-areas',endpoint:'/api/areas',entity:'Área',fields:[{name:'nombre',label:'Nombre',type:'text',required:true}],titleField:'nombre'});
+let areasSearch='';
 SCREENS['admin-areas']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading();
   try{
     const d=await api.get('/api/areas');
-    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-building','Sin datos','No hay áreas registradas.','Agregar','openModalCRUD_admin-areas()');return;}
-    const data=d.data||[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Áreas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span></div><div class="space-y-2">'+data.map(a=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleArea('+a.idarea+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-building text-spa"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+a.nombre+'</h4><p class="text-xs text-[#6b7280]">'+(a.cantidadpersonalfijo? a.cantidadpersonalfijo+' empleados' : '')+'</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-areas\','+a.idarea+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/areas\','+a.idarea+',\'admin-areas\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedArea===a.idarea?'rotate-180':'')+'"></i></div></div><div id="areaPanel_'+a.idarea+'" class="'+(expandedArea===a.idarea?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="areaContent_'+a.idarea+'">'+(expandedArea===a.idarea?showLoading():'')+'</div></div></div>').join('')+'</div><button onclick="openModalCRUD_admin-areas()" class="mt-4 px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agregar Área</button></div>';
+    if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-building','Sin datos','No hay áreas registradas.','Agregar','window[\'openModalCRUD_admin-areas\']()');return;}
+    const allData=d.data||[];
+    const data=allData.filter(a=>!areasSearch||(a.nombre||'').toLowerCase().includes(areasSearch.toLowerCase()));
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Áreas</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-areas\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar área..." value="'+areasSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="areasSearch=this.value;navigate(\'admin-areas\')"></div><div class="space-y-2">'+data.map(a=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleArea('+a.idarea+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-building text-spa"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+a.nombre+'</h4><p class="text-xs text-[#6b7280]" id="areaEmpCount_'+a.idarea+'">'+(a.cantidadpersonalfijo!=null?a.cantidadpersonalfijo+' empleados fijos':'')+'</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-areas\','+a.idarea+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/areas\','+a.idarea+',\'admin-areas\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedArea===a.idarea?'rotate-180':'')+'"></i></div></div><div id="areaPanel_'+a.idarea+'" class="'+(expandedArea===a.idarea?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="areaContent_'+a.idarea+'">'+(expandedArea===a.idarea?showLoading():'')+'</div></div></div>').join('')+'</div></div>';
     if(expandedArea)loadAreaPanel(expandedArea);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-areas\')')}
 };
@@ -492,21 +725,33 @@ async function loadAreaPanel(id){
   const ct=$('areaContent_'+id);if(!ct)return;
   try{
     const[emps,cat]=await Promise.all([api.get('/api/areas/'+id+'/empleados'),api.get('/api/categorias/area/'+id)]);
-    ct.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-menta mr-1"></i>Empleados</h5></div>'+(emps.success&&emps.data.length?'<div class="space-y-1.5">'+emps.data.map(e=>'<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+e.nombre+'</span></div>').join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>')+'</div><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-tags text-menta mr-1"></i>Categorías</h5><button onclick="agregarCategoriaArea('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+(cat.success&&cat.data.length?'<div class="space-y-1.5">'+cat.data.map(c=>'<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+(c.categorianombre||c.nombre||'')+'</span><button onclick="eliminarCategoria('+c.idcategoria+',\''+((c.categorianombre||c.nombre||'')).replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-trash-can"></i></button></div>').join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin categorías</p>')+'</div></div>';
-  }catch(e){ct.innerHTML='<p class="text-xs text-red-400">Error</p>'}
+    const empList=emps.success?emps.data||[]:[];
+    const catList=cat.success?cat.data||[]:[];
+    // Update counter badge in the card header
+    const badge=$('areaEmpCount_'+id);
+    if(badge)badge.textContent=empList.length+' empleados fijos';
+    var empHtml=empList.length?'<div class="space-y-1.5">'+empList.map(function(e){return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+e.nombre+'</span><button onclick="quitarEmpleadoArea('+id+','+e.idempleado+',\''+e.nombre.replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-circle-xmark"></i></button></div>'}).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>';
+    var catHtml=catList.length?'<div class="space-y-1.5">'+catList.map(function(c){return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+(c.categorianombre||c.nombre||'')+'</span><button onclick="eliminarCategoria('+c.idcategoria+',\''+((c.categorianombre||c.nombre||'')).replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-trash-can"></i></button></div>'}).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin categorías</p>';
+    ct.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-menta mr-1"></i>Empleados</h5><button onclick="agregarEmpleadoArea('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+empHtml+'</div><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-tags text-menta mr-1"></i>Categorías</h5><button onclick="agregarCategoriaArea('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+catHtml+'</div></div>';
+  }catch(e){ct.innerHTML='<p class="text-xs text-red-400">Error al cargar panel</p>'}
 }
 function toggleArea(id){const p=$(('areaPanel_'+id));if(expandedArea===id){expandedArea=null;p.classList.add('hidden');return;}if(expandedArea){const old=$(('areaPanel_'+expandedArea));if(old)old.classList.add('hidden')}expandedArea=id;p.classList.remove('hidden');loadAreaPanel(id);}
 async function agregarCategoriaArea(idArea){
-  openModal('<div class="p-6" style="max-width: 380px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-tag text-menta mr-2"></i>Nueva Categoría</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" id="catNombre" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarCategoriaArea('+idArea+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Guardar</button></div></div>');
+  try{
+    const cats=await api.get('/api/categorias');
+    if(!cats.success)return toast('Error al cargar categorías',false);
+    const existentes=cats.data||[];
+    openModal('<div class="p-6" style="max-width: 380px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-tag text-menta mr-2"></i>Agregar Categoría</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Categoría *</label><select id="catSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Seleccionar categoría</option>'+(existentes.length?existentes.map(c=>'<option value="'+c.idcategoria+'">'+(c.categorianombre||c.nombre||'')+'</option>').join(''):'')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarCategoriaArea('+idArea+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function guardarCategoriaArea(idArea){
-  const nombre=$('catNombre')?.value;
-  if(!nombre)return toast('El nombre es requerido',false);
+  const idcategoria=$('catSelect')?.value;
+  if(!idcategoria)return toast('Selecciona una categoría',false);
   try{
-    const d=await api.post('/api/categorias',{nombre,idarea:idArea});
+    const d=await api.put('/api/categorias/'+idcategoria,{idarea:idArea});
     if(!d.success)return toast(d.error||'Error',false);
-    toast('Categoría creada');closeModal();loadAreaPanel(idArea);
-  }catch(e){toast('Error de conexión',false)}
+    toast('Categoría asignada al área');closeModal();loadAreaPanel(idArea);
+  }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function eliminarCategoria(id,nombre){
   openConfirm('Eliminar Categoría','¿Eliminar "'+nombre+'"?',async()=>{
@@ -515,7 +760,35 @@ async function eliminarCategoria(id,nombre){
       if(!d.success)return toast(d.error||'Error',false);
       toast('Categoría eliminada');
       for(const k of Object.keys(SCREENS))if(k.startsWith('admin-areas')){navigate(k);break;}
-    }catch(e){toast('Error de conexión',false)}
+    }catch(e){toast(e.message||'Error de conexión',false)}
+  });
+}
+async function agregarEmpleadoArea(idArea){
+  try{
+    const[todosR,yaR]=await Promise.all([api.get('/api/empleados'),api.get('/api/areas/'+idArea+'/empleados')]);
+    if(!todosR.success)return toast('Error al cargar empleados',false);
+    const yaIds=(yaR.success?(yaR.data||[]):[]).map(e=>e.idempleado);
+    const disponibles=(todosR.data||[]).filter(e=>!yaIds.includes(e.idempleado));
+    if(!disponibles.length)return toast('Todos los empleados ya están asignados a esta área',false);
+    openModal('<div class="p-6" style="max-width:380px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-tie text-menta mr-2"></i>Agregar Empleado</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="empAreaSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Seleccionar empleado...</option>'+disponibles.map(function(e){return '<option value="'+e.idempleado+'">'+e.nombre+'</option>'}).join('')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarEmpleadoArea('+idArea+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
+  }catch(e){toast(e.message||'Error de conexión',false)}
+}
+async function guardarEmpleadoArea(idArea){
+  var idempleado=$('empAreaSelect')?.value;
+  if(!idempleado)return toast('Selecciona un empleado',false);
+  try{
+    var d=await api.post('/api/areas/'+idArea+'/empleados/'+idempleado);
+    if(!d.success)return toast(d.error||'Error',false);
+    toast('Empleado asignado al área');closeModal();loadAreaPanel(idArea);
+  }catch(e){toast(e.message||'Error de conexión',false)}
+}
+function quitarEmpleadoArea(idArea,idEmpleado,nombre){
+  openConfirm('Quitar Empleado','¿Quitar "'+nombre+'" del área?',async function(){
+    try{
+      var d=await api.del('/api/areas/'+idArea+'/empleados/'+idEmpleado);
+      if(!d.success)return toast(d.error||'Error',false);
+      toast('Empleado quitado del área');loadAreaPanel(idArea);
+    }catch(e){toast(e.message||'Error de conexión',false)}
   });
 }
 

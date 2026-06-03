@@ -162,7 +162,7 @@ const citaController = {
     async modificar(req, res) {
         try {
             const idCita = parseInt(req.params.idCita);
-            const cita = await citaService.modificarCita(idCita, req.body);
+            const cita = await citaService.actualizarCita(idCita, req.body);
             res.json({ success: true, data: cita });
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });

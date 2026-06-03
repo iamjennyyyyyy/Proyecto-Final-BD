@@ -17,6 +17,8 @@ const authRoutes = require('./routes/authRoutes');
 
 const { verificarToken } = require('./middlewares/authMiddleware');
 
+require('./jobs/refreshMaterializedViews');
+
 app.use(express.json());
 app.use(cors());
 

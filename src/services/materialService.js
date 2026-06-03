@@ -33,7 +33,12 @@ const materialService = {
     async eliminarMaterial(id) {
         const material = await materialRepository.buscarPorId(id);
         if (!material) throw new Error('Material no encontrado');
-        await materialRepository.eliminar(id);
+        try {
+            await materialRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el material está asociado a tratamientos o citas');
+            throw e;
+        }
     }
 };
 

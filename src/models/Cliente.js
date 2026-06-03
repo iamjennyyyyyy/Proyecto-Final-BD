@@ -2,7 +2,7 @@ class Cliente {
     constructor(datos = {}) {
         this.idcliente = datos.idcliente || null;
         this.nombre = datos.nombre || '';
-        this.dni = datos.dni || '';
+        this.ci = datos.ci || '';
         this.telefono = datos.telefono || '';
         this.email = datos.email || '';
     }

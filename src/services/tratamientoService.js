@@ -2,6 +2,7 @@ const tratamientoRepository = require('../repositories/tratamientoRepository');
 const categoriaRepository = require('../repositories/categoriaRepository');
 const materialRepository = require('../repositories/materialRepository');
 const materialesPorTratamientoRepository = require('../repositories/materialesPorTratamiento');
+const empleadoRepository = require('../repositories/empleadoRepository');
 const { MaterialTratamiento } = require('../models/Relaciones');
 const Tratamiento = require('../models/Tratamiento');
 
@@ -30,7 +31,7 @@ const tratamientoService = {
     },
 
     async asignarMaterialATratamiento(idTratamiento, idMaterial, cantidad) {
-        const relacion = new MaterialTratamiento({ idTratamiento, idMaterial, cantidad });
+        const relacion = new MaterialTratamiento({ idtratamiento: idTratamiento, idmaterial: idMaterial, cantidad });
         relacion.validar();
         const tratamiento = await tratamientoRepository.buscarPorId(idTratamiento);
         const material = await materialRepository.buscarPorId(idMaterial);
@@ -58,7 +59,7 @@ const tratamientoService = {
         if (!material) throw new Error('Material no encontrado');
         const existeRelacion = await materialesPorTratamientoRepository.existeRelacion(idMaterial, idTratamiento);
         if (!existeRelacion) throw new Error('El material no se encuentra asignado a este tratamiento');
-        return await materialesPorTratamientoRepository.actualizarCantidad(idMaterial, idTratamiento, cantidad);
+        return await materialesPorTratamientoRepository.actualizarCantidadMaterial(idMaterial, idTratamiento, cantidad);
     },
 
     async obtenerEmpleadosFijosPorTratamiento(idTratamiento) {
@@ -116,7 +117,12 @@ const tratamientoService = {
     async eliminarTratamiento(id) {
         const tratamiento = await tratamientoRepository.buscarPorId(id);
         if (!tratamiento) throw new Error('Tratamiento no encontrado');
-        await tratamientoRepository.eliminar(id);
+        try {
+            await tratamientoRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el tratamiento tiene citas, paquetes o materiales asociados');
+            throw e;
+        }
     }
 };
 

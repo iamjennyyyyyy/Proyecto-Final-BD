@@ -42,7 +42,12 @@ const categoriaService = {
     async eliminarCategoria(id) {
         const categoria = await categoriaRepository.buscarPorId(id);
         if (!categoria) throw new Error('Categoría no encontrada');
-        await categoriaRepository.eliminar(id);
+        try {
+            await categoriaRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: la categoría tiene tratamientos asociados');
+            throw e;
+        }
     }
 };
 

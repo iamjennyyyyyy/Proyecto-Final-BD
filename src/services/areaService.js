@@ -61,7 +61,12 @@ const areaService = {
     async eliminarArea(id) {
         const area = await areaRepository.buscarPorId(id);
         if (!area) throw new Error('Área no encontrada');
-        await areaRepository.eliminar(id);
+        try {
+            await areaRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el área tiene categorías o empleados asociados');
+            throw e;
+        }
     }
 };
 

@@ -69,6 +69,13 @@ class DistritoRepository {
 		const result = await pool.query('DELETE FROM distritos WHERE iddistrito = $1 RETURNING *', [id]);
 		return result.rows[0];
 	}
+
+	async reasignarEmpleados(origenId, destinoId) {
+		const result = await pool.query(
+			`UPDATE empleados SET iddistrito = $1 WHERE iddistrito = $2 RETURNING *`, [destinoId, origenId]
+		);
+		return result.rows;
+	}
 }
 
 module.exports = new DistritoRepository();

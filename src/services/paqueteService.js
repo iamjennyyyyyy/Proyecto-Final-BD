@@ -66,7 +66,12 @@ const paqueteService = {
     async eliminarPaquete(id) {
         const paquete = await paqueteRepository.buscarPorId(id);
         if (!paquete) throw new Error('Paquete no encontrado');
-        await paqueteRepository.eliminar(id);
+        try {
+            await paqueteRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el paquete tiene ventas o contenido asociados');
+            throw e;
+        }
     }
 };
 
