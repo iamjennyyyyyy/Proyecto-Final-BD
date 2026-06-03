@@ -7,6 +7,10 @@ const clienteService = {
         return await clienteRepository.listarTodos();
     },
 
+    async buscarClientes(q) {
+        return await clienteRepository.buscarPorQuery(q);
+    },
+
     async obtenerClientePorId(id) {
         const cliente = await clienteRepository.buscarPorId(id);
         if (!cliente) throw new Error('Cliente no encontrado');
@@ -23,7 +27,7 @@ const clienteService = {
         const cliente = new Cliente(datos);
         cliente.validar();
         if (await clienteRepository.buscarPorNombre(datos.nombre)) throw new Error('Ya existe un cliente con ese nombre');
-        if (await clienteRepository.buscarPorDNI(datos.dni)) throw new Error('Ya existe un cliente con ese DNI');
+        if (await clienteRepository.buscarPorDNI(datos.ci)) throw new Error('Ya existe un cliente con ese DNI');
         return await clienteRepository.crear(datos);
     },
 
@@ -33,7 +37,7 @@ const clienteService = {
         if (datos.nombre && datos.nombre !== existente.nombre && await clienteRepository.buscarPorNombre(datos.nombre)) {
             throw new Error('Ya existe un cliente con ese nombre');
         }
-        if (datos.dni && datos.dni !== existente.dni && await clienteRepository.buscarPorDNI(datos.dni)) {
+        if (datos.ci && datos.ci !== existente.ci && await clienteRepository.buscarPorDNI(datos.ci)) {
             throw new Error('Ya existe un cliente con ese DNI');
         }
         Cliente.validarActualizacion(datos);
@@ -43,7 +47,12 @@ const clienteService = {
     async eliminarCliente(id) {
         const cliente = await clienteRepository.buscarPorId(id);
         if (!cliente) throw new Error('Cliente no encontrado');
-        await clienteRepository.eliminar(id);
+        try {
+            await clienteRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el cliente tiene citas o ventas asociadas');
+            throw e;
+        }
     }
 };
 

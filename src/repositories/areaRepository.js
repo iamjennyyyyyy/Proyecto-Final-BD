@@ -3,17 +3,28 @@ const pool = require('../config/database');
 class AreaRepository {
 
     async listarTodos() {
-        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas');
+        const result = await pool.query(
+            `SELECT a.idarea, a.nombre, COALESCE(epa.count, 0)::int AS cantidadpersonalfijo
+            FROM areas a
+            LEFT JOIN (SELECT idarea, COUNT(*) AS count FROM empleadosporarea GROUP BY idarea) epa ON epa.idarea = a.idarea`);
         return result.rows;
     }
 
     async buscarPorId(id){
-        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas WHERE idarea = $1', [id]);
+        const result = await pool.query(
+            `SELECT a.idarea, a.nombre, COALESCE(epa.count, 0)::int AS cantidadpersonalfijo
+            FROM areas a
+            LEFT JOIN (SELECT idarea, COUNT(*) AS count FROM empleadosporarea GROUP BY idarea) epa ON epa.idarea = a.idarea
+            WHERE a.idarea = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT idarea, nombre, cantidadpersonalfijo FROM areas WHERE nombre = $1', [nombre]);
+        const result = await pool.query(
+            `SELECT a.idarea, a.nombre, COALESCE(epa.count, 0)::int AS cantidadpersonalfijo
+            FROM areas a
+            LEFT JOIN (SELECT idarea, COUNT(*) AS count FROM empleadosporarea GROUP BY idarea) epa ON epa.idarea = a.idarea
+            WHERE a.nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
@@ -24,6 +35,17 @@ class AreaRepository {
             FROM empleados e
             INNER JOIN empleadosPorArea epa ON epa.idempleado = e.idempleado
             WHERE epa.idarea = $1
+            ORDER BY e.nombre`, [idArea]
+        );
+        return result.rows;
+    }
+    //USAR METODO PARA FORMULARIOS
+    async buscarEmpleadosSuplentesPorArea(idArea){
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo, e.horastrabajo, e.direccion, e.telefono
+            FROM empleados e
+            INNER JOIN empleadosPorArea epa ON epa.idempleado = e.idempleado
+            WHERE epa.idarea = $1 AND e.esfijo = false
             ORDER BY e.nombre`, [idArea]
         );
         return result.rows;
@@ -72,11 +94,6 @@ class AreaRepository {
         if (datos.nombre !== undefined) {
             campos.push(`nombre`);
             valores.push(datos.nombre);
-        }
-        
-        if (datos.cantidadpersonalfijo !== undefined) {
-            campos.push(`cantidadpersonalfijo`);
-            valores.push(datos.cantidadpersonalfijo);
         }
         
         if (campos.length === 0) {

@@ -1,4 +1,5 @@
 const distritoRepository = require('../repositories/distritoRepository');
+const empleadoRepository = require('../repositories/empleadoRepository');
 const Distrito = require('../models/Distrito');
 
 const distritoService = {
@@ -30,10 +31,20 @@ const distritoService = {
         return await distritoRepository.actualizar(id, datos);
     },
 
-    async eliminarDistrito(id) {
+    async eliminarDistrito(id, migrarA) {
         const distrito = await distritoRepository.buscarPorId(id);
         if (!distrito) throw new Error('Distrito no encontrado');
-        await distritoRepository.eliminar(id);
+        if (migrarA) {
+            const destino = await distritoRepository.buscarPorId(migrarA);
+            if (!destino) throw new Error('Distrito de destino no encontrado');
+            await distritoRepository.reasignarEmpleados(id, migrarA);
+        }
+        try {
+            await distritoRepository.eliminar(id);
+        } catch (e) {
+            if (e.code === '23503') throw new Error('No se puede eliminar: el distrito tiene empleados asignados');
+            throw e;
+        }
     }
 };
 

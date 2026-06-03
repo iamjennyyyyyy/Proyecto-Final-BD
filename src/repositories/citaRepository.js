@@ -74,14 +74,14 @@ class CitaRepository {
         const valores = [];
         const campos = [];
 
-        if (datos.idCliente !== undefined) {
+        if (datos.idcliente !== undefined) {
             campos.push('idcliente');
-            valores.push(datos.idCliente);
+            valores.push(datos.idcliente);
         }
 
-        if (datos.idTratamiento !== undefined) {
+        if (datos.idtratamiento !== undefined) {
             campos.push('idtratamiento');
-            valores.push(datos.idTratamiento);
+            valores.push(datos.idtratamiento);
         }
 
         if (datos.fecha !== undefined) {
@@ -99,14 +99,14 @@ class CitaRepository {
             valores.push(datos.observaciones);
         }
 
-        if (datos.idPaqVendido !== undefined) {
+        if (datos.idpaquetevendido !== undefined) {
             campos.push('idpaquetevendido');
-            valores.push(datos.idPaqVendido);
+            valores.push(datos.idpaquetevendido);
         }
 
-        if (datos.idEmpleado !== undefined) {
+        if (datos.idempleado !== undefined) {
             campos.push('idempleado');
-            valores.push(datos.idEmpleado);
+            valores.push(datos.idempleado);
         }
 
         if (datos.estado !== undefined) {
@@ -135,15 +135,15 @@ class CitaRepository {
         const sets = [];
         let contador = 1;
 
-        if (datos.idCliente !== undefined) {
+        if (datos.idcliente !== undefined) {
             sets.push(`idcliente = $${contador}`);
-            valores.push(datos.idCliente);
+            valores.push(datos.idcliente);
             contador++;
         }
 
-        if (datos.idTratamiento !== undefined) {
+        if (datos.idtratamiento !== undefined) {
             sets.push(`idtratamiento = $${contador}`);
-            valores.push(datos.idTratamiento);
+            valores.push(datos.idtratamiento);
             contador++;
         }
 
@@ -165,15 +165,15 @@ class CitaRepository {
             contador++;
         }
 
-        if (datos.idPaqVendido !== undefined) {
+        if (datos.idpaquetevendido !== undefined) {
             sets.push(`idpaquetevendido = $${contador}`);
-            valores.push(datos.idPaqVendido);
+            valores.push(datos.idpaquetevendido);
             contador++;
         }
 
-        if (datos.idEmpleado !== undefined) {
+        if (datos.idempleado !== undefined) {
             sets.push(`idempleado = $${contador}`);
-            valores.push(datos.idEmpleado);
+            valores.push(datos.idempleado);
             contador++;
         }
 

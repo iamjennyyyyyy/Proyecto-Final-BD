@@ -3,28 +3,32 @@ const pool = require('../config/database');
 class TratamientoRepository {
     async listarTodos() {
         const result = await pool.query(
-            `SELECT * FROM vw_tratamientos`);
+            `SELECT t.*, c.nombre as categorianombre FROM vw_tratamientos t
+            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria`);
         return result.rows;
     }
 
     async buscarPorId(id) {
         const result = await pool.query(
-            `SELECT * FROM vw_tratamientos
-            WHERE idtratamiento = $1`, [id]);
+            `SELECT t.*, c.nombre as categorianombre FROM vw_tratamientos t
+            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
+            WHERE t.idtratamiento = $1`, [id]);
         return result.rows[0];
     }
 
     async buscarPorNombre(nombre) {
         const result = await pool.query(
-            `SELECT * FROM vw_tratamientos
-            WHERE nombre = $1`, [nombre]);
+            `SELECT t.*, c.nombre as categorianombre FROM vw_tratamientos t
+            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
+            WHERE t.nombre = $1`, [nombre]);
         return result.rows[0];
     }
 
     async buscarPorCategoria(idcategoria) {
         const result = await pool.query(
-            `SELECT * FROM vw_tratamientos
-            WHERE idcategoria = $1`, [idcategoria]);
+            `SELECT t.*, c.nombre as categorianombre FROM vw_tratamientos t
+            LEFT JOIN categorias c ON c.idcategoria = t.idcategoria
+            WHERE t.idcategoria = $1`, [idcategoria]);
         return result.rows;
     }
 
@@ -86,7 +90,7 @@ class TratamientoRepository {
         const result = await pool.query(
             `SELECT *
             FROM empleadosfijosportratamiento
-            WHERE idempleado = $1 AND idtratamiento = $2`, [idEmpleado, idTratamiento]
+            WHERE idempleadofijo = $1 AND idtratamiento = $2`, [idEmpleado, idTratamiento]
         );
         return result.rows[0];
     }

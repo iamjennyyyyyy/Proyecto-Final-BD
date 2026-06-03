@@ -42,7 +42,8 @@ const distritoController = {
 
     async eliminar(req, res) {
         try {
-        await distritoService.eliminarDistrito(parseInt(req.params.idDistrito));
+        const migrarA = req.query.migrarA ? parseInt(req.query.migrarA) : null;
+        await distritoService.eliminarDistrito(parseInt(req.params.idDistrito), migrarA);
         res.json({ success: true, message: 'Distrito eliminado' });
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });

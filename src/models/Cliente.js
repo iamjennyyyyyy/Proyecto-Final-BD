@@ -2,7 +2,7 @@ class Cliente {
     constructor(datos = {}) {
         this.idcliente = datos.idcliente || null;
         this.nombre = datos.nombre || '';
-        this.dni = datos.dni || '';
+        this.ci = datos.ci || '';
         this.telefono = datos.telefono || '';
         this.email = datos.email || '';
     }
@@ -15,17 +15,17 @@ class Cliente {
             throw new Error('El nombre debe tener al menos 3 caracteres');
         }
 
-        if (!this.dni || this.dni.trim() === '') {
+        if (!this.ci || this.ci.trim() === '') {
             throw new Error('La cédula de identidad es obligatoria');
         }
-        const dniLimpio = this.dni.toString().replace(/[\s\.\-]/g, '');
-        if (!/^\d+$/.test(dniLimpio)) {
+        const ciLimpio = this.ci.toString().replace(/[\s\.\-]/g, '');
+        if (!/^\d+$/.test(ciLimpio)) {
             throw new Error('La cédula debe contener solo números');
         }
-        if (dniLimpio.length != 11) {
+        if (ciLimpio.length != 11) {
             throw new Error('La cédula debe tener 11 dígitos');
         }
-        this.dni = dniLimpio;
+        this.ci = ciLimpio;
 
         if (this.telefono) {
             const telLimpio = this.telefono.toString().replace(/[\s\-\(\)]/g, '');
@@ -55,15 +55,15 @@ class Cliente {
             }
         }
 
-        if (datos.dni !== undefined) {
-            if (!datos.dni || datos.dni.trim() === '') {
+        if (datos.ci !== undefined) {
+            if (!datos.ci || datos.ci.trim() === '') {
                 throw new Error('La cédula de identidad es obligatoria');
             }
-            const dniLimpio = datos.dni.toString().replace(/[\s\.\-]/g, '');
-            if (!/^\d+$/.test(dniLimpio)) {
+            const ciLimpio = datos.ci.toString().replace(/[\s\.\-]/g, '');
+            if (!/^\d+$/.test(ciLimpio)) {
                 throw new Error('La cédula debe contener solo números');
             }
-            if (dniLimpio.length != 11) {
+            if (ciLimpio.length != 11) {
                 throw new Error('La cédula debe tener 11 dígitos');
             }
         }

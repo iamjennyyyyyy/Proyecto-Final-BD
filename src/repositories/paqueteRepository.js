@@ -12,7 +12,7 @@ class PaqueteRepository{
     }
 
     async buscarPorNombre(nombre) {
-        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE nombre = $1', [nombre]);
+        const result = await pool.query('SELECT * FROM vw_paquete_con_tratamientos WHERE paquetenombre = $1', [nombre]);
         return result.rows[0];
     }
 

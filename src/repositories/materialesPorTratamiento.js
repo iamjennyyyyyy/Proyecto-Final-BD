@@ -57,7 +57,7 @@ class materialesPorTratamientoRepository{
         const result = await pool.query(
             `SELECT *
             FROM materialesportratamiento
-            WHERE idtratamiento = $1 AND idmaterial = $2 RETURNING *`, [idTratamiento, idMaterial]
+            WHERE idtratamiento = $1 AND idmaterial = $2`, [idTratamiento, idMaterial]
         );
         return result.rows[0];
     }

@@ -25,6 +25,16 @@ class ClienteRepository {
         return result.rows[0];
     }
 
+    async buscarPorQuery(q) {
+        const result = await pool.query(
+            `SELECT idcliente, nombre, ci, telefono, email
+            FROM clientes
+            WHERE nombre ILIKE $1 OR ci ILIKE $1
+            ORDER BY nombre
+            LIMIT 20`, [`%${q}%`]);
+        return result.rows;
+    }
+
     async buscarPorDNI(dni_v) {
         const result = await pool.query(
             `SELECT idcliente, nombre, ci, telefono, email from clientes
