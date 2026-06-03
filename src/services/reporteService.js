@@ -44,6 +44,34 @@ const reporteService = {
             throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
         }
         return await reporteRepository.buscarServiciosPorClientePorIntervalo(id, fecha);
+    },
+
+    async obtenerReporteDiscrepanciasCompleto(anio, mes) {
+        if (!anio && anio !== 0) {
+            throw new Error('El año es obligatorio');
+        }
+        
+        if (!mes && mes !== 0) {
+            throw new Error('El mes es obligatorio');
+        }
+       
+        const anioNum = parseInt(anio);
+        if (isNaN(anioNum)) {
+            throw new Error('El año debe ser un número válido');
+        }
+        if (anioNum < 1900 || anioNum > 2100) {
+            throw new Error('El año debe estar entre 1900 y 2100');
+        }
+        
+        const mesNum = parseInt(mes);
+        if (isNaN(mesNum)) {
+            throw new Error('El mes debe ser un número válido');
+        }
+        if (mesNum < 1 || mesNum > 12) {
+            throw new Error('El mes debe estar entre 1 y 12');
+        }
+        
+        return await reporteRepository.obtenerReporteDiscrepanciasCompleto(anioNum, mesNum);
     }
 };
 

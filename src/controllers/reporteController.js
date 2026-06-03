@@ -40,6 +40,60 @@ const reporteController = {
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
         }
+    },
+
+    async obtenerReporteDiscrepanciasCompleto(req, res) {
+        try {
+            const { anio, mes } = req.params;
+            
+            
+            const anioNum = parseInt(anio);
+            const mesNum = parseInt(mes);
+            
+            const reporte = await reporteService.obtenerReporteDiscrepanciasCompleto(anioNum, mesNum);
+            
+            
+            const totalTratamientos = new Set(reporte.map(item => item.id_tratamiento)).size;
+            const totalMateriales = reporte.filter(item => item.id_material).length;
+            
+        
+            const totalCitasPlanificadas = reporte.reduce((sum, item) => sum + (item.cantidad_planificada_citas || 0), 0);
+            const totalCitasRealizadas = reporte.reduce((sum, item) => sum + (item.cantidad_realizada_citas || 0), 0);
+            const totalDiscrepanciaCitas = reporte.reduce((sum, item) => sum + (item.discrepancia_citas || 0), 0);
+            
+            const totalMaterialPlanificado = reporte.reduce((sum, item) => sum + (item.cantidad_planificada_material || 0), 0);
+            const totalMaterialUtilizado = reporte.reduce((sum, item) => sum + (item.cantidad_utilizada_material || 0), 0);
+            const totalDiscrepanciaMaterial = reporte.reduce((sum, item) => sum + (item.discrepancia_material || 0), 0);
+            
+            res.json({ 
+                success: true, 
+                params: {
+                    anio: anioNum,
+                    mes: mesNum
+                },
+                summary: {
+                    total_tratamientos: totalTratamientos,
+                    total_registros_materiales: totalMateriales,
+                    citas: {
+                        planificadas: totalCitasPlanificadas,
+                        realizadas: totalCitasRealizadas,
+                        discrepancia: totalDiscrepanciaCitas
+                    },
+                    materiales: {
+                        planificados: totalMaterialPlanificado,
+                        utilizados: totalMaterialUtilizado,
+                        discrepancia: totalDiscrepanciaMaterial
+                    }
+                },
+                data: reporte
+            });
+        } catch (error) {
+            if (error.message.includes('año') || error.message.includes('mes')) {
+                res.status(400).json({ success: false, error: error.message });
+            } else {
+                res.status(500).json({ success: false, error: error.message });
+            }
+        }
     }
 };
 

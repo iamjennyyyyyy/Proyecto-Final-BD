@@ -30,6 +30,13 @@ class ReporteRepository {
         )
         return result.rows;
     }
+
+    async obtenerReporteDiscrepanciasCompleto(anio, mes) {
+        const result = await pool.query(
+            `SELECT * FROM reporte_discrepancias_completo($1, $2)`,[anio, mes]
+        );
+        return result.rows;
+    }
 }
 
 module.exports = new ReporteRepository();
