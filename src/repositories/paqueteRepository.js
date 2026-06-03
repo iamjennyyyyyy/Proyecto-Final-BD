@@ -16,6 +16,8 @@ class PaqueteRepository{
         return result.rows[0];
     }
 
+    
+
     //RELACION CONTENIDOPAQUETE /PAQUETE - TRATAMIENTOS
     async buscarTratamientosPorPaquete(idPaquete){
         const result = await pool.query(

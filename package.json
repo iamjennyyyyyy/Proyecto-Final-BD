@@ -1,8 +1,9 @@
 {
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
-    "dayjs": "^1.11.20",
+    "dayjs": "^1.11.21",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
@@ -13,5 +14,10 @@
   "scripts": {
     "dev": "node src/app.js",
     "start": "node src/app.js"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0"
   }
 }

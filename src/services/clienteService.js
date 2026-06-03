@@ -45,6 +45,7 @@ const clienteService = {
         if (!cliente) throw new Error('Cliente no encontrado');
         await clienteRepository.eliminar(id);
     }
+    
 };
 
 module.exports = clienteService;
