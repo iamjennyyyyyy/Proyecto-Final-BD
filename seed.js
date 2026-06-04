@@ -79,7 +79,7 @@ async function seed() {
     try {
       const r = await pool.query(
         `INSERT INTO empleados (nombre, especialidad, horastrabajo, direccion, dni, telefono, iddistrito, esfijo)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (nombre) DO NOTHING RETURNING idempleado`,
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (nombre) DO NOTHING RETURNING idempleado`,
         [nombre, especialidad, horastrabajo, direccion, dni, telefono, iddistrito, esfijo]
       );
       if (r.rows.length) empRows.push(r.rows[0].idempleado);
@@ -151,7 +151,7 @@ async function seed() {
     try {
       const r = await pool.query(
         `INSERT INTO tratamientos (nombre, precio, descripcion, duracion, idcategoria)
-         VALUES ($1,$2,$3,$4,$5) ON CONFLICT (nombre) DO NOTHING RETURNING idtratamiento`,
+        VALUES ($1,$2,$3,$4,$5) ON CONFLICT (nombre) DO NOTHING RETURNING idtratamiento`,
         [nombre, precio, descripcion, duracion, idcategoria]
       );
       if (r.rows.length) tratRows.push(r.rows[0].idtratamiento);

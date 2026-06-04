@@ -14,8 +14,9 @@ const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const paqueteVendidoRoutes = require('./routes/paqueteVendidoRoutes');
 const citaRoutes = require('./routes/citaRoutes');
 const authRoutes = require('./routes/authRoutes');
+const reporteRoutes = require('./routes/reporteRoutes');
 
-const { verificarToken } = require('./middlewares/authMiddleware');
+const { verificarToken } = require('../middlewares/authMiddleware');
 
 require('./jobs/refreshMaterializedViews');
 
@@ -45,6 +46,7 @@ app.use('/api/paquetes', verificarToken, paqueteRoutes);
 app.use('/api/tratamientos', verificarToken, tratamientoRoutes);
 app.use('/api/paquetes-vendidos', verificarToken, paqueteVendidoRoutes);
 app.use('/api/citas', verificarToken, citaRoutes);
+app.use('/api/reportes', verificarToken, reporteRoutes);
 
 app.use((err, req, res, next) => {
     console.error('ERROR:', err);
