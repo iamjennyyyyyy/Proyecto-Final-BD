@@ -213,6 +213,18 @@ class CitaRepository {
         const result = await pool.query('DELETE FROM citas WHERE idcita = $1 RETURNING *', [id]);
         return result.rows[0];
     }
+
+    async buscarPorPaqueteVendido(idPaqueteVendido) {
+  const result = await pool.query(
+    `SELECT c.*, t.nombre as tratamientonombre 
+     FROM citas c
+     JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+     WHERE c.idpaquetevendido = $1
+     ORDER BY c.fecha ASC`,
+    [idPaqueteVendido]
+  );
+  return result.rows;
+}
 }
 
 module.exports = new CitaRepository();

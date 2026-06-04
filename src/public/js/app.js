@@ -613,6 +613,7 @@ async function renderPaquetesVendidos() {
     }
     
     let paquetes = d.data || [];
+    const hoy = dayjs().format('YYYY-MM-DD');
     
     // Filtrar por fechas
     if (paqueteVendidoFechaDesde) {
@@ -647,33 +648,41 @@ async function renderPaquetesVendidos() {
         </div>
         
         <div class="space-y-3">
-          ${paquetes.length ? paquetes.map(pv => `
-            <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
-              <div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" 
-                   onclick="togglePaqVendidoPanel(${pv.idpaquetevendido})">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <i class="fa-solid fa-box text-amber-500 text-sm"></i>
+          ${paquetes.length ? paquetes.map(pv => {
+            const esActivo = pv.fechainicio <= hoy && pv.fechafin >= hoy;
+            const estadoBadge = !esActivo
+              ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Vencido</span>'
+              : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Activo</span>';
+            
+            return `
+              <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
+                <div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" 
+                     onclick="togglePaqVendidoPanel(${pv.idpaquetevendido})">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                      <i class="fa-solid fa-box text-amber-500 text-sm"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-[#2c3e50]">${pv.paquetenombre || 'Paquete #' + pv.idpaquete}</h4>
+                      <p class="text-xs text-[#6b7280]">
+                        ${pv.clientenombre || 'Cliente'} &bull; Compra: ${formatDateShort(pv.fechacompra)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-medium text-[#2c3e50]">${pv.paquetenombre || 'Paquete #' + pv.idpaquete}</h4>
-                    <p class="text-xs text-[#6b7280]">
-                      ${pv.clientenombre || 'Cliente'} &bull; Compra: ${formatDateShort(pv.fechacompra)}
-                    </p>
+                  <div class="flex items-center gap-3">
+                    ${estadoBadge}
+                    <span class="text-base font-bold text-menta">${$$(pv.precio || 0)}</span>
+                    <i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVendChev_${pv.idpaquetevendido}"></i>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-base font-bold text-menta">${$$(pv.precio || 0)}</span>
-                  <i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVendChev_${pv.idpaquetevendido}"></i>
+                <div id="paqVendPanel_${pv.idpaquetevendido}" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]">
+                  <div class="p-4" id="paqVendContent_${pv.idpaquetevendido}">
+                    ${showLoading()}
+                  </div>
                 </div>
               </div>
-              <div id="paqVendPanel_${pv.idpaquetevendido}" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]">
-                <div class="p-4" id="paqVendContent_${pv.idpaquetevendido}">
-                  ${showLoading()}
-                </div>
-              </div>
-            </div>
-          `).join('') : showEmpty('fa-regular fa-receipt', 'Sin paquetes vendidos', 'Aún no se han vendido paquetes.')}
+            `;
+          }).join('') : showEmpty('fa-regular fa-receipt', 'Sin paquetes vendidos', 'Aún no se han vendido paquetes.')}
         </div>
       </div>
     `;
@@ -1518,7 +1527,7 @@ SCREENS.inicio=async()=>{
   try{
     const d=await api.get('/api/citas');
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-calendar-xmark','Sin datos','No se pudieron cargar las citas.');return;}
-    const hoy=dayjs().format('YYYY-MM-DD'),hoyCitas=d.data.filter(c=>c.fecha===hoy),pendientes=hoyCitas.filter(c=>c.estado==='pendiente'),realizadasHoy=hoyCitas.filter(c=>c.estado==='realizada');
+    const hoy=dayjs().format('YYYY-MM-DD'),hoyCitas = d.data.filter(c => dayjs(c.fecha).format('YYYY-MM-DD') === hoy),pendientes=hoyCitas.filter(c=>c.estado==='pendiente'),realizadasHoy=hoyCitas.filter(c=>c.estado==='realizada');
     const ventasHoy=realizadasHoy.reduce((s,c)=>s+Number(c.precio||c.costo||0),0);
     const frases=['"El cuidado personal es la forma más profunda de amor propio." —','"Donde la calma y la belleza se encuentran." —','"Cada día es una oportunidad para renovarte." —','"Tu bienestar es nuestra inspiración." —'];
     const frase=frases[dayjs().day()%frases.length];
@@ -1791,18 +1800,22 @@ async function _renderPaqVendidosScreen(ct) {
     const paqList = d.data || [];
     ct.innerHTML = '<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-receipt text-menta mr-2"></i>Paquetes Vendidos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">' + paqList.length + '</span></div>'
       + (paqList.length ? '<div class="space-y-3">' + paqList.map(pv => {
-          const estadoBadge = pv.activo === false || pv.activo === 0 || pv.activo === 'false'
-            ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Inactivo</span>'
-            : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Activo</span>';
+         const hoy = dayjs().format('YYYY-MM-DD');
+const inicio = dayjs(pv.fechainicio).format('YYYY-MM-DD');
+const fin = dayjs(pv.fechafin).format('YYYY-MM-DD');
+const esActivo = inicio <= hoy && fin >= hoy;
+const estadoBadge = !esActivo
+  ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Inactivo</span>'
+  : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Activo</span>';
           return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">'
-            + '<div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="togglePaqVendidoPanel(' + pv.idpaquete + ')">'
+            + '<div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="togglePaqVendidoPanel(' + pv.idpaquetevendido + ')">'
             + '<div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-box text-amber-500 text-sm"></i></div>'
-            + '<div><h4 class="font-medium text-[#2c3e50]">' + (pv.paquetenombre || pv.nombre || 'Paquete #' + pv.idpaquete) + '</h4>'
+            + '<div><h4 class="font-medium text-[#2c3e50]">' + (pv.paquetenombre || pv.nombre || 'Paquete #' + pv.idpaquetevendido) + '</h4>'
             + '<p class="text-xs text-[#6b7280]">' + (pv.clientenombre || 'Cliente') + ' &bull; Compra: ' + formatDateShort(pv.fechacompra) + '</p></div></div>'
             + '<div class="flex items-center gap-2">' + estadoBadge
             + '<span class="text-base font-bold text-menta">' + $$(pv.precio || 0) + '</span>'
-            + '<i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVChev_' + pv.idpaquete + '"></i></div></div>'
-            + '<div id="paqVPanel_' + pv.idpaquete + '" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="paqVContent_' + pv.idpaquete + '">' + showLoading() + '</div></div>'
+            + '<i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVChev_' + pv.idpaquetevendido + '"></i></div></div>'
+            + '<div id="paqVPanel_' + pv.idpaquetevendido + '" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="paqVContent_' + pv.idpaquetevendido + '">' + showLoading() + '</div></div>'
             + '</div>';
         }).join('') + '</div>'
       : showEmpty('fa-regular fa-receipt', 'Sin paquetes vendidos', 'Aun no se han vendido paquetes.'))
@@ -1831,44 +1844,93 @@ function togglePaqVendidoPanel(id) {
   _expandedPaqV = id;
   if (panel) panel.classList.remove('hidden');
   if (chev) chev.classList.add('rotate-180');
-  _loadPaqVendidoContent(id);
+  loadPaqVendidoDetalle(id);
 }
-async function _loadPaqVendidoContent(id) {
-  const ct = $('paqVContent_' + id); if (!ct) return;
+async function loadPaqVendidoDetalle(id) {
+  const ct = $(`paqVContent_${id}`);
+  if (!ct) return;
+  
   try {
+    // Obtener detalle del paquete vendido
     const d = await api.get('/api/paquetes-vendidos/' + id);
-    if (!d.success) { ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>'; return; }
+    if (!d.success) {
+      ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>';
+      return;
+    }
+    
     const pv = d.data;
-    // Build detail view
-    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-    // Info del paquete
-    html += '<div><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2"><i class="fa-solid fa-circle-info text-menta mr-1"></i>Información</h5>'
-      + '<div class="space-y-1.5">'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Paquete</span><span class="font-medium">' + (pv.paquetenombre || '-') + '</span></div>'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium">' + (pv.clientenombre || '-') + '</span></div>'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-bold text-menta">' + $$(pv.precio || 0) + '</span></div>'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Compra</span><span class="font-medium">' + formatDateShort(pv.fechacompra) + '</span></div>'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Inicio</span><span class="font-medium">' + formatDateShort(pv.fechainicio) + '</span></div>'
-      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Fin</span><span class="font-medium">' + formatDateShort(pv.fechafin) + '</span></div>'
-      + '</div></div>';
-    // Citas asociadas a este paquete
+    
+    // ✅ CORREGIDO: usar el endpoint correcto /paquete-vendido/
     let citasHtml = '<p class="text-xs text-[#9ca3af] py-2">Cargando citas...</p>';
     try {
-      const cRes = await api.get('/api/citas/paquete/' + id);
-      const citas = cRes.success ? cRes.data || [] : [];
-      citasHtml = citas.length
-        ? '<div class="space-y-1.5">' + citas.map(c =>
-            '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm">'
-            + '<div><p class="font-medium text-[#2c3e50]">' + (c.tratamientonombre || '-') + '</p>'
-            + '<p class="text-xs text-[#6b7280]">' + formatDateShort(c.fecha) + ' ' + formatTime(c.hora) + '</p></div>'
-            + '<span class="px-2 py-0.5 text-xs font-semibold rounded-full border ' + sc(c.estado) + '">' + cap(c.estado) + '</span>'
-            + '</div>').join('') + '</div>'
-        : '<p class="text-xs text-[#9ca3af] py-2">Sin citas registradas para este paquete</p>';
-    } catch(e2) { citasHtml = '<p class="text-xs text-red-300">Error al cargar citas</p>'; }
-    html += '<div><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2"><i class="fa-solid fa-calendar-check text-menta mr-1"></i>Citas del Paquete</h5>' + citasHtml + '</div>';
-    html += '</div>';
-    ct.innerHTML = html;
-  } catch(e) { ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>'; }
+      const cRes = await api.get('/api/citas/paquete-vendido/' + id);
+      const citas = cRes.success ? (cRes.data || []) : [];
+      
+      console.log('Citas encontradas:', citas);
+      
+      citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      
+      citasHtml = citas.length ? `
+        <div class="space-y-2">
+          <p class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Citas del paquete</p>
+          ${citas.map(c => `
+            <div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm">
+              <div>
+                <p class="font-medium text-[#2c3e50]">${c.tratamientonombre || '-'}</p>
+                <p class="text-xs text-[#6b7280]">${formatDateShort(c.fecha)} ${formatTime(c.hora)}</p>
+              </div>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full border ${sc(c.estado)}">${cap(c.estado)}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<p class="text-xs text-[#9ca3af] py-2">Sin citas registradas para este paquete</p>';
+    } catch(e2) {
+      console.error('Error al cargar citas:', e2);
+      citasHtml = '<p class="text-xs text-red-300">Error al cargar citas: ' + (e2.message || '') + '</p>';
+    }
+    
+    ct.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-circle-info text-menta mr-1"></i>Información
+          </h5>
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Paquete</span>
+              <span class="font-medium">${pv.paquetenombre || '-'}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Cliente</span>
+              <span class="font-medium">${pv.clientenombre || '-'}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Precio</span>
+              <span class="font-bold text-menta">${$$(pv.precio || 0)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Compra</span>
+              <span class="font-medium">${formatDateShort(pv.fechacompra)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Inicio</span>
+              <span class="font-medium">${formatDateShort(pv.fechainicio)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Fin</span>
+              <span class="font-medium">${formatDateShort(pv.fechafin)}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          ${citasHtml}
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    console.error('Error:', e);
+    ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle: ' + (e.message || '') + '</p>';
+  }
 }
 
 // ============================================================

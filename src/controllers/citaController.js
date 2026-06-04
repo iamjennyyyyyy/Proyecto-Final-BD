@@ -185,7 +185,18 @@ const citaController = {
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
         }
+    },
+    // Obtener citas por paquete vendido
+// Agrega esta función al citaController
+async obtenerCitasPorPaqueteVendido(req, res) {
+    try {
+        const idPaqueteVendido = parseInt(req.params.idPaqueteVendido);
+        const citas = await citaService.obtenerCitasPorPaqueteVendido(idPaqueteVendido);
+        res.json({ success: true, count: citas.length, data: citas });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
     }
+}
 }
 
 module.exports = citaController;

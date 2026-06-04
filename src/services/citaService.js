@@ -168,7 +168,18 @@ const citaService = {
         const cita = await citaRepository.buscarPorId(id);
         if (!cita) throw new Error('Cita no encontrada');
         await citaRepository.eliminar(id);
+    },
+    // Agrega esta función al citaService
+async obtenerCitasPorPaqueteVendido(idPaqueteVendido) {
+    if (!idPaqueteVendido) {
+        throw new Error('El ID del paquete vendido es obligatorio');
     }
+    const id = parseInt(idPaqueteVendido);
+    if (isNaN(id)) {
+        throw new Error('El ID del paquete vendido debe ser un número válido');
+    }
+    return await citaRepository.buscarPorPaqueteVendido(id);
+}
 };
 
 module.exports = citaService;

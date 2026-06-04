@@ -7,6 +7,7 @@ router.get('/cliente/:idCliente', citaController.obtenerPorCliente);
 router.get('/empleado/:idEmpleado', citaController.obtenerPorEmpleado);
 router.get('/tratamiento/:idTratamiento', citaController.obtenerPorTratamiento);
 router.get('/paquete/:idPaquete', citaController.obtenerPorPaquete);
+router.get('/paquete-vendido/:idPaqueteVendido', citaController.obtenerCitasPorPaqueteVendido);  // ← CAMBIADO
 router.get('/fecha', citaController.obtenerPorFecha);
 router.get('/estado', citaController.obtenerPorEstado);
 router.get('/intervalo/fechas', citaController.obtenerPorIntervaloFechas);
