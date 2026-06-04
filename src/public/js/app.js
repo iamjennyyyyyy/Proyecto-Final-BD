@@ -68,9 +68,10 @@ if(location.search.includes('clear=1')&&clearSession)clearSession();
 function enterApp(){$('loginScreen').classList.add('hidden');$('loginScreen').style.display='none';$('appLayout').classList.remove('hidden');const init=user.rol==='administrador'?'admin-tratamientos':'inicio';$('userAvatar').textContent=(user.username||'U')[0].toUpperCase();$('userName').textContent=user.username;renderSidebar();navigate(init);window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h)navigate(h)});}
 
 // Sidebar & Navigation
-const MENU_DEP=[{id:'inicio',icon:'fa-house',label:'Inicio'},{id:'citas',icon:'fa-calendar-check',label:'Citas'},{id:'paquetes',icon:'fa-box',label:'Paquetes'},{id:'tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'mapa',icon:'fa-map-location-dot',label:'Mapa y Contactos'}];
-const MENU_ADM=[{id:'admin-tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'admin-paquetes',icon:'fa-box',label:'Paquetes'},{id:'admin-empleados',icon:'fa-user-tie',label:'Empleados'},{id:'admin-clientes',icon:'fa-users',label:'Clientes'},{id:'admin-materiales',icon:'fa-oil-can',label:'Materiales'},{id:'admin-categorias',icon:'fa-tags',label:'Categorías'},{id:'admin-distritos',icon:'fa-map-pin',label:'Distritos'},{id:'admin-areas',icon:'fa-building',label:'Áreas'},{id:'admin-reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'admin-informe-ingresos',icon:'fa-file-invoice-dollar',label:'Informe Ingresos'},{id:'admin-informe-discrepancia',icon:'fa-file-excel',label:'Informe Discrepancia'}];
-const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia'};
+const MENU_DEP=[{id:'inicio',icon:'fa-house',label:'Inicio'},{id:'citas',icon:'fa-calendar-check',label:'Citas'},{id:'paquetes',icon:'fa-box',label:'Paquetes'},{id:'paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},{id:'tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'mapa',icon:'fa-map-location-dot',label:'Mapa y Contactos'}];
+const MENU_ADM=[{id:'admin-tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'admin-paquetes',icon:'fa-box',label:'Paquetes'},{id:'admin-paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},{id:'admin-empleados',icon:'fa-user-tie',label:'Empleados'},{id:'admin-clientes',icon:'fa-users',label:'Clientes'},{id:'admin-materiales',icon:'fa-oil-can',label:'Materiales'},{id:'admin-categorias',icon:'fa-tags',label:'Categorías'},{id:'admin-distritos',icon:'fa-map-pin',label:'Distritos'},{id:'admin-areas',icon:'fa-building',label:'Áreas'},{id:'admin-reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'admin-informe-ingresos',icon:'fa-file-invoice-dollar',label:'Informe Ingresos'},{id:'admin-informe-discrepancia',icon:'fa-file-excel',label:'Informe Discrepancia'}];
+const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia','paquetes-vendidos': 'Paquetes Vendidos',
+  'admin-paquetes-vendidos': 'Paquetes Vendidos'};
 const SCREENS={};
 function renderSidebar(){const nav=$('sidebarNav');if(!nav)return;const items=user?.rol==='administrador'?MENU_ADM:MENU_DEP;nav.innerHTML=items.map(i=>'<a href="#'+i.id+'" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all '+(currentPage===i.id?'bg-menta text-white font-medium shadow-sm':'text-[#6b7280] hover:bg-lavender-50 hover:text-[#2c3e50]')+'"><i class="fa-solid '+i.icon+' w-5 text-center text-base"></i><span class="sidebar-text">'+i.label+'</span></a>').join('');}
 function toggleSidebar(){const sb=$('sidebar'),mc=$('mainContent');if(window.innerWidth<=768){sb.style.transform=sb.style.transform==='translateX(0%)'?'translateX(-100%)':'translateX(0%)';$('sidebarOverlay').classList.toggle('hidden')}else{sidebarCollapsed=!sidebarCollapsed;sb.style.width=sidebarCollapsed?'70px':'260px';mc.style.marginLeft=sidebarCollapsed?'70px':'260px';qq('.sidebar-text').forEach(el=>el.style.display=sidebarCollapsed?'none':'');$('sidebarBrand').style.display=sidebarCollapsed?'none':'';}}
@@ -112,7 +113,7 @@ SCREENS.citas=async()=>{
     if(citasFilterFechaHasta)citas=citas.filter(c=>!c.fecha||c.fecha<=citasFilterFechaHasta);
     if(citasFilterPrecioMin)citas=citas.filter(c=>Number(c.precio||0)>=Number(citasFilterPrecioMin));
     if(citasFilterPrecioMax)citas=citas.filter(c=>Number(c.precio||0)<=Number(citasFilterPrecioMax));
-    citas.sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
+    citas.sort((a,b)=>new Date(a.fecha||0)-new Date(b.fecha||0));
     const filtrosActivos=citasFilterEstado!=='todas'||citasFilterFechaDesde||citasFilterFechaHasta||citasFilterPrecioMin||citasFilterPrecioMax;
     ct.innerHTML='<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+citas.length+'</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='todas'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'todas\';SCREENS.citas()">Todas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='pendiente'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'pendiente\';SCREENS.citas()">Pendientes</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='realizada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'realizada\';SCREENS.citas()">Realizadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='cancelada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'cancelada\';SCREENS.citas()">Canceladas</button></div></div></div><div class="flex flex-wrap items-center gap-2 mb-4 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-filter text-xs text-[#6b7280]"></i><input type="date" id="filtroFechaDesde" value="'+citasFilterFechaDesde+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaDesde=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">a</span><input type="date" id="filtroFechaHasta" value="'+citasFilterFechaHasta+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaHasta=this.value;SCREENS.citas()"><input type="number" id="filtroPrecioMin" placeholder="Precio min" value="'+citasFilterPrecioMin+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMin=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">-</span><input type="number" id="filtroPrecioMax" placeholder="Precio max" value="'+citasFilterPrecioMax+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMax=this.value;SCREENS.citas()">'+(filtrosActivos?'<button onclick="citasFilterFechaDesde=\'\';citasFilterFechaHasta=\'\';citasFilterPrecioMin=\'\';citasFilterPrecioMax=\'\';citasFilterEstado=\'todas\';SCREENS.citas()" class="px-3 py-1.5 bg-gray-200 text-[#6b7280] text-xs font-medium rounded-lg hover:bg-gray-300">Limpiar</button>':'')+'</div><div class="flex justify-end mb-4"><button onclick="citaModal()" class="px-4 py-2 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agendar Cita</button></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
     if(citas.length){
@@ -354,6 +355,8 @@ SCREENS.tratamientos=async()=>{
     ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+d.data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-spa text-spa"></i></div><div class="min-w-0"><h4 class="font-semibold text-[#2c3e50] truncate">'+t.nombre+'</h4><p class="text-xs text-[#6b7280] mt-0.5 line-clamp-2">'+(t.descripcion||'Sin descripción')+'</p></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-[#e8ecf1]"><span class="text-lg font-bold text-menta">'+$$(t.precio)+'</span><div class="text-right"><span class="text-xs text-[#6b7280]">'+t.duracion+' min</span>'+(t.categorianombre?'<br><span class="text-xs text-menta font-medium">'+t.categorianombre+'</span>':'')+'</div></div></div>').join('')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar tratamientos.','Reintentar','navigate(\'tratamientos\')')}
 };
+SCREENS['paquetes-vendidos'] = async () => renderPaquetesVendidos();
+SCREENS['admin-paquetes-vendidos'] = async () => renderPaquetesVendidos();
 function actualizarPrecioMostrado() {
   const sel = document.getElementById('citaTratamiento');
   if (!sel) {
@@ -387,23 +390,175 @@ SCREENS.paquetes=async()=>{
     ct.innerHTML=content;
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'paquetes\')')}
 };
-async function verPaqueteDetalle(id){
-  try{
-    const d=await api.get('/api/paquetes/'+id);
-    if(!d.success)return toast(d.error,false);
-    const p=d.data;const trat=p.tratamientos||[];
-    openModal('<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-gift text-amber-500 mr-2"></i>'+p.paquetenombre+'</h3>'+(trat.length?'<div class="mb-4"><p class="text-xs font-semibold text-[#6b7280] mb-2 uppercase tracking-wider">Tratamientos incluidos</p><div class="space-y-2">'+trat.map(t=>'<div class="flex items-center gap-3 px-3 py-2.5 bg-lavender-50 rounded-xl text-sm"><div class="w-2 h-2 rounded-full bg-menta"></div><span class="text-[#2c3e50]">'+t.nombre+'</span></div>').join('')+'</div></div>':'')+'<div class="flex items-center justify-between py-3 border-t border-[#e8ecf1]"><span class="text-sm text-[#6b7280]">Precio Total</span><span class="text-xl font-bold text-menta">'+$$(p.precio)+'</span></div><button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Cerrar</button></div>');
-  }catch(e){toast('Error al cargar detalle',false)}
+async function verPaqueteDetalle(id) {
+  try {
+    const d = await api.get('/api/paquetes/' + id);
+    if (!d.success) return toast(d.error, false);
+    const p = d.data;
+    
+    // Los tratamientos vienen como un string separado por comas desde la vista
+    const tratamientosString = p.tratamientos || '';
+    const tratamientosList = tratamientosString ? tratamientosString.split(', ') : [];
+    
+    // Duración total
+    const duracionTotal = p.duraciontotal ? `${p.duraciontotal} min` : 'No especificada';
+    
+    openModal(`<div class="p-6" style="max-width: 480px">
+      <h3 class="text-lg font-semibold text-[#2c3e50] mb-4">
+        <i class="fa-solid fa-gift text-amber-500 mr-2"></i>${p.paquetenombre}
+      </h3>
+      <div class="mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <p class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider">Duración Total</p>
+          <span class="text-sm font-medium text-menta">${duracionTotal}</span>
+        </div>
+      </div>
+      ${tratamientosList.length ? `
+        <div class="mb-4">
+          <p class="text-xs font-semibold text-[#6b7280] mb-2 uppercase tracking-wider">Tratamientos incluidos</p>
+          <div class="space-y-2">
+            ${tratamientosList.map(t => `
+              <div class="flex items-center gap-3 px-3 py-2.5 bg-lavender-50 rounded-xl text-sm">
+                <div class="w-2 h-2 rounded-full bg-menta"></div>
+                <span class="text-[#2c3e50]">${t}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '<p class="text-sm text-[#9ca3af] mb-4">No hay tratamientos asignados</p>'}
+      <div class="flex items-center justify-between py-3 border-t border-[#e8ecf1]">
+        <span class="text-sm text-[#6b7280]">Precio Total</span>
+        <span class="text-xl font-bold text-menta">${$$(p.precio)}</span>
+      </div>
+      <button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Cerrar</button>
+    </div>`);
+  } catch(e) {
+    toast('Error al cargar detalle', false);
+  }
 }
-async function venderPaquete(id,nombre,precio){
-  try{
-    const cl=await api.get('/api/clientes');
-    if(!cl.success)return toast('Error al cargar clientes',false);
-    openModal('<div class="p-6" style="max-width: 460px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-gift text-amber-500 mr-2"></i>Vender Paquete</h3><div class="bg-amber-50 rounded-xl px-4 py-3 mb-4 border border-amber-100"><p class="font-semibold text-[#2c3e50]">'+nombre+'</p><p class="text-lg font-bold text-menta mt-1">'+$$(precio)+'</p></div><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label><div class="relative"><input type="text" id="vtaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" placeholder="Nombre del cliente"><input type="hidden" id="vtaClienteId"><div id="vtaClienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div></div></div><input type="hidden" id="vtaPaqueteId" value="'+id+'"></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarVentaPaquete()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Registrar Venta</button></div></div>',()=>{
-      const inp=$('vtaClienteInput');
-      if(inp)inp.addEventListener('input',debounce(function(){vtaAutocomplete()},300));
+async function venderPaquete(id, nombre, precio) {
+  try {
+    const cl = await api.get('/api/clientes');
+    if (!cl.success) return toast('Error al cargar clientes', false);
+    
+    // Obtener los tratamientos del paquete
+    const pkgRes = await api.get('/api/paquetes/' + id);
+    if (!pkgRes.success) return toast('Error al cargar el paquete', false);
+    const paquete = pkgRes.data;
+    
+    // Obtener tratamientos del paquete
+    const tratamientosRes = await api.get('/api/paquetes/' + id + '/tratamientos');
+    const tratamientos = tratamientosRes.success ? tratamientosRes.data || [] : [];
+    
+    console.log('Tratamientos del paquete:', tratamientos); // Para depurar
+    
+    if (tratamientos.length === 0) {
+      toast('El paquete no tiene tratamientos asignados', false);
+      return;
+    }
+    
+    // Cargar empleados para cada tratamiento
+    const empleadosMap = {};
+    for (const trat of tratamientos) {
+      // ✅ CORREGIDO: usar 'idtratamiento' (con 't' minúscula después de la 'm')
+      const tratId = trat.idtratamiento;
+      const empsRes = await api.get('/api/tratamientos/' + tratId + '/empleados-fijos');
+      if (empsRes.success && empsRes.data) {
+        empleadosMap[tratId] = empsRes.data;
+      } else {
+        empleadosMap[tratId] = [];
+      }
+    }
+    
+    // Construir modal con selección de cliente y citas
+    let tratamientosHtml = '';
+    let diaOffset = 0;
+    
+    for (let i = 0; i < tratamientos.length; i++) {
+      const trat = tratamientos[i];
+      const fechaMin = dayjs().add(diaOffset, 'day').format('YYYY-MM-DD');
+      // ✅ CORREGIDO: usar 'tratamientonombre' (con 'm' minúscula después de la 't')
+      const nombreTratamiento = trat.tratamientonombre || trat.nombre || 'Tratamiento sin nombre';
+      
+      tratamientosHtml += `
+        <div class="border-t border-[#e8ecf1] pt-4 mt-4 ${i === 0 ? 'border-t-0 pt-0 mt-0' : ''}">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-full bg-menta-50 flex items-center justify-center">
+              <span class="text-xs font-bold text-menta">${i + 1}</span>
+            </div>
+            <h4 class="font-semibold text-[#2c3e50]">${nombreTratamiento}</h4>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-[#6b7280] mb-1">Fecha *</label>
+              <input type="date" class="citaFecha w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
+                     data-trat="${trat.idtratamiento}" data-index="${i}" value="${fechaMin}">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#6b7280] mb-1">Hora *</label>
+              <input type="time" class="citaHora w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
+                     data-trat="${trat.idtratamiento}" data-index="${i}" value="10:00">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-[#6b7280] mb-1">Empleado *</label>
+              <select class="citaEmpleado w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
+                      data-trat="${trat.idtratamiento}" data-index="${i}">
+                <option value="">Seleccionar</option>
+                ${empleadosMap[trat.idtratamiento].map(e => `<option value="${e.idempleado}">${e.nombre}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+      diaOffset++;
+    }
+    
+    openModal(`
+      <div class="p-6" style="max-width: 700px; max-height: 80vh; overflow-y-auto">
+        <h3 class="text-lg font-semibold text-[#2c3e50] mb-4">
+          <i class="fa-solid fa-gift text-amber-500 mr-2"></i>Vender Paquete: ${paquete.paquetenombre}
+        </h3>
+        
+        <div class="bg-amber-50 rounded-xl px-4 py-3 mb-4 border border-amber-100">
+          <p class="text-sm font-semibold text-[#2c3e50]">Precio del paquete</p>
+          <p class="text-lg font-bold text-menta">${$$(paquete.precio)}</p>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label>
+          <div class="relative">
+            <input type="text" id="vtaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" placeholder="Nombre del cliente">
+            <input type="hidden" id="vtaClienteId">
+            <div id="vtaClienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div>
+          </div>
+        </div>
+        
+        <input type="hidden" id="vtaPaqueteId" value="${paquete.idpaquete}">
+        <input type="hidden" id="vtaPaquetePrecio" value="${paquete.precio}">
+        
+        <div class="border-t border-[#e8ecf1] pt-4 mt-4">
+          <h4 class="font-semibold text-[#2c3e50] mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-menta text-sm"></i>Agendar Citas
+          </h4>
+          <div id="tratamientosContainer">
+            ${tratamientosHtml}
+          </div>
+        </div>
+        
+        <div class="flex gap-2 mt-6 pt-4 border-t border-[#e8ecf1]">
+          <button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>
+          <button onclick="guardarVentaPaqueteCompleto()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Registrar Venta y Citas</button>
+        </div>
+      </div>
+    `, () => {
+      const inp = $('vtaClienteInput');
+      if (inp) inp.addEventListener('input', debounce(function() { vtaAutocomplete() }, 300));
     });
-  }catch(e){toast(e.message||'Error de conexión',false)}
+    
+  } catch(e) {
+    console.error('Error:', e);
+    toast(e.message || 'Error de conexión', false);
+  }
 }
 async function vtaAutocomplete(){
   const q=$('vtaClienteInput')?.value;if(!q||q.length<2){$('vtaClienteAutocomplete')?.classList.add('hidden');return;}
@@ -438,18 +593,381 @@ async function guardarClienteRapido(origen){
     else if(origen==='vta'){$('vtaClienteId').value=d.data.idcliente;$('vtaClienteInput').value=d.data.nombre;const ac=$('vtaClienteAutocomplete');if(ac)ac.classList.add('hidden');}
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
-async function guardarVentaPaquete(){
-  const idcliente=$('vtaClienteId').value,idpaquete=$('vtaPaqueteId').value;
-  if(!idcliente)return toast('Selecciona un cliente',false);
-  const hoy=todayStr(),fin=dayjs().add(30,'day').format('YYYY-MM-DD');
-  try{
-    const pkg=await api.get('/api/paquetes/'+idpaquete);
-    if(!pkg.success)return toast('Error al obtener paquete',false);
-    const d=await api.post('/api/paquetes-vendidos',{idpaquete,idcliente,precio:pkg.data.precio,fechacompra:hoy,fechainicio:hoy,fechafin:fin});
-    if(!d.success)return toast(d.error||'Error al registrar venta',false);
-    toast('Paquete vendido correctamente');closeModal();SCREENS.paquetes();
-  }catch(e){toast(e.message||'Error de conexión',false);}
+
+// ============================================================
+// PAQUETES VENDIDOS - Lista general
+// ============================================================
+let paquetesVendidosFilter = 'todos';
+let paqueteVendidoFechaDesde = '';
+let paqueteVendidoFechaHasta = '';
+
+async function renderPaquetesVendidos() {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando paquetes vendidos...');
+  
+  try {
+    const d = await api.get('/api/paquetes-vendidos');
+    if (!d.success) {
+      ct.innerHTML = showEmpty('fa-regular fa-receipt', 'Sin datos', 'No se pudieron cargar los paquetes vendidos.');
+      return;
+    }
+    
+    let paquetes = d.data || [];
+    
+    // Filtrar por fechas
+    if (paqueteVendidoFechaDesde) {
+      paquetes = paquetes.filter(p => p.fechacompra >= paqueteVendidoFechaDesde);
+    }
+    if (paqueteVendidoFechaHasta) {
+      paquetes = paquetes.filter(p => p.fechacompra <= paqueteVendidoFechaHasta);
+    }
+    
+    // Ordenar por fecha de compra (más reciente primero)
+    paquetes.sort((a, b) => new Date(b.fechacompra) - new Date(a.fechacompra));
+    
+    const filtrosActivos = paqueteVendidoFechaDesde || paqueteVendidoFechaHasta;
+    
+    ct.innerHTML = `
+      <div class="fade-in">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg font-semibold text-[#2c3e50]">
+            <i class="fa-solid fa-receipt text-menta mr-2"></i>Paquetes Vendidos
+          </h3>
+          <span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">${paquetes.length}</span>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-2 mb-4 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]">
+          <i class="fa-solid fa-filter text-xs text-[#6b7280]"></i>
+          <input type="date" id="paqVendFechaDesde" value="${paqueteVendidoFechaDesde}" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" 
+                 onchange="paqueteVendidoFechaDesde=this.value;renderPaquetesVendidos()">
+          <span class="text-xs text-[#6b7280]">a</span>
+          <input type="date" id="paqVendFechaHasta" value="${paqueteVendidoFechaHasta}" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" 
+                 onchange="paqueteVendidoFechaHasta=this.value;renderPaquetesVendidos()">
+          ${filtrosActivos ? '<button onclick="paqueteVendidoFechaDesde=\'\';paqueteVendidoFechaHasta=\'\';renderPaquetesVendidos()" class="px-3 py-1.5 bg-gray-200 text-[#6b7280] text-xs font-medium rounded-lg hover:bg-gray-300">Limpiar</button>' : ''}
+        </div>
+        
+        <div class="space-y-3">
+          ${paquetes.length ? paquetes.map(pv => `
+            <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
+              <div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" 
+                   onclick="togglePaqVendidoPanel(${pv.idpaquetevendido})">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                    <i class="fa-solid fa-box text-amber-500 text-sm"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-[#2c3e50]">${pv.paquetenombre || 'Paquete #' + pv.idpaquete}</h4>
+                    <p class="text-xs text-[#6b7280]">
+                      ${pv.clientenombre || 'Cliente'} &bull; Compra: ${formatDateShort(pv.fechacompra)}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-base font-bold text-menta">${$$(pv.precio || 0)}</span>
+                  <i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVendChev_${pv.idpaquetevendido}"></i>
+                </div>
+              </div>
+              <div id="paqVendPanel_${pv.idpaquetevendido}" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]">
+                <div class="p-4" id="paqVendContent_${pv.idpaquetevendido}">
+                  ${showLoading()}
+                </div>
+              </div>
+            </div>
+          `).join('') : showEmpty('fa-regular fa-receipt', 'Sin paquetes vendidos', 'Aún no se han vendido paquetes.')}
+        </div>
+      </div>
+    `;
+    
+  } catch(e) {
+    console.error(e);
+    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error al cargar los paquetes vendidos.', 'Reintentar', 'renderPaquetesVendidos()');
+  }
 }
+
+let _expandedPaqVendido = null;
+
+async function loadPaqVendidoDetalle(id) {
+  const ct = $(`paqVendContent_${id}`);
+  if (!ct) return;
+  
+  try {
+    const d = await api.get('/api/paquetes-vendidos/' + id);
+    if (!d.success) {
+      ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>';
+      return;
+    }
+    
+    const pv = d.data;
+    
+    // Obtener citas del paquete
+    let citasHtml = '<p class="text-xs text-[#9ca3af] py-2">Cargando citas...</p>';
+    try {
+      const cRes = await api.get('/api/citas/paquete/' + id);
+      const citas = cRes.success ? (cRes.data || []) : [];
+      
+      // Ordenar citas por fecha (más cercana primero)
+      citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      
+      citasHtml = citas.length ? `
+        <div class="space-y-2">
+          <p class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Citas del paquete</p>
+          ${citas.map(c => `
+            <div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm">
+              <div>
+                <p class="font-medium text-[#2c3e50]">${c.tratamientonombre || '-'}</p>
+                <p class="text-xs text-[#6b7280]">${formatDateShort(c.fecha)} ${formatTime(c.hora)}</p>
+              </div>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full border ${sc(c.estado)}">${cap(c.estado)}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<p class="text-xs text-[#9ca3af] py-2">Sin citas registradas para este paquete</p>';
+    } catch(e2) {
+      citasHtml = '<p class="text-xs text-red-300">Error al cargar citas</p>';
+    }
+    
+    ct.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-circle-info text-menta mr-1"></i>Información
+          </h5>
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Paquete</span>
+              <span class="font-medium">${pv.paquetenombre || '-'}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Cliente</span>
+              <span class="font-medium">${pv.clientenombre || '-'}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Precio</span>
+              <span class="font-bold text-menta">${$$(pv.precio || 0)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Compra</span>
+              <span class="font-medium">${formatDateShort(pv.fechacompra)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Inicio</span>
+              <span class="font-medium">${formatDateShort(pv.fechainicio)}</span>
+            </div>
+            <div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]">
+              <span class="text-[#6b7280]">Fin</span>
+              <span class="font-medium">${formatDateShort(pv.fechafin)}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          ${citasHtml}
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>';
+  }
+}
+
+function togglePaqVendidoPanel(id) {
+  const panel = $(`paqVendPanel_${id}`);
+  const chev = $(`paqVendChev_${id}`);
+  
+  if (_expandedPaqVendido === id) {
+    _expandedPaqVendido = null;
+    if (panel) panel.classList.add('hidden');
+    if (chev) chev.classList.remove('rotate-180');
+    return;
+  }
+  
+  if (_expandedPaqVendido) {
+    const oldPanel = $(`paqVendPanel_${_expandedPaqVendido}`);
+    const oldChev = $(`paqVendChev_${_expandedPaqVendido}`);
+    if (oldPanel) oldPanel.classList.add('hidden');
+    if (oldChev) oldChev.classList.remove('rotate-180');
+  }
+  
+  _expandedPaqVendido = id;
+  if (panel) panel.classList.remove('hidden');
+  if (chev) chev.classList.add('rotate-180');
+  loadPaqVendidoDetalle(id);
+}
+async function guardarVentaPaqueteCompleto() {
+  try {
+    const idcliente = $('vtaClienteId').value;
+    const idpaquete = $('vtaPaqueteId').value;
+    const precioPaquete = $('vtaPaquetePrecio').value;
+    
+    if (!idcliente) {
+      toast('Selecciona un cliente', false);
+      return;
+    }
+    
+    // Obtener todas las citas del formulario
+    const fechas = document.querySelectorAll('.citaFecha');
+    const horas = document.querySelectorAll('.citaHora');
+    const empleados = document.querySelectorAll('.citaEmpleado');
+    
+    const citas = [];
+    let errores = false;
+    let fechaInicio = null;
+    let fechaFin = null;
+    
+    for (let i = 0; i < fechas.length; i++) {
+      const fecha = fechas[i].value;
+      const hora = horas[i].value;
+      const idempleado = empleados[i].value;
+      const idtratamiento = fechas[i].dataset.trat;
+      
+      if (!fecha) {
+        toast(`La fecha del tratamiento ${i + 1} es obligatoria`, false);
+        errores = true;
+        break;
+      }
+      if (!hora) {
+        toast(`La hora del tratamiento ${i + 1} es obligatoria`, false);
+        errores = true;
+        break;
+      }
+      if (!idempleado) {
+        toast(`El empleado del tratamiento ${i + 1} es obligatorio`, false);
+        errores = true;
+        break;
+      }
+      
+      // Calcular fecha de inicio y fin
+      if (fechaInicio === null || fecha < fechaInicio) fechaInicio = fecha;
+      if (fechaFin === null || fecha > fechaFin) fechaFin = fecha;
+      
+      citas.push({
+        idcliente: Number(idcliente),
+        idtratamiento: Number(idtratamiento),
+        fecha,
+        hora,
+        idempleado: Number(idempleado),
+        observaciones: `Cita incluida en paquete`,
+        estado: 'pendiente',
+        precio: 0  // ✅ ENVIAR PRECIO 0 (el trigger lo respetará o lo cambiará)
+      });
+    }
+    
+    if (errores) return;
+    
+    // Mostrar loading en el botón
+    const btn = document.querySelector('button[onclick*="guardarVentaPaqueteCompleto"]');
+    const originalText = btn?.innerHTML;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Guardando...';
+    }
+    
+    // 1. PRIMERO registrar todas las citas (con precio 0)
+    let citasGuardadas = [];
+    let errorEnCitas = false;
+    
+    for (const cita of citas) {
+      try {
+        console.log('Creando cita:', cita); // Para depurar
+        const citaRes = await api.post('/api/citas', cita);
+        
+        if (citaRes.success) {
+          citasGuardadas.push({
+            ...cita,
+            idcita: citaRes.data.idcita
+          });
+          console.log(`✅ Cita ${cita.idtratamiento} creada con ID: ${citaRes.data.idcita}`);
+        } else {
+          console.error('Error al guardar cita:', citaRes.error);
+          toast(`Error al agendar cita: ${citaRes.error}`, false);
+          errorEnCitas = true;
+          break;
+        }
+      } catch(e) {
+        console.error('Error:', e);
+        toast(`Error al agendar cita: ${e.message}`, false);
+        errorEnCitas = true;
+        break;
+      }
+    }
+    
+    if (errorEnCitas) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+      return;
+    }
+    
+    // 2. Registrar el paquete vendido con las fechas calculadas
+    const hoy = todayStr();
+    console.log('Registrando paquete vendido:', {
+      idpaquete: Number(idpaquete),
+      idcliente: Number(idcliente),
+      precio: Number(precioPaquete),
+      fechacompra: hoy,
+      fechainicio: fechaInicio,
+      fechafin: fechaFin
+    });
+    
+    const paqueteRes = await api.post('/api/paquetes-vendidos', {
+      idpaquete: Number(idpaquete),
+      idcliente: Number(idcliente),
+      precio: Number(precioPaquete),
+      fechacompra: hoy,
+      fechainicio: fechaInicio,
+      fechafin: fechaFin
+    });
+    
+    if (!paqueteRes.success) {
+      toast(paqueteRes.error || 'Error al registrar el paquete, pero las citas se crearon', false);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+      SCREENS.citas();
+      return;
+    }
+    
+    const idPaqueteVendido = paqueteRes.data.idpaquetevendido;
+    console.log(`✅ Paquete vendido creado con ID: ${idPaqueteVendido}`);
+    
+    // 3. ACTUALIZAR las citas con el idpaquetevendido
+    let citasActualizadas = 0;
+    for (const cita of citasGuardadas) {
+      try {
+        await api.put(`/api/citas/${cita.idcita}`, {
+          idpaquetevendido: idPaqueteVendido
+        });
+        citasActualizadas++;
+        console.log(`✅ Cita ${cita.idcita} actualizada con paquete vendido`);
+      } catch(e) {
+        console.error('Error al actualizar cita:', e);
+      }
+    }
+    
+    toast(`✅ Paquete vendido y ${citasActualizadas} citas agendadas correctamente`);
+    closeModal();
+    SCREENS.citas();
+    
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+    
+  } catch(e) {
+    console.error('Error general:', e);
+    toast(e.message || 'Error al guardar', false);
+    const btn = document.querySelector('button[onclick*="guardarVentaPaqueteCompleto"]');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Registrar Venta y Citas';
+    }
+  }
+}
+
+
+
+
 // Reportes — dependiente y admin comparten el mismo render
 async function _renderReporteScreen(ct){
   ct.innerHTML=showLoading('Generando reportes...');
