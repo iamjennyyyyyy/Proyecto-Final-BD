@@ -126,17 +126,26 @@ const citaController = {
     },
 
     async asignarMaterialACita(req, res) {
-        try{
-            const idCita = parseInt(req.params.idCita);
-            const idMaterial = parseInt(req.params.idMaterial);
-            const  {cantidad} = req.body;
-            await citaService.asignarMaterialACita(idCita,idMaterial, cantidad);
-            res.json({success: true, mensaje: 'Material asignado correctamente'});
-        }
-        catch(error){
-            res.status(400).json({success: false, error: error.message});
-        }
-    },
+    try {
+        console.log('=== CONTROLLER DEBUG ===');
+        console.log('req.params:', req.params);
+        console.log('req.body:', req.body);
+        
+        const idCita = parseInt(req.params.idCita);
+        const idMaterial = parseInt(req.params.idMaterial);
+        const { cantidadutilizada } = req.body;
+        
+        console.log('idCita:', idCita);
+        console.log('idMaterial:', idMaterial);
+        console.log('cantidadutilizada:', cantidadutilizada);
+        
+        await citaService.asignarMaterialACita(idCita, idMaterial, cantidadutilizada);
+        res.json({ success: true, mensaje: 'Material asignado correctamente' });
+    } catch (error) {
+        console.error('Error en controller:', error.message);
+        res.status(400).json({ success: false, error: error.message });
+    }
+},
 
     async desasignarMaterialACita(req, res) {
         try{

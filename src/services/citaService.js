@@ -83,16 +83,22 @@ const citaService = {
         return await materialesPorCitaRepository.buscarCitasPorMaterial(idMaterial);
     },
 
-    async asignarMaterialACita(idCita, idMaterial, cantidad) {
-        const relacion = new MaterialCita({ idCita, idMaterial, cantidadutilizada: cantidad });
-        relacion.validar();
-        const cita = await citaRepository.buscarPorId(idCita);
-        const material = await materialRepository.buscarPorId(idMaterial);
+    async asignarMaterialACita(idcita, idmaterial, cantidad) {
+         console.log('=== SERVICE DEBUG ===');
+    console.log('idCita:', idcita);
+    console.log('idMaterial:', idmaterial);
+    console.log('cantidad:', cantidad);
+    
+    const relacion = new MaterialCita({ idcita, idmaterial, cantidadutilizada: cantidad });
+    console.log('MaterialCita creado:', relacion);
+    relacion.validar();
+        const cita = await citaRepository.buscarPorId(idcita);
+        const material = await materialRepository.buscarPorId(idmaterial);
         if (!cita) throw new Error('Cita no encontrada');
         if (!material) throw new Error('Material no encontrado');
-        const existeRelacion = await materialesPorCitaRepository.existeRelacion(idCita, idMaterial);
+        const existeRelacion = await materialesPorCitaRepository.existeRelacion(idcita, idmaterial);
         if (existeRelacion) throw new Error('Este material ya está asignado a esta cita');
-        return await materialesPorCitaRepository.asignarMaterialACita(idCita, idMaterial, cantidad);
+        return await materialesPorCitaRepository.asignarMaterialACita(idcita, idmaterial, cantidad);
     },
 
     async desasignarMaterialDeCita(idCita, idMaterial) {

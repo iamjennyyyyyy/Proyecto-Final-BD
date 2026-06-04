@@ -116,7 +116,7 @@ SCREENS.citas=async()=>{
     const filtrosActivos=citasFilterEstado!=='todas'||citasFilterFechaDesde||citasFilterFechaHasta||citasFilterPrecioMin||citasFilterPrecioMax;
     ct.innerHTML='<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+citas.length+'</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='todas'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'todas\';SCREENS.citas()">Todas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='pendiente'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'pendiente\';SCREENS.citas()">Pendientes</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='realizada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'realizada\';SCREENS.citas()">Realizadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all '+(citasFilterEstado==='cancelada'?'bg-white text-[#2c3e50] shadow-sm':'text-[#6b7280] hover:text-[#2c3e50]')+'" onclick="citasFilterEstado=\'cancelada\';SCREENS.citas()">Canceladas</button></div></div></div><div class="flex flex-wrap items-center gap-2 mb-4 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-filter text-xs text-[#6b7280]"></i><input type="date" id="filtroFechaDesde" value="'+citasFilterFechaDesde+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaDesde=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">a</span><input type="date" id="filtroFechaHasta" value="'+citasFilterFechaHasta+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaHasta=this.value;SCREENS.citas()"><input type="number" id="filtroPrecioMin" placeholder="Precio min" value="'+citasFilterPrecioMin+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMin=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">-</span><input type="number" id="filtroPrecioMax" placeholder="Precio max" value="'+citasFilterPrecioMax+'" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMax=this.value;SCREENS.citas()">'+(filtrosActivos?'<button onclick="citasFilterFechaDesde=\'\';citasFilterFechaHasta=\'\';citasFilterPrecioMin=\'\';citasFilterPrecioMax=\'\';citasFilterEstado=\'todas\';SCREENS.citas()" class="px-3 py-1.5 bg-gray-200 text-[#6b7280] text-xs font-medium rounded-lg hover:bg-gray-300">Limpiar</button>':'')+'</div><div class="flex justify-end mb-4"><button onclick="citaModal()" class="px-4 py-2 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agendar Cita</button></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
     if(citas.length){
-      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',renderTable([{label:'Fecha',render:c=>formatDateShort(c.fecha)},{label:'Hora',render:c=>formatTime(c.hora)},{label:'Cliente',render:c=>c.clientenombre||'-'},{label:'Teléfono',render:c=>c.telefonocliente||'-'},{label:'Tratamiento',render:c=>c.tratamientonombre||'-'},{label:'Precio',render:c=>$$(c.precio)},{label:'Estado',render:c=>'<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+' cursor-pointer" onclick="cambioEstadoCita('+c.idcita+',\''+c.estado+'\')">'+cap(c.estado)+'</span>'},{label:'',render:c=>'<div class="flex gap-1.5 justify-end"><button onclick="verCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg transition-all" title="Ver"><i class="fa-regular fa-eye"></i></button><button onclick="editarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="eliminarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],citas));
+      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',renderTable([{label:'Fecha',render:c=>formatDateShort(c.fecha)},{label:'Hora',render:c=>formatTime(c.hora)},{label:'Cliente',render:c=>c.clientenombre||'-'},{label:'Teléfono',render:c=>c.telefonocliente||'-'},{label:'Tratamiento',render:c=>c.tratamientonombre||'-'},{label:'Precio',render:c=>$$(c.precio)},{label:'Estado',render:c=>'<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+' cursor-pointer" onclick="cambioEstadoCita('+c.idcita+',\''+c.estado+'\')">'+cap(c.estado)+'</span>'},{label:'',render:c=>'<div class="flex gap-1.5 justify-end">'+(c.estado==='pendiente'?'<button onclick="realizarCita('+c.idcita+')" class="px-2 py-1 text-xs font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg flex items-center gap-1"><i class="fa-solid fa-check"></i> Realizar</button><button onclick="cancelarCita('+c.idcita+')" class="px-2 py-1 text-xs font-semibold text-white bg-red-400 hover:bg-red-500 rounded-lg flex items-center gap-1"><i class="fa-solid fa-xmark"></i> Cancelar</button>':'')+'<button onclick="verCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg transition-all" title="Ver"><i class="fa-regular fa-eye"></i></button><button onclick="editarCita('+c.idcita+')" class="p-1.5 text-[#6b7280] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button></div>'}],citas));
     }else{
       ct.querySelector('.fade-in').insertAdjacentHTML('beforeend',showEmpty((citasFilterEstado==='todas'?'fa-regular fa-calendar-check':'fa-regular fa-filter'),(citasFilterEstado==='todas'?'No hay citas registradas':'No hay citas '+citasFilterEstado),'Agenda la primera cita para comenzar.','Agendar Cita','citaModal()'));
     }
@@ -127,7 +127,7 @@ async function verCita(id){
     const d=await api.get('/api/citas/'+id);
     if(!d.success)return toast(d.error||'Error',false);
     const c=d.data;
-    openModal('<div class="p-6" style="max-width: 520px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-regular fa-circle-info text-menta mr-2"></i>Detalle de Cita</h3><span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span></div><div class="space-y-3 text-sm"><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium text-[#2c3e50]">'+c.clientenombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Teléfono</span><span class="font-medium text-[#2c3e50]">'+c.telefonocliente+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Tratamiento</span><span class="font-medium text-[#2c3e50]">'+c.tratamientonombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-medium text-[#2c3e50]">'+$$(c.precio)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Fecha</span><span class="font-medium text-[#2c3e50]">'+formatDate(c.fecha)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Hora</span><span class="font-medium text-[#2c3e50]">'+formatTime(c.hora)+'</span></div>'+(c.empleadonombre?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Empleado</span><span class="font-medium text-[#2c3e50]">'+c.empleadonombre+'</span></div>':'')+(c.observaciones?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Observaciones</span><span class="font-medium text-[#2c3e50]">'+c.observaciones+'</span></div>':'')+'</div><div class="flex gap-2 mt-6 justify-end"><button onclick="closeModal()" class="px-5 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button><button onclick="closeModal();editarCita('+id+')" class="px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Editar</button></div></div>');
+    openModal('<div class="p-6" style="max-width: 520px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-regular fa-circle-info text-menta mr-2"></i>Detalle de Cita</h3><span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span></div><div class="space-y-3 text-sm"><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium text-[#2c3e50]">'+c.clientenombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Teléfono</span><span class="font-medium text-[#2c3e50]">'+c.telefonocliente+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Tratamiento</span><span class="font-medium text-[#2c3e50]">'+c.tratamientonombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-medium text-[#2c3e50]">'+$$(c.precio)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Fecha</span><span class="font-medium text-[#2c3e50]">'+formatDate(c.fecha)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Hora</span><span class="font-medium text-[#2c3e50]">'+formatTime(c.hora)+'</span></div>'+(c.empleadonombre?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Empleado</span><span class="font-medium text-[#2c3e50]">'+c.empleadonombre+'</span></div>':'')+(c.observaciones?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Observaciones</span><span class="font-medium text-[#2c3e50]">'+c.observaciones+'</span></div>':'')+'</div><div class="flex gap-2 mt-6 justify-end"><button onclick="closeModal()" class="px-5 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button>'+(c.estado==='pendiente'?'<button onclick=\"closeModal();cancelarCita('+id+')\" class=\"px-5 py-2.5 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200\"><i class=\"fa-solid fa-xmark mr-1.5\"></i>Cancelar</button><button onclick=\"closeModal();realizarCita('+id+')\" class=\"px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600\"><i class=\"fa-solid fa-check mr-1.5\"></i>Realizar</button>':'<button onclick=\"closeModal();editarCita('+id+')\" class=\"px-5 py-2.5 bg-amber-100 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-200\"><i class=\"fa-regular fa-pen-to-square mr-1.5\"></i>Editar</button>')+'</div></div>');
   }catch(e){toast('Error al cargar detalle',false)}
 }
 async function cambioEstadoCita(id,estadoActual){
@@ -142,15 +142,7 @@ async function aplicarCambioEstado(id,estado){
     toast('Estado actualizado a '+cap(estado));closeModal();SCREENS.citas();
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
-async function eliminarCita(id){
-  openConfirm('Eliminar Cita','¿Estás seguro de eliminar esta cita? Esta acción no se puede deshacer.',async()=>{
-    try{
-      const d=await api.del('/api/citas/'+id);
-      if(!d.success)return toast(d.error||'Error',false);
-      toast('Cita eliminada');SCREENS.citas();
-    }catch(e){toast(e.message||'Error de conexión',false)}
-  });
-}
+function eliminarCita(id){toast('Las citas no se pueden eliminar. Puedes cancelarlas o marcarlas como realizadas.',false);}
 async function citaModal(editData){
   editId=editData?.idcita||null;
   try{
@@ -173,13 +165,21 @@ async function citaModal(editData){
       }catch(e2){var sel2=$('citaEmpleado');if(sel2)sel2.innerHTML='<option value="">Error</option>'}
     };
     var tratOpts='';t.data.forEach(function(tr){tratOpts+='<option value="'+tr.idtratamiento+'" data-precio="'+tr.precio+'"'+(editData&&editData.idtratamiento==tr.idtratamiento?' selected':'')+'>'+tr.nombre+'</option>'});
-    var estadoHtml='';if(editData)estadoHtml='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Estado</label><select id="citaEstado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="pendiente"'+(editData.estado==='pendiente'?' selected':'')+'>Pendiente</option><option value="realizada"'+(editData.estado==='realizada'?' selected':'')+'>Realizada</option><option value="cancelada"'+(editData.estado==='cancelada'?' selected':'')+'>Cancelada</option></select></div>';
+    var estadoHtml='';
     var obsVal=editData?editData.observaciones||'':'';
     var body='<div class="p-6" style="max-width:520px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-calendar-plus text-menta mr-2"></i>'+(editData?'Editar Cita':'Agendar Cita')+'</h3>';
     body+='<div class="space-y-3.5">';
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label><div class="relative"><input type="text" id="citaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" placeholder="Nombre del cliente" value="'+(editData?editData.clientenombre||'':'')+'"><input type="hidden" id="citaClienteId" value="'+(editData?editData.idcliente||'':'')+'"><div id="clienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div></div></div>';
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label><select id="citaTratamiento" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" onchange="autoFillPrecio()">'+tratOpts+'</select></div>';
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio *</label><input type="number" step="0.01" min="0" id="citaPrecio" value="'+(editData?editData.precio||'':'')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    // Precio: BD lo asigna al crear; al editar es solo lectura
+    if(editData){
+      const _pvId=editData.idpaquetevendido||editData.paquetevendido||editData.id_paquete_vendido||editData.idpaquete_vendido;
+      const paqLabel=_pvId?'<span class="text-xs text-amber-600 font-medium ml-2"><i class="fa-solid fa-box mr-1"></i>Incluido en paquete (precio $0)</span>':'';
+      body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio</label><div class="w-full px-4 py-2.5 bg-gray-50 border border-[#e8ecf1] rounded-xl text-sm text-[#6b7280] flex items-center gap-2">'+$$(editData.precio||0)+paqLabel+'<span class="ml-auto text-xs text-[#9ca3af]"><i class="fa-solid fa-lock mr-1"></i>Solo lectura</span></div><input type="hidden" id="citaPrecio" value="'+(editData.precio||0)+'"></div>';
+      if(_pvId){
+        body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Paquete Vendido</label><div class="w-full px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 flex items-center gap-2"><i class="fa-solid fa-box"></i>Cita de paquete #'+_pvId+'<span class="ml-auto text-xs text-amber-500"><i class="fa-solid fa-lock mr-1"></i>No editable</span></div></div>';
+      }
+    }
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Fecha *</label><input type="date" id="citaFecha" value="'+(editData?editData.fecha||'':todayStr())+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label><input type="time" id="citaHora" value="'+(editData?editData.hora||'':'09:00')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
     body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Cargando...</option></select></div>';
@@ -189,7 +189,7 @@ async function citaModal(editData){
     openModal(body,function(){
       var inp=$('citaClienteInput');
       if(inp)inp.addEventListener('input',debounce(autocompleteClientes,300));
-      if(!editData)autoFillPrecio();
+      // precio lo asigna la BD al crear
       var selTrat=$('citaTratamiento');
       if(selTrat&&selTrat.value)loadEmps(selTrat.value);
       selTrat.addEventListener('change',function(){if(this.value)loadEmps(this.value)});
@@ -231,14 +231,14 @@ async function autocompleteClientes(){
 }
 function seleccionarCliente(id,nombre){$('citaClienteId').value=id;$('citaClienteInput').value=nombre;$('clienteAutocomplete').classList.add('hidden');}
 async function guardarCita(){
-  const idcliente=$('citaClienteId').value,idtratamiento=$('citaTratamiento').value,precio=parseFloat($('citaPrecio').value),fecha=$('citaFecha').value,hora=$('citaHora').value,idempleado=$('citaEmpleado').value,observaciones=$('citaObservaciones')?.value||'',estado=editId?($('citaEstado')?.value||null):null;
+  const idcliente=$('citaClienteId').value,idtratamiento=$('citaTratamiento').value,fecha=$('citaFecha').value,hora=$('citaHora').value,idempleado=$('citaEmpleado').value,observaciones=$('citaObservaciones')?.value||'',estado=editId?($('citaEstado')?.value||null):null;
   if(!idcliente)return toast('Selecciona un cliente',false);
   if(!idtratamiento)return toast('Selecciona un tratamiento',false);
-  if(isNaN(precio))return toast('Ingresa un precio válido',false);
   if(!fecha)return toast('Selecciona una fecha',false);
   if(!hora)return toast('Selecciona una hora',false);
   if(!idempleado)return toast('Selecciona un empleado',false);
-  const data={idcliente:Number(idcliente),idtratamiento:Number(idtratamiento),precio,fecha,hora,idempleado:Number(idempleado),observaciones};
+  // El precio lo asigna la BD automáticamente
+  const data={idcliente:Number(idcliente),idtratamiento:Number(idtratamiento),fecha,hora,idempleado:Number(idempleado),observaciones};
   if(estado)data.estado=estado;
   try{
     const d=editId?await api.put('/api/citas/'+editId,data):await api.post('/api/citas',data);
@@ -304,7 +304,7 @@ async function vtaAutocomplete(){
 }
 function vtaSelCliente(id,nombre){$('vtaClienteId').value=id;$('vtaClienteInput').value=nombre;$('vtaClienteAutocomplete').classList.add('hidden');}
 async function crearClienteRapido(origen){
-  openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-plus text-menta mr-2"></i>Nuevo Cliente</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" id="rapidClienteNombre" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">CI *</label><input type="text" id="rapidClienteCi" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Teléfono</label><input type="text" id="rapidClienteTelefono" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Email</label><input type="email" id="rapidClienteEmail" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarClienteRapido(\''+origen+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Crear Cliente</button></div></div>');
+  openSubModal('<div class="p-6" style="max-width:420px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-user-plus text-menta mr-2"></i>Nuevo Cliente</h3><button onclick="closeSubModal()" class="text-[#9ca3af] hover:text-[#6b7280] text-xl"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Nombre *</label><input type="text" id="rapidClienteNombre" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">CI *</label><input type="text" id="rapidClienteCi" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Teléfono</label><input type="text" id="rapidClienteTelefono" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Email</label><input type="email" id="rapidClienteEmail" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div></div><div class="flex gap-2 mt-6"><button onclick="closeSubModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarClienteRapido(\''+origen+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Crear Cliente</button></div></div>');
 }
 async function guardarClienteRapido(origen){
   const nombre=$('rapidClienteNombre')?.value?.trim(),ci=$('rapidClienteCi')?.value?.trim(),telefono=$('rapidClienteTelefono')?.value?.trim(),email=$('rapidClienteEmail')?.value?.trim();
@@ -313,7 +313,7 @@ async function guardarClienteRapido(origen){
   try{
     const d=await api.post('/api/clientes',{nombre,ci,telefono:telefono||null,email:email||null});
     if(!d.success){toast(d.error||'Error al crear cliente',false);return;}
-    toast('Cliente creado');closeModal();
+    toast('Cliente creado');closeSubModal();
     if(origen==='cita'){$('citaClienteId').value=d.data.idcliente;$('citaClienteInput').value=d.data.nombre;const ac=$('clienteAutocomplete');if(ac)ac.classList.add('hidden');}
     else if(origen==='vta'){$('vtaClienteId').value=d.data.idcliente;$('vtaClienteInput').value=d.data.nombre;const ac=$('vtaClienteAutocomplete');if(ac)ac.classList.add('hidden');}
   }catch(e){toast(e.message||'Error de conexión',false)}
@@ -330,32 +330,32 @@ async function guardarVentaPaquete(){
     toast('Paquete vendido correctamente');closeModal();SCREENS.paquetes();
   }catch(e){toast(e.message||'Error de conexión',false);}
 }
-// Reportes (dependiente + admin)
-SCREENS.reportes=async()=>{
-  const ct=$('pageContent');ct.innerHTML=showLoading('Generando reportes...');
+// Reportes — dependiente y admin comparten el mismo render
+async function _renderReporteScreen(ct){
+  ct.innerHTML=showLoading('Generando reportes...');
   try{
-    const[hoy,clientes]=await Promise.all([api.get('/api/citas/fecha?fecha='+todayStr()),api.get('/api/clientes')]);
-    if(!hoy.success){ct.innerHTML=showEmpty('fa-regular fa-chart-bar','Sin datos','No se pudieron cargar los reportes.','Reintentar','navigate(\'reportes\')');return;}
-    const todas=hoy.data||[],realizadas=todas.filter(c=>c.estado==='realizada'),pendientes=todas.filter(c=>c.estado==='pendiente'),canceladas=todas.filter(c=>c.estado==='cancelada');
-    const ventasHoy=realizadas.reduce((s,c)=>s+Number(c.precio||c.costo||0),0);
+    const hoy=todayStr();
+    const[hoyRes,topRes]=await Promise.all([
+      api.get('/api/citas/fecha?fecha='+hoy),
+      api.get('/api/reportes/top-tratamientos')
+    ]);
+    const hoyCitas=hoyRes.success?hoyRes.data||[]:[];
+    const realizadas=hoyCitas.filter(c=>c.estado==='realizada');
+    const pendientes=hoyCitas.filter(c=>c.estado==='pendiente');
+    const canceladas=hoyCitas.filter(c=>c.estado==='cancelada');
+    const ventasHoy=realizadas.reduce((s,c)=>s+Number(c.precio||0),0);
     const inicioSem=dayjs().startOf('week').format('YYYY-MM-DD'),finSem=dayjs().endOf('week').format('YYYY-MM-DD');
     let semData={data:[]};
     try{semData=await api.get('/api/citas/intervalo/fechas?fecha1='+inicioSem+'&fecha2='+finSem)}catch(e){}
-    const semRealizadas=(semData.data||[]).filter(c=>c.estado==='realizada');
-    const ventasSem=semRealizadas.reduce((s,c)=>s+Number(c.precio||c.costo||0),0);
-    const clientesData=clientes.data||[];
-    const inicioMes=dayjs().startOf('month').format('YYYY-MM-DD');
-    const clientesMes=clientesData.filter(c=>c.fecharegistro>=inicioMes||c.fecha_creacion>=inicioMes||c.createdat>=inicioMes);
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-chart-bar text-menta mr-2"></i>Reportes</h3></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">'+
-    '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-spa"></i></div><div><p class="text-xs text-[#6b7280]">Citas Hoy</p></div></div><p class="text-3xl font-bold text-[#2c3e50]">'+todas.length+'</p><p class="text-xs text-[#6b7280] mt-1">'+pendientes.length+' pendientes</p></div>'+
-    '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-coins text-menta"></i></div><div><p class="text-xs text-[#6b7280]">Ventas Semana</p></div></div><p class="text-3xl font-bold text-menta">'+$$(ventasSem)+'</p><p class="text-xs text-[#6b7280] mt-1">'+semRealizadas.length+' realizadas</p></div>'+
-    '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-user-plus text-amber-500"></i></div><div><p class="text-xs text-[#6b7280]">Clientes Nuevos</p></div></div><p class="text-3xl font-bold text-[#2c3e50]">'+clientesMes.length+'</p><p class="text-xs text-[#6b7280] mt-1">este mes</p></div>'+
-    '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-ban text-red-400"></i></div><div><p class="text-xs text-[#6b7280]">Canceladas Hoy</p></div></div><p class="text-3xl font-bold text-red-400">'+canceladas.length+'</p><p class="text-xs text-[#6b7280] mt-1">citas canceladas</p></div>'+
-    '</div></div>';
+    const semReal=(semData.data||[]).filter(c=>c.estado==='realizada');
+    const ventasSem=semReal.reduce((s,c)=>s+Number(c.precio||0),0);
+    const topData=topRes.success?topRes.data||[]:[];
+    const topColors=['bg-amber-100 text-amber-600','bg-gray-100 text-gray-500','bg-orange-50 text-orange-400'];
+    const topHtml=topData.length?topData.map((t,i)=>'<div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold '+topColors[i]+'">'+(i+1)+'</div><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[#2c3e50] truncate">'+(t.tratamientonombre||t.nombre||'-')+'</p><p class="text-xs text-[#6b7280]">'+(t.totalcitas||t.cantidad||0)+' citas</p></div><span class="text-sm font-semibold text-menta">'+$$(t.ingresos||t.total||0)+'</span></div>').join(''):'<p class="text-sm text-[#9ca3af] py-3 text-center">Sin datos disponibles</p>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-chart-bar text-menta mr-2"></i>Reportes</h3></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-spa text-sm"></i></div><p class="text-xs text-[#6b7280]">Citas Hoy</p></div><p class="text-3xl font-bold text-[#2c3e50]">'+hoyCitas.length+'</p><p class="text-xs text-[#6b7280] mt-1">'+pendientes.length+' pendientes</p></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-coins text-menta text-sm"></i></div><p class="text-xs text-[#6b7280]">Ventas Hoy</p></div><p class="text-3xl font-bold text-menta">'+$$(ventasHoy)+'</p><p class="text-xs text-[#6b7280] mt-1">'+realizadas.length+' realizadas</p></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-calendar-week text-amber-500 text-sm"></i></div><p class="text-xs text-[#6b7280]">Ventas Semana</p></div><p class="text-3xl font-bold text-[#2c3e50]">'+$$(ventasSem)+'</p><p class="text-xs text-[#6b7280] mt-1">'+semReal.length+' realizadas</p></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-ban text-red-400 text-sm"></i></div><p class="text-xs text-[#6b7280]">Canceladas Hoy</p></div><p class="text-3xl font-bold text-red-400">'+canceladas.length+'</p><p class="text-xs text-[#6b7280] mt-1">citas canceladas</p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-5"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-3 flex items-center gap-2"><i class="fa-solid fa-trophy text-amber-500 text-sm"></i>Top 3 Tratamientos</h4><div class="space-y-2">'+topHtml+'</div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><h4 class="font-semibold text-[#2c3e50] mb-3 flex items-center gap-2"><i class="fa-solid fa-user-clock text-menta text-sm"></i>Historial de Cliente</h4><div class="space-y-2"><div class="relative"><input type="text" id="rptClienteInput" autocomplete="off" placeholder="Buscar cliente..." class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" oninput="debounce(rptAutocomplete,300)()"><input type="hidden" id="rptClienteId"><div id="rptClienteAC" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-40 overflow-y-auto hidden"></div></div><div class="flex gap-2"><input type="date" id="rptFechaDesde" class="flex-1 px-3 py-2 border border-[#d1d5db] rounded-xl text-sm"><input type="date" id="rptFechaHasta" class="flex-1 px-3 py-2 border border-[#d1d5db] rounded-xl text-sm"></div><div class="flex gap-2"><button onclick="rptEmpleadosPorCliente()" class="flex-1 px-3 py-2 bg-lavender-100 text-spa text-xs font-medium rounded-xl hover:bg-lavender-200">Ver empleados</button><button onclick="rptServiciosCliente()" class="flex-1 px-3 py-2 bg-menta-50 text-menta text-xs font-medium rounded-xl hover:bg-menta-100">Ver servicios por fechas</button></div><div id="rptClienteResultado" class="text-xs text-[#9ca3af] text-center py-2">Selecciona un cliente</div></div></div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar reportes.','Reintentar','navigate(\'reportes\')')}
-};
-// Admin reportes uses same function
-SCREENS['admin-reportes']=SCREENS.reportes;
+}
+SCREENS.reportes=async()=>_renderReporteScreen($('pageContent'));
 // Dependiente: Mapa y Contactos
 SCREENS.mapa=async()=>{
   const ct=$('pageContent');
@@ -792,71 +792,89 @@ function quitarEmpleadoArea(idArea,idEmpleado,nombre){
   });
 }
 
-// Admin: Reportes links to informes
+// Admin: Reportes hub — acceso a informes + reportes generales
 SCREENS['admin-reportes']=async()=>{
   const ct=$('pageContent');
-  ct.innerHTML='<div class="fade-in"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-chart-pie text-menta mr-2"></i>Informes</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-ingresos\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-file-invoice-dollar text-menta text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Ingresos</h4><p class="text-sm text-[#6b7280] mt-0.5">Resumen mensual de ingresos por tratamientos y paquetes</p></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-discrepancia\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-file-excel text-amber-500 text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Discrepancia</h4><p class="text-sm text-[#6b7280] mt-0.5">Comparativa de materiales planificados vs. utilizados</p></div></div></div></div></div>';
+  ct.innerHTML='<div class="fade-in"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-chart-pie text-menta mr-2"></i>Informes y Reportes</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-ingresos\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-file-invoice-dollar text-menta text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Ingresos</h4><p class="text-sm text-[#6b7280] mt-0.5">Resumen mensual de ingresos por tratamientos y paquetes</p></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-discrepancia\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-file-excel text-amber-500 text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Discrepancia</h4><p class="text-sm text-[#6b7280] mt-0.5">Comparativa de materiales planificados vs. utilizados</p></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="_renderReporteScreen($(\'pageContent\'))"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-chart-bar text-spa text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Reportes Generales</h4><p class="text-sm text-[#6b7280] mt-0.5">Top tratamientos, historial de clientes, estadísticas del día</p></div></div></div></div></div>';
 };
 
-// Admin: Informe Ingresos (monthly cards)
+// Admin: Informe Ingresos — usa endpoint real /api/reportes/ingresos + top tratamientos
 SCREENS['admin-informe-ingresos']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading('Generando informe de ingresos...');
   try{
-    const[citas,pqv]=await Promise.all([api.get('/api/citas'),api.get('/api/paquetes-vendidos')]);
-    if(!citas.success){ct.innerHTML=showEmpty('fa-regular fa-file-invoice-dollar','Sin datos','No hay datos de ingresos.');return;}
-    const realizadas=citas.data.filter(c=>c.estado==='realizada');
-    const paqVend=pqv.success?pqv.data||[]:[];
-    const meses={};
     const mesesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    for(let i=0;i<12;i++){
-      const m=dayjs().subtract(i,'month');const key=m.format('YYYY-MM');
-      meses[key]={label:mesesNom[m.month()]+' '+m.format('YYYY'),citas:0,ingresosCitas:0,paquetes:0,ingresosPaq:0,ingresosTotal:0};
+    const[ingRes,topRes]=await Promise.all([
+      api.get('/api/reportes/ingresos'),
+      api.get('/api/reportes/top-tratamientos')
+    ]);
+    // Informe ingresos por mes desde la BD
+    const ingData=ingRes.success?ingRes.data||[]:[];
+    const topData=topRes.success?topRes.data||[]:[];
+    const totalGeneral=ingData.reduce((s,m)=>s+Number(m.total||m.ingresos||0),0);
+    const topColors=['bg-amber-100 text-amber-600','bg-gray-100 text-gray-500','bg-orange-50 text-orange-400'];
+    const topHtml=topData.length?'<div class="space-y-2">'+topData.map((t,i)=>'<div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold '+topColors[i]+'">'+(i+1)+'</div><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[#2c3e50] truncate">'+(t.tratamientonombre||t.nombre||'-')+'</p><p class="text-xs text-[#6b7280]">'+(t.totalcitas||t.cantidad||0)+' citas</p></div><span class="text-sm font-semibold text-menta">'+$$(t.ingresos||t.total||0)+'</span></div>').join('')+'</div>':'<p class="text-sm text-[#9ca3af] py-3 text-center">Sin datos de top tratamientos</p>';
+    // Construir tarjetas por mes
+    let mesCards='';
+    if(ingData.length){
+      // BD devuelve filas con mes/anio/total — construir display
+      const sorted=[...ingData].sort((a,b)=>{
+        const ka=(a.anio||a.year||0)+'-'+(String(a.mes||a.month||0).padStart(2,'0'));
+        const kb=(b.anio||b.year||0)+'-'+(String(b.mes||b.month||0).padStart(2,'0'));
+        return kb.localeCompare(ka);
+      });
+      mesCards=sorted.map(m=>{
+        const mes=Number(m.mes||m.month||1)-1;
+        const anio=m.anio||m.year||'';
+        const label=(mesesNom[mes]||'')+' '+anio;
+        const tot=Number(m.total||m.ingresos||0);
+        const citasCnt=Number(m.citas||m.totalcitas||0);
+        const paqCnt=Number(m.paquetes||m.totalpaquetes||0);
+        return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center justify-between mb-3"><h4 class="font-semibold text-[#2c3e50] text-sm">'+label+'</h4><span class="text-lg font-bold text-menta">'+$$(tot)+'</span></div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-[#6b7280]">Tratamientos</span><span>'+citasCnt+' citas</span></div><div class="flex justify-between"><span class="text-[#6b7280]">Paquetes</span><span>'+paqCnt+' vendidos</span></div></div></div>';
+      }).join('');
+    }else{
+      // Fallback: construir desde citas locales
+      const[citas,pqv]=await Promise.all([api.get('/api/citas'),api.get('/api/paquetes-vendidos')]);
+      const realizadas = (citas.success ? (citas.data || []) : []).filter(c => c.estado === 'realizada');
+      const paqVend=pqv.success?pqv.data||[]:[];
+      const meses={};
+      for(let i=0;i<12;i++){
+        const m2=dayjs().subtract(i,'month');const key=m2.format('YYYY-MM');
+        meses[key]={label:mesesNom[m2.month()]+' '+m2.format('YYYY'),citas:0,ingresosCitas:0,paquetes:0,ingresosPaq:0,ingresosTotal:0};
+      }
+      realizadas.forEach(c=>{if(!c.fecha)return;const key=dayjs(c.fecha).format('YYYY-MM');if(meses[key]){meses[key].citas++;meses[key].ingresosCitas+=Number(c.precio||0)}});
+      paqVend.forEach(p=>{if(!p.fechacompra)return;const key=dayjs(p.fechacompra).format('YYYY-MM');if(meses[key]){meses[key].paquetes++;meses[key].ingresosPaq+=Number(p.precio||0)}});
+      Object.keys(meses).forEach(k=>{meses[k].ingresosTotal=meses[k].ingresosCitas+meses[k].ingresosPaq});
+      const sorted2=Object.keys(meses).sort().reverse();
+      const totalGeneral2=sorted2.reduce((s,k)=>s+meses[k].ingresosTotal,0);
+      mesCards=sorted2.map(k=>{const m2=meses[k];return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center justify-between mb-3"><h4 class="font-semibold text-[#2c3e50] text-sm">'+m2.label+'</h4><span class="text-lg font-bold text-menta">'+$$(m2.ingresosTotal)+'</span></div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-[#6b7280]">Tratamientos</span><span>'+m2.citas+' citas — '+$$(m2.ingresosCitas)+'</span></div><div class="flex justify-between"><span class="text-[#6b7280]">Paquetes</span><span>'+m2.paquetes+' vendidos — '+$$(m2.ingresosPaq)+'</span></div></div></div>';}).join('');
     }
-    realizadas.forEach(c=>{
-      if(!c.fecha)return;const key=dayjs(c.fecha).format('YYYY-MM');
-      if(meses[key]){meses[key].citas++;meses[key].ingresosCitas+=Number(c.precio||c.costo||0)}
-    });
-    paqVend.forEach(p=>{
-      if(!p.fechacompra)return;const key=dayjs(p.fechacompra).format('YYYY-MM');
-      if(meses[key]){meses[key].paquetes++;meses[key].ingresosPaq+=Number(p.precio||0)}
-    });
-    Object.keys(meses).forEach(k=>{meses[k].ingresosTotal=meses[k].ingresosCitas+meses[k].ingresosPaq});
-    const sorted=Object.keys(meses).sort().reverse();
-    const totalGeneral=sorted.reduce((s,k)=>s+meses[k].ingresosTotal,0);
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-invoice-dollar text-menta mr-2"></i>Informe de Ingresos</h3><span class="px-3 py-1.5 bg-menta-50 text-menta-700 text-sm font-semibold rounded-full">Total: '+$$(totalGeneral)+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+sorted.map(k=>{
-      const m=meses[k];
-      return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center justify-between mb-3"><h4 class="font-semibold text-[#2c3e50] text-sm">'+m.label+'</h4><span class="text-lg font-bold text-menta">'+$$(m.ingresosTotal)+'</span></div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-[#6b7280]">Tratamientos</span><span>'+m.citas+' citas — '+$$(m.ingresosCitas)+'</span></div><div class="flex justify-between"><span class="text-[#6b7280]">Paquetes</span><span>'+m.paquetes+' vendidos — '+$$(m.ingresosPaq)+'</span></div></div></div>';
-    }).join('')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-invoice-dollar text-menta mr-2"></i>Informe de Ingresos</h3><span class="px-3 py-1.5 bg-menta-50 text-menta-700 text-sm font-semibold rounded-full">Total: '+$$(totalGeneral)+'</span></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6"><div class="lg:col-span-2"><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-calendar-alt text-menta mr-1.5"></i>Por Mes</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">'+mesCards+'</div></div><div><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Top 3 Tratamientos</h4>'+topHtml+'</div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-ingresos\')')}
 };
 
-// Admin: Informe Discrepancia (monthly selector + material comparison)
+// Admin: Informe Discrepancia — usa endpoint real /api/reportes/discrepancias/:anio/:mes
 SCREENS['admin-informe-discrepancia']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading('Cargando informe de discrepancia...');
   try{
-    const[mats,trat]=await Promise.all([api.get('/api/materiales'),api.get('/api/tratamientos')]);
-    if(!mats.success){ct.innerHTML=showEmpty('fa-regular fa-file-excel','Sin datos','No hay datos de materiales.');return;}
     const mesesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const mesesOp=[];for(let i=0;i<12;i++){const m=dayjs().subtract(i,'month');mesesOp.push({val:m.format('YYYY-MM'),label:mesesNom[m.month()]+' '+m.format('YYYY')})}
-    const matsData=mats.data||[];const tratData=trat.success?trat.data||[]:[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia</h3></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 mb-5"><div class="flex items-center gap-3"><div class="flex-1"><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Seleccionar Mes</label><select id="discMes" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+mesesOp.map(m=>'<option value="'+m.val+'">'+m.label+'</option>').join('')+'</select></div><button onclick="generarInformeDiscrepancia()" class="mt-5 px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm self-end">Generar Informe</button></div></div><div id="discResultado"><div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-hand-point-up text-2xl text-[#d1d5db] block mb-3"></i>Selecciona un mes y haz clic en "Generar Informe"</div></div></div>';
+    const mesesOp=[];for(let i=0;i<12;i++){const m=dayjs().subtract(i,'month');mesesOp.push({val:m.format('YYYY-MM'),anio:m.year(),mes:m.month()+1,label:mesesNom[m.month()]+' '+m.format('YYYY')})}
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia</h3></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 mb-5"><div class="flex flex-wrap items-end gap-3"><div class="flex-1 min-w-48"><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Seleccionar Mes</label><select id="discMes" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+mesesOp.map(m=>'<option value="'+m.anio+'/'+m.mes+'">'+m.label+'</option>').join('')+'</select></div><button onclick="generarInformeDiscrepancia()" class="px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm"><i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i>Generar Informe</button></div></div><div id="discResultado"><div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-hand-point-up text-2xl text-[#d1d5db] block mb-3"></i>Selecciona un mes y haz clic en "Generar Informe"</div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-discrepancia\')')}
 };
 async function generarInformeDiscrepancia(){
-  const mes=$('discMes')?.value;if(!mes)return toast('Selecciona un mes',false);
+  const mesVal=$('discMes')?.value;if(!mesVal)return toast('Selecciona un mes',false);
   const ct=$('discResultado');if(!ct)return;
-  ct.innerHTML=showLoading('Generando informe...');
+  ct.innerHTML='<div class="flex items-center justify-center py-10"><div class="w-8 h-8 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
   try{
-    const d=await api.get('/api/citas');
-    if(!d.success){ct.innerHTML='<p class="text-center py-8 text-sm text-red-400">Error al cargar datos</p>';return;}
-    const realizadas=d.data.filter(c=>c.estado==='realizada'&&c.fecha&&c.fecha.startsWith(mes));
-    if(!realizadas.length){ct.innerHTML='<div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-calendar-xmark text-2xl text-[#d1d5db] block mb-3"></i>No hay citas realizadas en este mes</div>';return;}
-    const agrupadas={};realizadas.forEach(c=>{const key=c.tratamientonombre||'Sin nombre';if(!agrupadas[key])agrupadas[key]={trat:key,count:0};agrupadas[key].count++});
-    const rows=Object.values(agrupadas);
-    ct.innerHTML='<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h4 class="font-semibold text-[#2c3e50]">Tratamientos realizados en '+mes+'</h4><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+realizadas.length+' total</span></div>'+renderTable([{label:'Tratamiento',render:r=>r.trat},{label:'Cant. Realizados',render:r=>r.count},{label:'',render:r=>'<button onclick="toggleDiscDetalle(\''+r.trat.replace(/'/g,"\\'")+'\')" class="text-xs text-menta hover:text-menta-600 font-medium" id="discToggle_'+r.trat.replace(/\s/g,'')+'">Ver materiales</button>'}],rows)+'<div id="discDetalle" class="hidden"></div></div>';
-  }catch(e){ct.innerHTML='<p class="text-center py-8 text-sm text-red-400">Error al conectar</p>'}
+    const d=await api.get('/api/reportes/discrepancias/'+mesVal);
+    if(!d.success){ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+( d.error||'Error al cargar discrepancias')+'</div>';return;}
+    const data=d.data||[];
+    if(!data.length){ct.innerHTML='<div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-calendar-xmark text-2xl text-[#d1d5db] block mb-3"></i>No hay datos de discrepancia para este mes</div>';return;}
+    // data es array de {material, cantidadplanificada, cantidadusada, diferencia, ...}
+    const hayDiferencia=data.some(r=>Number(r.diferencia||r.discrepancia||0)!==0);
+    ct.innerHTML='<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h4 class="font-semibold text-[#2c3e50]">Discrepancias de Materiales</h4>'+(hayDiferencia?'<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Hay discrepancias</span>':'<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full border border-mentaverde-200"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>')+'</div>'+renderTable([{label:'Material',render:r=>r.nombrematerial||r.material||r.nombre||'-'},{label:'Planificado',render:r=>'<span class="font-medium">'+Number(r.cantidadplanificada||r.planificado||0)+'</span>'},{label:'Utilizado',render:r=>'<span class="font-medium">'+Number(r.cantidadusada||r.usado||r.utilizado||0)+'</span>'},{label:'Diferencia',render:r=>{const diff=Number(r.diferencia||r.discrepancia||0);return'<span class="font-semibold '+(diff<0?'text-red-500':diff>0?'text-amber-500':'text-menta')+'">'+(diff>0?'+':'')+diff+'</span>'}},{label:'Estado',render:r=>{const diff=Number(r.diferencia||r.discrepancia||0);return diff<0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>':diff>0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>':'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700 border border-mentaverde-200">OK</span>';}}],data,'No hay datos de materiales')+'</div>';
+  }catch(e){ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+(e.message||'Error al conectar')+'</div>'}
 }
-function toggleDiscDetalle(tratNombre){toast('Detalle de materiales para: '+tratNombre);}
 SCREENS.inicio=async()=>{
   const ct=$('pageContent');
   ct.innerHTML=showLoading();
@@ -870,3 +888,404 @@ SCREENS.inicio=async()=>{
     ct.innerHTML='<div class="fade-in"><div class="bg-gradient-to-br from-menta via-menta-600 to-menta-700 rounded-2xl p-6 md:p-8 mb-6 relative overflow-hidden shadow-md"><div class="absolute inset-0 pointer-events-none"><div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div><div class="absolute -bottom-8 -left-8 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div><div class="absolute top-1/2 left-1/4 w-32 h-32 bg-spa-300/10 rounded-full blur-xl"></div></div><div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4"><div><div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"><i class="fa-solid fa-spa text-white text-lg"></i></div><h2 class="text-white font-semibold text-lg">Bienvenido/a, '+(user?.username||'Usuario')+'</h2></div><p class="text-white/80 text-sm">Hoy es '+today()+'</p></div><div class="flex gap-3"><div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5 text-center"><p class="text-xs text-white/70">Citas Hoy</p><p class="text-xl font-bold text-white">'+hoyCitas.length+'</p></div><div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-2.5 text-center"><p class="text-xs text-white/70">Ventas Hoy</p><p class="text-xl font-bold text-white">'+$$(ventasHoy)+'</p></div></div></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"><div class="bg-white rounded-2xl p-5 border border-[#e8ecf1] shadow-sm card-hover"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-calendar-day text-menta"></i></div><div><p class="text-xs text-[#6b7280]">Citas Hoy</p><p class="text-2xl font-bold text-[#2c3e50]">'+hoyCitas.length+'</p></div></div></div><div class="bg-white rounded-2xl p-5 border border-[#e8ecf1] shadow-sm card-hover"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-hourglass-half text-amber-500"></i></div><div><p class="text-xs text-[#6b7280]">Pendientes</p><p class="text-2xl font-bold text-[#2c3e50]">'+pendientes.length+'</p></div></div></div><div class="bg-white rounded-2xl p-5 border border-[#e8ecf1] shadow-sm card-hover"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-spa text-spa"></i></div><div><p class="text-xs text-[#6b7280]">Hoy</p><p class="text-lg font-semibold text-[#2c3e50]">'+today()+'</p></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-5"><div class="lg:col-span-2 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h3 class="font-semibold text-[#2c3e50]"><i class="fa-regular fa-clock text-menta mr-2"></i>Citas de Hoy</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+hoyCitas.length+'</span></div>'+(hoyCitas.length?renderTable([{label:'Hora',render:c=>formatTime(c.hora)},{label:'Cliente',render:c=>c.clientenombre||'-'},{label:'Tratamiento',render:c=>c.tratamientonombre||'-'},{label:'Estado',render:c=>'<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span>'}],hoyCitas):'<div class="p-12 flex flex-col items-center gap-2 text-[#9ca3af]"><i class="fa-regular fa-calendar-check text-3xl"></i><p class="text-sm font-medium">¡Sin citas hoy!</p><p class="text-xs">Un día libre para ti y tu equipo.</p></div>')+'</div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-leaf text-menta"></i></div><h3 class="font-semibold text-[#2c3e50] text-sm">Ambiente del Día</h3></div><p class="text-sm text-[#6b7280] italic leading-relaxed">'+frase+'</p><p class="text-xs text-[#9ca3af] mt-2">Un espacio de calma y bienestar.</p><div class="flex gap-2 mt-4"><span class="w-2 h-2 rounded-full bg-menta"></span><span class="w-2 h-2 rounded-full bg-spa-300"></span><span class="w-2 h-2 rounded-full bg-blush"></span><span class="w-2 h-2 rounded-full bg-turquesa"></span></div></div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar el resumen.','Reintentar','navigate(\'inicio\')')}
 };
+// ============================================================
+// SUB-MODAL: second layer on top of the main modal
+// Used for "Agregar cliente" while cita modal stays open
+// ============================================================
+function openSubModal(html, cb) {
+  let sm = document.getElementById('subModalContainer');
+  if (!sm) {
+    sm = document.createElement('div');
+    sm.id = 'subModalContainer';
+    sm.className = 'fixed inset-0 z-[60] flex items-center justify-center p-4';
+    sm.style.cssText = 'background:rgba(0,0,0,0.45);backdrop-filter:blur(2px)';
+    sm.addEventListener('click', function(e){ if(e.target===sm) closeSubModal(); });
+    document.body.appendChild(sm);
+  }
+  sm.innerHTML = '<div id="subModalBody" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto scale-in" onclick="event.stopPropagation()">' + html + '</div>';
+  sm.style.display = 'flex';
+  if (cb) setTimeout(cb, 50);
+}
+function closeSubModal() {
+  const sm = document.getElementById('subModalContainer');
+  if (sm) sm.style.display = 'none';
+}
+
+// ============================================================
+// CANCELAR CITA
+// ============================================================
+function cancelarCita(id) {
+  openConfirm(
+    'Cancelar Cita',
+    '¿Confirmas la cancelación de esta cita? Solo podrás reactivarla editándola.',
+    async function() {
+      try {
+        const d = await api.put('/api/citas/' + id, { estado: 'cancelada' });
+        if (!d.success) return toast(d.error || 'Error al cancelar', false);
+        toast('Cita cancelada');
+        SCREENS.citas();
+      } catch(e) { toast(e.message || 'Error de conexión', false); }
+    },
+    true
+  );
+}
+
+// ============================================================
+// REALIZAR CITA — opens materials screen
+// ============================================================
+let _realizarMateriales = []; // working list of materials for this realization
+
+async function realizarCita(idCita) {
+  try {
+    // Load cita details
+    const citaRes = await api.get('/api/citas/' + idCita);
+    if (!citaRes.success) { 
+      toast('Error al cargar la cita', false); 
+      return; 
+    }
+    const cita = citaRes.data;
+
+    // Get treatment materials from the database using the correct endpoint
+    const tratMatRes = await api.get('/api/tratamientos/' + cita.idtratamiento + '/materiales');
+    
+    // Get all available materials (for adding new ones)
+    const allMatRes = await api.get('/api/materiales');
+
+    // Build working materials list - set cantidad to 0 initially
+    _realizarMateriales = [];
+    if (tratMatRes.success && tratMatRes.data && tratMatRes.data.length) {
+      tratMatRes.data.forEach(function(m) {
+        _realizarMateriales.push({
+          idmaterial: m.idmaterial,
+          // ✅ CORREGIDO: usar 'nombrematerial' en lugar de 'nombre'
+          nombre: m.nombrematerial || m.nombre || 'Material',
+          cantidad: 0,
+          cantidadPredeterminada: m.cantidad || 0,
+          esPredeterminado: true
+        });
+      });
+    } else {
+      toast('Este tratamiento no tiene materiales asignados', false);
+    }
+
+    const todosLosMat = (allMatRes.success && allMatRes.data) ? allMatRes.data : [];
+
+    _renderRealizarModal(idCita, cita, todosLosMat);
+  } catch(e) {
+    console.error('Error al cargar materiales:', e);
+    toast(e.message || 'Error al cargar materiales', false);
+  }
+}
+
+function _renderRealizarModal(idCita, cita, todosLosMat) {
+  const matUsados = new Set(_realizarMateriales.map(m => m.idmaterial));
+  const matDisponibles = todosLosMat.filter(m => !matUsados.has(m.idmaterial));
+
+  const matListHtml = _realizarMateriales.length
+    ? _realizarMateriales.map(function(m, i) {
+        // Show default quantity in a small badge
+        const defaultBadge = m.cantidadPredeterminada ? 
+          `<span class="text-xs text-gray-400 ml-1">(default: ${m.cantidadPredeterminada})</span>` : '';
+        
+        return '<div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1] mb-2">'
+          + '<div class="flex-1 min-w-0">'
+          + '<p class="text-sm font-medium text-[#2c3e50] truncate">' + m.nombre + defaultBadge + '</p>'
+          + (m.esPredeterminado ? '<span class="text-xs text-menta font-medium">Material del tratamiento</span>' : '<span class="text-xs text-[#9ca3af]">Agregado</span>')
+          + '</div>'
+          + '<div class="flex items-center gap-2 flex-shrink-0">'
+          + '<label class="text-xs text-[#6b7280]">Cant.:</label>'
+          + '<input type="number" min="0" step="0.01" value="' + m.cantidad + '" class="w-20 px-2 py-1.5 border border-[#d1d5db] rounded-lg text-sm text-center" onchange="window._realizarCantidad(' + i + ',this.value)">'
+          + '<button onclick="window._realizarQuitarMat(' + i + ')" class="p-1.5 text-[#d1d5db] hover:text-red-400 transition-colors" title="Quitar"><i class="fa-solid fa-xmark"></i></button>'
+          + '</div></div>';
+      }).join('')
+    : '<p class="text-sm text-[#9ca3af] py-2 text-center">No hay materiales asignados a este tratamiento</p>';
+
+  const addSelectHtml = matDisponibles.length
+    ? '<select id="realizarAddSelect" class="flex-1 px-3 py-2 border border-[#d1d5db] rounded-xl text-sm">'
+        + '<option value="">Seleccionar material a agregar...</option>'
+        + matDisponibles.map(m => '<option value="' + m.idmaterial + '">' + m.nombre + '</option>').join('')
+        + '</select>'
+        + '<button onclick="window._realizarAgregarMat(' + idCita + ')" class="px-3 py-2 bg-menta text-white rounded-xl text-sm font-medium hover:bg-menta-600 flex-shrink-0"><i class="fa-solid fa-plus mr-1"></i>Agregar</button>'
+    : '<p class="text-xs text-[#9ca3af]">No hay más materiales disponibles</p>';
+
+  const html = '<div class="p-6" style="max-width:600px">'
+    + '<div class="flex items-center justify-between mb-5">'
+    + '<div><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-check-circle text-menta mr-2"></i>Realizar Cita</h3>'
+    + '<p class="text-xs text-[#6b7280] mt-1">' + (cita.clientenombre || '') + ' — ' + (cita.tratamientonombre || '') + '</p></div>'
+    + '<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border bg-amber-100 text-amber-700 border-amber-200">Pendiente</span>'
+    + '</div>'
+    + '<div class="mb-4">'
+    + '<h4 class="text-sm font-semibold text-[#2c3e50] mb-2"><i class="fa-solid fa-box-open text-menta mr-1.5"></i>Materiales utilizados</h4>'
+    + '<div class="text-xs text-[#6b7280] mb-2">Ingresa las cantidades utilizadas para cada material:</div>'
+    + matListHtml
+    + '</div>'
+    + '<div class="border-t border-[#e8ecf1] pt-4 mb-4">'
+    + '<h4 class="text-sm font-semibold text-[#2c3e50] mb-2"><i class="fa-solid fa-plus text-mentaverde-500 mr-1.5"></i>Agregar material extra</h4>'
+    + '<div class="flex gap-2 items-center">' + addSelectHtml + '</div>'
+    + '</div>'
+    + '<div class="flex gap-2 mt-6">'
+    + '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>'
+    + '<button onclick="window._confirmarRealizarCita(' + idCita + ')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600 flex items-center justify-center gap-2"><i class="fa-solid fa-check"></i>Confirmar Realizada</button>'
+    + '</div></div>';
+
+  openModal(html);
+
+  // Store data for later use
+  window._todosLosMat = todosLosMat;
+  window._realizarCitaId = idCita;
+  window._realizarCitaData = cita;
+}
+
+// Update quantity for a material in the working list
+window._realizarCantidad = function(idx, val) {
+  if (_realizarMateriales[idx]) _realizarMateriales[idx].cantidad = parseFloat(val) || 0;
+};
+
+// Remove a material from working list and re-render
+window._realizarQuitarMat = function(idx) {
+  _realizarMateriales.splice(idx, 1);
+  _renderRealizarModal(window._realizarCitaId, window._realizarCitaData, window._todosLosMat);
+};
+
+// Add a material from the dropdown
+window._realizarAgregarMat = function(idCita) {
+  const sel = document.getElementById('realizarAddSelect');
+  if (!sel || !sel.value) { 
+    toast('Selecciona un material', false); 
+    return; 
+  }
+  const idm = parseInt(sel.value);
+  const mat = window._todosLosMat.find(function(m){ return m.idmaterial === idm; });
+  if (!mat) return;
+  
+  _realizarMateriales.push({ 
+    idmaterial: mat.idmaterial, 
+    nombre: mat.nombre, 
+    cantidad: 0, // Start with 0
+    cantidadPredeterminada: 0,
+    esPredeterminado: false 
+  });
+  _renderRealizarModal(window._realizarCitaId, window._realizarCitaData, window._todosLosMat);
+};
+
+// Confirm: assign materials to cita and mark as realizada
+// Confirm: assign materials to cita and mark as realizada
+window._confirmarRealizarCita = async function(idCita) {
+  console.log('=== INICIANDO CONFIRMACIÓN ===');
+  console.log('ID Cita:', idCita);
+  
+  const citaId = Number(idCita);
+  
+  const hasMaterialsWithQuantity = _realizarMateriales.some(m => m.cantidad > 0);
+  
+  if (!hasMaterialsWithQuantity) {
+    const userConfirmed = confirm('⚠️ No has registrado ningún material.\n¿Deseas continuar?');
+    if (!userConfirmed) return;
+  }
+
+  try {
+    const btn = document.querySelector('button[onclick*="_confirmarRealizarCita"]');
+    if (btn) { 
+      btn.disabled = true; 
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Guardando...'; 
+    }
+
+    // PASO 1: Marcar cita como realizada
+    console.log('Paso 1: Actualizando estado de la cita...');
+    const updateRes = await api.put(`/api/citas/${citaId}`, { estado: 'realizada' });
+    
+    if (!updateRes.success) {
+      toast(updateRes.error || 'Error al actualizar cita', false);
+      if (btn) btn.disabled = false;
+      return;
+    }
+    console.log('✅ Cita actualizada a realizada');
+
+    // Esperar un momento
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // PASO 2: Insertar materiales con el campo correcto: 'cantidadutilizada'
+    let assignedCount = 0;
+    for (const m of _realizarMateriales) {
+      if (m.cantidad > 0) {
+        try {
+          console.log(`Registrando material: ${m.nombre}, cantidad: ${m.cantidad}`);
+          
+          // ✅ CAMBIO IMPORTANTE: usar 'cantidadutilizada' en lugar de 'cantidad'
+          const matRes = await api.post(`/api/citas/${citaId}/materiales/${m.idmaterial}`, {
+            cantidadutilizada: m.cantidad
+          });
+          
+          if (matRes.success) {
+            assignedCount++;
+            console.log(`✅ ${m.nombre} registrado`);
+          } else {
+            console.error(`Error con ${m.nombre}:`, matRes.error);
+            toast(`Error: ${matRes.error}`, false);
+          }
+        } catch(e) {
+          console.error(`Excepción con ${m.nombre}:`, e);
+          toast(`Error al registrar ${m.nombre}: ${e.message}`, false);
+        }
+      }
+    }
+
+    toast(`✅ Cita realizada. ${assignedCount} material(es) registrado(s).`);
+    closeModal();
+    SCREENS.citas();
+    
+  } catch(e) {
+    console.error('Error general:', e);
+    toast(e.message || 'Error de conexión', false);
+    const btn = document.querySelector('button[onclick*="_confirmarRealizarCita"]');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i>Confirmar Realizada';
+    }
+  }
+};
+
+
+async function _renderPaqVendidosScreen(ct) {
+  ct.innerHTML = showLoading('Cargando paquetes vendidos...');
+  try {
+    const d = await api.get('/api/paquetes-vendidos');
+    if (!d.success) { ct.innerHTML = showEmpty('fa-regular fa-receipt', 'Sin datos', 'No se pudieron cargar los paquetes vendidos.'); return; }
+    const paqList = d.data || [];
+    ct.innerHTML = '<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-receipt text-menta mr-2"></i>Paquetes Vendidos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">' + paqList.length + '</span></div>'
+      + (paqList.length ? '<div class="space-y-3">' + paqList.map(pv => {
+          const estadoBadge = pv.activo === false || pv.activo === 0 || pv.activo === 'false'
+            ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Inactivo</span>'
+            : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Activo</span>';
+          return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">'
+            + '<div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="togglePaqVendidoPanel(' + pv.idpaquete + ')">'
+            + '<div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-box text-amber-500 text-sm"></i></div>'
+            + '<div><h4 class="font-medium text-[#2c3e50]">' + (pv.paquetenombre || pv.nombre || 'Paquete #' + pv.idpaquete) + '</h4>'
+            + '<p class="text-xs text-[#6b7280]">' + (pv.clientenombre || 'Cliente') + ' &bull; Compra: ' + formatDateShort(pv.fechacompra) + '</p></div></div>'
+            + '<div class="flex items-center gap-2">' + estadoBadge
+            + '<span class="text-base font-bold text-menta">' + $$(pv.precio || 0) + '</span>'
+            + '<i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform" id="paqVChev_' + pv.idpaquete + '"></i></div></div>'
+            + '<div id="paqVPanel_' + pv.idpaquete + '" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="paqVContent_' + pv.idpaquete + '">' + showLoading() + '</div></div>'
+            + '</div>';
+        }).join('') + '</div>'
+      : showEmpty('fa-regular fa-receipt', 'Sin paquetes vendidos', 'Aun no se han vendido paquetes.'))
+      + '</div>';
+  } catch(e) { ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrio un error.', 'Reintentar', navigate('paquetes-vendidos')); }
+}
+SCREENS['paquetes-vendidos'] = async () => _renderPaqVendidosScreen($('pageContent'));
+SCREENS['admin-paquetes-vendidos'] = async () => _renderPaqVendidosScreen($('pageContent'));
+
+let _expandedPaqV = null;
+function togglePaqVendidoPanel(id) {
+  const panel = $('paqVPanel_' + id);
+  const chev = $('paqVChev_' + id);
+  if (_expandedPaqV === id) {
+    _expandedPaqV = null;
+    if (panel) panel.classList.add('hidden');
+    if (chev) chev.classList.remove('rotate-180');
+    return;
+  }
+  if (_expandedPaqV) {
+    const oldPanel = $('paqVPanel_' + _expandedPaqV);
+    const oldChev = $('paqVChev_' + _expandedPaqV);
+    if (oldPanel) oldPanel.classList.add('hidden');
+    if (oldChev) oldChev.classList.remove('rotate-180');
+  }
+  _expandedPaqV = id;
+  if (panel) panel.classList.remove('hidden');
+  if (chev) chev.classList.add('rotate-180');
+  _loadPaqVendidoContent(id);
+}
+async function _loadPaqVendidoContent(id) {
+  const ct = $('paqVContent_' + id); if (!ct) return;
+  try {
+    const d = await api.get('/api/paquetes-vendidos/' + id);
+    if (!d.success) { ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>'; return; }
+    const pv = d.data;
+    // Build detail view
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+    // Info del paquete
+    html += '<div><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2"><i class="fa-solid fa-circle-info text-menta mr-1"></i>Información</h5>'
+      + '<div class="space-y-1.5">'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Paquete</span><span class="font-medium">' + (pv.paquetenombre || '-') + '</span></div>'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium">' + (pv.clientenombre || '-') + '</span></div>'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-bold text-menta">' + $$(pv.precio || 0) + '</span></div>'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Compra</span><span class="font-medium">' + formatDateShort(pv.fechacompra) + '</span></div>'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Inicio</span><span class="font-medium">' + formatDateShort(pv.fechainicio) + '</span></div>'
+      + '<div class="flex justify-between text-sm px-3 py-2 bg-white rounded-xl border border-[#e8ecf1]"><span class="text-[#6b7280]">Fin</span><span class="font-medium">' + formatDateShort(pv.fechafin) + '</span></div>'
+      + '</div></div>';
+    // Citas asociadas a este paquete
+    let citasHtml = '<p class="text-xs text-[#9ca3af] py-2">Cargando citas...</p>';
+    try {
+      const cRes = await api.get('/api/citas/paquete/' + id);
+      const citas = cRes.success ? cRes.data || [] : [];
+      citasHtml = citas.length
+        ? '<div class="space-y-1.5">' + citas.map(c =>
+            '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm">'
+            + '<div><p class="font-medium text-[#2c3e50]">' + (c.tratamientonombre || '-') + '</p>'
+            + '<p class="text-xs text-[#6b7280]">' + formatDateShort(c.fecha) + ' ' + formatTime(c.hora) + '</p></div>'
+            + '<span class="px-2 py-0.5 text-xs font-semibold rounded-full border ' + sc(c.estado) + '">' + cap(c.estado) + '</span>'
+            + '</div>').join('') + '</div>'
+        : '<p class="text-xs text-[#9ca3af] py-2">Sin citas registradas para este paquete</p>';
+    } catch(e2) { citasHtml = '<p class="text-xs text-red-300">Error al cargar citas</p>'; }
+    html += '<div><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2"><i class="fa-solid fa-calendar-check text-menta mr-1"></i>Citas del Paquete</h5>' + citasHtml + '</div>';
+    html += '</div>';
+    ct.innerHTML = html;
+  } catch(e) { ct.innerHTML = '<p class="text-xs text-red-400">Error al cargar detalle</p>'; }
+}
+
+// ============================================================
+// REPORTES — Funciones auxiliares: autocomplete cliente + acciones
+// ============================================================
+async function rptAutocomplete() {
+  const q = $('rptClienteInput')?.value; if (!q || q.length < 2) { $('rptClienteAC')?.classList.add('hidden'); return; }
+  try {
+    const d = await api.get('/api/clientes?q=' + encodeURIComponent(q));
+    if (!d.success) return;
+    const ac = $('rptClienteAC'); if (!ac) return;
+    let html = '<div class="p-2 space-y-1">';
+    if (d.data.length) {
+      html += d.data.map(c => '<div class="px-3 py-2 hover:bg-menta-50 rounded-lg cursor-pointer text-sm text-[#2c3e50] flex items-center justify-between" onclick="rptSelCliente(' + c.idcliente + ',\'' + c.nombre.replace(/'/g, "\\'") + '\')"><span>' + c.nombre + '</span><span class="text-xs text-[#6b7280]">' + (c.telefono || '') + '</span></div>').join('');
+    } else { html += '<div class="px-3 py-2 text-sm text-[#9ca3af]">Sin resultados</div>'; }
+    html += '</div>';
+    ac.innerHTML = html; ac.classList.remove('hidden');
+  } catch(e) {}
+}
+function rptSelCliente(id, nombre) {
+  const hi = $('rptClienteId'); const inp = $('rptClienteInput'); const ac = $('rptClienteAC');
+  if (hi) hi.value = id; if (inp) inp.value = nombre; if (ac) ac.classList.add('hidden');
+}
+async function rptEmpleadosPorCliente() {
+  const idcliente = $('rptClienteId')?.value;
+  if (!idcliente) return toast('Selecciona un cliente primero', false);
+  const res = $('rptClienteResultado'); if (!res) return;
+  res.innerHTML = '<div class="flex justify-center py-3"><div class="w-5 h-5 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
+  try {
+    const d = await api.get('/api/reportes/empleados-por-cliente/' + idcliente);
+    if (!d.success) { res.innerHTML = '<p class="text-xs text-red-400 text-center py-2">' + (d.error || 'Error') + '</p>'; return; }
+    const emps = d.data || [];
+    res.innerHTML = emps.length
+      ? '<div class="mt-1"><p class="text-xs font-semibold text-[#6b7280] mb-1.5">Empleados que atendieron a este cliente:</p><div class="space-y-1">'
+        + emps.map(e => '<div class="flex items-center gap-2 px-3 py-2 bg-[#f8fafc] rounded-lg border border-[#e8ecf1]"><div class="w-6 h-6 rounded-full bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-user-tie text-menta text-xs"></i></div><span class="text-xs font-medium text-[#2c3e50]">' + (e.nombre || '-') + '</span><span class="ml-auto text-xs text-[#6b7280]">' + (e.totalcitas || e.citas || '') + ' cita(s)</span></div>').join('')
+        + '</div></div>'
+      : '<p class="text-xs text-[#9ca3af] text-center py-2">No hay empleados registrados para este cliente</p>';
+  } catch(e) { res.innerHTML = '<p class="text-xs text-red-400 text-center py-2">Error: ' + (e.message || '') + '</p>'; }
+}
+async function rptServiciosCliente() {
+  const idcliente = $('rptClienteId')?.value;
+  if (!idcliente) return toast('Selecciona un cliente primero', false);
+  const desde = $('rptFechaDesde')?.value; const hasta = $('rptFechaHasta')?.value;
+  if (!desde || !hasta) return toast('Selecciona las fechas de inicio y fin', false);
+  const res = $('rptClienteResultado'); if (!res) return;
+  res.innerHTML = '<div class="flex justify-center py-3"><div class="w-5 h-5 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
+  try {
+    const d = await api.get('/api/reportes/servicios-cliente/' + idcliente + '?fechaInicio=' + desde + '&fechaFin=' + hasta);
+    if (!d.success) { res.innerHTML = '<p class="text-xs text-red-400 text-center py-2">' + (d.error || 'Error') + '</p>'; return; }
+    const svcs = d.data || [];
+    res.innerHTML = svcs.length
+      ? '<div class="mt-1"><p class="text-xs font-semibold text-[#6b7280] mb-1.5">Servicios de ' + formatDateShort(desde) + ' a ' + formatDateShort(hasta) + ':</p><div class="space-y-1">'
+        + svcs.map(s => '<div class="flex items-center justify-between px-3 py-2 bg-[#f8fafc] rounded-lg border border-[#e8ecf1]"><div><p class="text-xs font-medium text-[#2c3e50]">' + (s.tratamientonombre || s.nombre || '-') + '</p><p class="text-xs text-[#6b7280]">' + formatDateShort(s.fecha) + ' ' + formatTime(s.hora) + '</p></div><span class="text-xs font-semibold text-menta">' + $$(s.precio || 0) + '</span></div>').join('')
+        + '</div></div>'
+      : '<p class="text-xs text-[#9ca3af] text-center py-2">Sin servicios en el intervalo seleccionado</p>';
+  } catch(e) { res.innerHTML = '<p class="text-xs text-red-400 text-center py-2">Error: ' + (e.message || '') + '</p>'; }
+}
