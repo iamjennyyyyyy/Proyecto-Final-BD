@@ -8,5 +8,6 @@ router.get('/area/:idArea', categoriaController.obtenerCategoriasPorArea);
 router.post('/', categoriaController.crear);
 router.put('/:idCategoria', categoriaController.actualizar);
 router.delete('/:idCategoria', categoriaController.eliminar);
+router.put('/:idCategoria/tratamientos/mover', categoriaController.moverTratamientosAOtraCategoria);
 
 module.exports = router;

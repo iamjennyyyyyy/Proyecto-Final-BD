@@ -185,6 +185,13 @@ class TratamientoRepository {
         const result = await pool.query('DELETE FROM tratamientos WHERE idtratamiento = $1 RETURNING *', [id]);
         return result.rows[0];
     }
+        async moverACategoria(idCategoriaOrigen, idCategoriaDestino) {
+        const result = await pool.query(
+            `UPDATE tratamientos SET idcategoria = $1 WHERE idcategoria = $2 RETURNING *`,
+            [idCategoriaDestino, idCategoriaOrigen]
+        );
+        return result.rows;
+    }
 }
 
 module.exports = new TratamientoRepository();

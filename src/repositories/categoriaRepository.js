@@ -95,6 +95,13 @@ class CategoriaRepository{
         const result = await pool.query('DELETE FROM categorias WHERE idcategoria = $1 RETURNING *', [id]);
         return result.rows[0];
     }
+        async cambiarDeArea(idCategoria, idAreaNueva) {
+        const result = await pool.query(
+            `UPDATE categorias SET idarea = $1 WHERE idcategoria = $2 RETURNING *`,
+            [idAreaNueva, idCategoria]
+        );
+        return result.rows[0];
+    }
 }
 
 module.exports = new CategoriaRepository();

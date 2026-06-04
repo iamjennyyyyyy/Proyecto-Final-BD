@@ -76,6 +76,13 @@ class DistritoRepository {
 		);
 		return result.rows;
 	}
+	    async buscarEmpleadosPorDistrito(idDistrito) {
+        const result = await pool.query(
+            `SELECT * FROM vw_empleados WHERE iddistrito = $1 ORDER BY nombre`,
+            [idDistrito]
+        );
+        return result.rows;
+    }
 }
 
 module.exports = new DistritoRepository();

@@ -11,5 +11,7 @@ router.delete('/:idArea/empleados/:idEmpleado', areaController.desasignarEmplead
 router.post('/', areaController.crear);
 router.put('/:idArea', areaController.actualizar);
 router.delete('/:idArea', areaController.eliminar);
+router.get('/:idArea/empleados-todos', areaController.obtenerTodosEmpleadosPorArea);
+router.put('/:idArea/categorias/:idCategoria/mover', areaController.moverCategoriaAOtraArea);
 
 module.exports = router;

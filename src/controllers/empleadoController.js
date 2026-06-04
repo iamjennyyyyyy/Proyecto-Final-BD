@@ -57,7 +57,16 @@ const empleadoController = {
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
         }
-    }
+    },
+        async cambiarEsFijo(req, res) {
+        try {
+            const idEmpleado = parseInt(req.params.idEmpleado);
+            const empleado = await empleadoService.cambiarEsFijo(idEmpleado);
+            res.json({ success: true, data: empleado, mensaje: 'Estado esFijo cambiado' });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
 };
 
 module.exports = empleadoController;

@@ -63,7 +63,17 @@ const categoriaController = {
         catch(error){
             res.status(500).json({success: false, error: error.message});
         }
-    }
+    },
+        async moverTratamientosAOtraCategoria(req, res) {
+        try {
+            const idCategoriaOrigen = parseInt(req.params.idCategoria);
+            const idCategoriaDestino = parseInt(req.body.idCategoriaDestino);
+            const resultado = await categoriaService.moverTratamientosAOtraCategoria(idCategoriaOrigen, idCategoriaDestino);
+            res.json({ success: true, count: resultado.length, data: resultado, mensaje: 'Tratamientos movidos a otra categoría' });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
 }
 
 module.exports = categoriaController;

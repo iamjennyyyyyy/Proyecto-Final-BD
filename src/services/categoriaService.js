@@ -1,6 +1,7 @@
 const categoriaRepository = require('../repositories/categoriaRepository');
 const areaRepository = require('../repositories/areaRepository');
 const Categoria = require('../models/Categoria');
+const tratamientoRepository = require('../repositories/tratamientoRepository');
 
 const categoriaService = {
 
@@ -48,7 +49,22 @@ const categoriaService = {
             if (e.code === '23503') throw new Error('No se puede eliminar: la categoría tiene tratamientos asociados');
             throw e;
         }
-    }
+    },
+        async moverCategoriaAOtraArea(idCategoria, idAreaNueva) {
+        const categoria = await categoriaRepository.buscarPorId(idCategoria);
+        if (!categoria) throw new Error('Categoría no encontrada');
+        const area = await areaRepository.buscarPorId(idAreaNueva);
+        if (!area) throw new Error('Área de destino no encontrada');
+        return await categoriaRepository.cambiarDeArea(idCategoria, idAreaNueva);
+    },
+
+    async moverTratamientosAOtraCategoria(idCategoriaOrigen, idCategoriaDestino) {
+        const origen = await categoriaRepository.buscarPorId(idCategoriaOrigen);
+        if (!origen) throw new Error('Categoría de origen no encontrada');
+        const destino = await categoriaRepository.buscarPorId(idCategoriaDestino);
+        if (!destino) throw new Error('Categoría de destino no encontrada');
+        return await tratamientoRepository.moverACategoria(idCategoriaOrigen, idCategoriaDestino);
+    },
 };
 
 module.exports = categoriaService;

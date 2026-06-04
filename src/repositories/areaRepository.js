@@ -139,6 +139,16 @@ class AreaRepository {
         const result = await pool.query('DELETE FROM areas WHERE idarea = $1 RETURNING *', [id]);
         return result.rows[0];
     }
+        async obtenerTodosEmpleadosPorArea(idArea) {
+        const result = await pool.query(
+            `SELECT e.idempleado, e.nombre, e.dni, e.especialidad, e.esfijo, e.horastrabajo, e.direccion, e.telefono
+            FROM empleados e
+            INNER JOIN empleadosPorArea epa ON epa.idempleado = e.idempleado
+            WHERE epa.idarea = $1
+            ORDER BY e.nombre`, [idArea]
+        );
+        return result.rows;
+    }
 }
 
 module.exports = new AreaRepository();

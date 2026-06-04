@@ -67,7 +67,12 @@ const areaService = {
             if (e.code === '23503') throw new Error('No se puede eliminar: el área tiene categorías o empleados asociados');
             throw e;
         }
-    }
+    },
+        async obtenerTodosEmpleadosPorArea(id) {
+        const area = await areaRepository.buscarPorId(id);
+        if (!area) throw new Error('Área no encontrada');
+        return await areaRepository.obtenerTodosEmpleadosPorArea(id);
+    },
 };
 
 module.exports = areaService;

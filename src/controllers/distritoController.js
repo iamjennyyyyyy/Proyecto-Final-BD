@@ -48,7 +48,27 @@ const distritoController = {
         } catch (error) {
         res.status(404).json({ success: false, error: error.message });
         }
-    }
+    },
+        async obtenerEmpleadosPorDistrito(req, res) {
+        try {
+            const idDistrito = parseInt(req.params.idDistrito);
+            const empleados = await distritoService.obtenerEmpleadosPorDistrito(idDistrito);
+            res.json({ success: true, count: empleados.length, data: empleados });
+        } catch (error) {
+            res.status(404).json({ success: false, error: error.message });
+        }
+    },
+
+    async moverEmpleados(req, res) {
+        try {
+            const idOrigen = parseInt(req.params.idDistrito);
+            const idDestino = parseInt(req.body.idDistritoDestino);
+            const resultado = await distritoService.moverEmpleados(idOrigen, idDestino);
+            res.json({ success: true, count: resultado.length, data: resultado, mensaje: 'Empleados reasignados' });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
 };
 
 module.exports = distritoController;

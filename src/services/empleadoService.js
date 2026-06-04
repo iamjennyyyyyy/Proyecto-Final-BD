@@ -52,7 +52,13 @@ const empleadoService = {
             if (e.code === '23503') throw new Error('No se puede eliminar: el empleado tiene citas, áreas o tratamientos asociados');
             throw e;
         }
-    }
+    },
+        async cambiarEsFijo(id) {
+        const empleado = await empleadoRepository.buscarPorId(id);
+        if (!empleado) throw new Error('Empleado no encontrado');
+        const nuevoValor = !empleado.esfijo;
+        return await empleadoRepository.cambiarEsFijo(id, nuevoValor);
+    },
 };
 
 module.exports = empleadoService;

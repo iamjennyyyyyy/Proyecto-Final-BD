@@ -69,8 +69,21 @@ function enterApp(){$('loginScreen').classList.add('hidden');$('loginScreen').st
 
 // Sidebar & Navigation
 const MENU_DEP=[{id:'inicio',icon:'fa-house',label:'Inicio'},{id:'citas',icon:'fa-calendar-check',label:'Citas'},{id:'paquetes',icon:'fa-box',label:'Paquetes'},{id:'paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},{id:'tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'mapa',icon:'fa-map-location-dot',label:'Mapa y Contactos'}];
-const MENU_ADM=[{id:'admin-tratamientos',icon:'fa-spa',label:'Tratamientos'},{id:'admin-paquetes',icon:'fa-box',label:'Paquetes'},{id:'admin-paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},{id:'admin-empleados',icon:'fa-user-tie',label:'Empleados'},{id:'admin-clientes',icon:'fa-users',label:'Clientes'},{id:'admin-materiales',icon:'fa-oil-can',label:'Materiales'},{id:'admin-categorias',icon:'fa-tags',label:'Categorías'},{id:'admin-distritos',icon:'fa-map-pin',label:'Distritos'},{id:'admin-areas',icon:'fa-building',label:'Áreas'},{id:'admin-reportes',icon:'fa-chart-bar',label:'Reportes'},{id:'admin-informe-ingresos',icon:'fa-file-invoice-dollar',label:'Informe Ingresos'},{id:'admin-informe-discrepancia',icon:'fa-file-excel',label:'Informe Discrepancia'}];
-const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia','paquetes-vendidos': 'Paquetes Vendidos',
+const MENU_ADM=[
+  {id:'admin-tratamientos', icon:'fa-spa', label:'Tratamientos'},
+  {id:'admin-paquetes', icon:'fa-box', label:'Paquetes'},
+  {id:'admin-paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},
+  {id:'admin-ventas', icon:'fa-chart-line', label:'Ventas'},
+  {id:'admin-empleados', icon:'fa-user-tie', label:'Empleados'},
+  {id:'admin-clientes', icon:'fa-users', label:'Clientes'},
+  {id:'admin-materiales', icon:'fa-oil-can', label:'Materiales'},
+  {id:'admin-categorias', icon:'fa-tags', label:'Categorías'},
+  {id:'admin-distritos', icon:'fa-map-pin', label:'Distritos'},
+  {id:'admin-areas', icon:'fa-building', label:'Áreas'},
+  {id:'admin-reportes', icon:'fa-chart-bar', label:'Reportes'},
+  {id:'admin-informe-ingresos', icon:'fa-file-invoice-dollar', label:'Informe Ingresos'},
+  {id:'admin-informe-discrepancia', icon:'fa-file-excel', label:'Informe Discrepancia'}
+];const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes', 'admin-ventas': 'Ventas',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia','paquetes-vendidos': 'Paquetes Vendidos',
   'admin-paquetes-vendidos': 'Paquetes Vendidos'};
 const SCREENS={};
 function renderSidebar(){const nav=$('sidebarNav');if(!nav)return;const items=user?.rol==='administrador'?MENU_ADM:MENU_DEP;nav.innerHTML=items.map(i=>'<a href="#'+i.id+'" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all '+(currentPage===i.id?'bg-menta text-white font-medium shadow-sm':'text-[#6b7280] hover:bg-lavender-50 hover:text-[#2c3e50]')+'"><i class="fa-solid '+i.icon+' w-5 text-center text-base"></i><span class="sidebar-text">'+i.label+'</span></a>').join('');}
@@ -355,6 +368,7 @@ SCREENS.tratamientos=async()=>{
     ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+d.data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-spa text-spa"></i></div><div class="min-w-0"><h4 class="font-semibold text-[#2c3e50] truncate">'+t.nombre+'</h4><p class="text-xs text-[#6b7280] mt-0.5 line-clamp-2">'+(t.descripcion||'Sin descripción')+'</p></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-[#e8ecf1]"><span class="text-lg font-bold text-menta">'+$$(t.precio)+'</span><div class="text-right"><span class="text-xs text-[#6b7280]">'+t.duracion+' min</span>'+(t.categorianombre?'<br><span class="text-xs text-menta font-medium">'+t.categorianombre+'</span>':'')+'</div></div></div>').join('')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar tratamientos.','Reintentar','navigate(\'tratamientos\')')}
 };
+
 SCREENS['paquetes-vendidos'] = async () => renderPaquetesVendidos();
 SCREENS['admin-paquetes-vendidos'] = async () => renderPaquetesVendidos();
 function actualizarPrecioMostrado() {
@@ -1069,23 +1083,27 @@ async function crudForm(page,endpoint,entity,fields,editData,onCreated){
   body+='</form><div id="crudFormError" class="hidden mt-2 text-sm text-red-500 bg-red-50 rounded-xl px-3 py-2 border border-red-100"></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUD(\''+endpoint+'\',\''+page+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear '+entity)+'</button></div></div>';
   openModal(body,()=>{if(onCreated)setTimeout(onCreated,50);});
 }
+// Reemplazar la función saveCRUD completa
 async function saveCRUD(endpoint,page,hasCallback){
   const form=$('crudForm');if(!form)return;
   const fd=new FormData(form);const data={};
   fd.forEach((v,k)=>{data[k]=v});
-  // Handle checkboxes: convert to proper boolean, not '0'/'1'
-  form.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-    data[cb.name]=cb.checked;
-  });
-  // Convert numeric-looking fields to numbers
-  ['precio','duracion','cantidad','iddistrito','idcategoria','idarea','horastrabajo'].forEach(k=>{
+  form.querySelectorAll('input[type="checkbox"]').forEach(cb=>{data[cb.name]=cb.checked;});
+  
+  // Para paquetes, mapear 'nombre' a 'paquetenombre'
+  if(endpoint==='/api/paquetes' && data.nombre){
+    data.paquetenombre = data.nombre;
+    delete data.nombre;
+  }
+  
+  ['precio','duracion','cantidad','iddistrito','idcategoria','idarea','horastrabajo','duraciontotal'].forEach(k=>{
     if(data[k]!==undefined&&data[k]!=='')data[k]=isNaN(Number(data[k]))?data[k]:Number(data[k]);
   });
   try{
     const d=editId?await api.put(endpoint+'/'+editId,data):await api.post(endpoint,data);
-    if(!d.success){toast(d.error||'Error al guardar',false);return;} // Keep modal open on error
+    if(!d.success){toast(d.error||'Error al guardar',false);return;}
     toast(editId?'Actualizado':'Creado exitosamente');closeModal();navigate(page);
-  }catch(e){toast(e.message||'Error de conexión',false);} // Keep modal open on error
+  }catch(e){toast(e.message||'Error de conexión',false);}
 }
 window.deleteCRUD=async(endpoint,id,page)=>{
   openConfirm('Eliminar','¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.',async()=>{
@@ -1128,12 +1146,57 @@ SCREENS['admin-tratamientos']=async()=>{
 async function loadTratamientoPanel(id){
   const ct=$('tratContent_'+id);if(!ct)return;
   try{
-    const[m,emps]=await Promise.all([api.get('/api/tratamientos/'+id+'/materiales'),api.get('/api/tratamientos/'+id+'/empleados-fijos')]);
+    const[m,emps]=await Promise.all([
+      api.get('/api/tratamientos/'+id+'/materiales'),
+      api.get('/api/tratamientos/'+id+'/empleados-fijos')
+    ]);
     let html='<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
-    html+='<div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-oil-can text-menta mr-1"></i>Materiales</h5><button onclick="agregarMaterialTratamiento('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+(m.success&&m.data.length?'<div class="space-y-1.5">'+m.data.map(mat=>'<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span class="text-[#2c3e50]">'+mat.nombrematerial+'</span><span class="text-xs text-[#6b7280]">'+mat.cantidad+'</span></div>').join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin materiales asignados</p>')+'</div>';
-    html+='<div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-menta mr-1"></i>Empleados</h5><button onclick="agregarEmpleadoTratamiento('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+(emps.success&&emps.data.length?'<div class="space-y-1.5">'+emps.data.map(e=>'<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span class="text-[#2c3e50]">'+e.nombre+'</span></div>').join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>')+'</div>';
-    html+='</div>';ct.innerHTML=html;
+    html+='<div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-oil-can text-menta mr-1"></i>Materiales</h5><button onclick="agregarMaterialTratamiento('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>';
+    if(m.success && m.data.length){
+      html+='<div class="space-y-1.5">'+m.data.map(function(mat){
+        return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span class="text-[#2c3e50]">'+mat.nombrematerial+'</span><div class="flex items-center gap-2"><span class="text-xs text-[#6b7280]">Cant: '+mat.cantidad+'</span><button onclick="eliminarMaterialTratamiento('+id+','+mat.idmaterial+',\''+mat.nombrematerial+'\')" class="p-1 text-red-400 hover:text-red-600 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div></div>';
+      }).join('')+'</div>';
+    } else {
+      html+='<p class="text-xs text-[#9ca3af] py-2">Sin materiales asignados</p>';
+    }
+    html+='</div>';
+    html+='<div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-menta mr-1"></i>Empleados Fijos</h5><button onclick="agregarEmpleadoTratamiento('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>';
+    if(emps.success && emps.data.length){
+      html+='<div class="space-y-1.5">'+emps.data.map(function(e){
+        return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span class="text-[#2c3e50]">'+e.nombre+'</span><button onclick="eliminarEmpleadoFijoTratamiento('+id+','+e.idempleado+',\''+e.nombre+'\')" class="p-1 text-red-400 hover:text-red-600 rounded-lg transition-all" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>';
+      }).join('')+'</div>';
+    } else {
+      html+='<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>';
+    }
+    html+='</div></div>';
+    ct.innerHTML=html;
   }catch(e){ct.innerHTML='<p class="text-xs text-red-400">Error al cargar panel</p>'}
+}
+
+async function eliminarMaterialTratamiento(idTrat, idMat, nombre){
+  openConfirm('Eliminar Material', '¿Quitar "'+nombre+'" del tratamiento?', async function(){
+    try{
+      const d=await api.del('/api/tratamientos/'+idTrat+'/materiales/'+idMat);
+      if(!d.success) throw new Error(d.error);
+      toast('Material eliminado del tratamiento');
+      loadTratamientoPanel(idTrat);
+    }catch(e){
+      toast(e.message||'Error',false);
+    }
+  });
+}
+
+async function eliminarEmpleadoFijoTratamiento(idTrat, idEmp, nombre){
+  openConfirm('Eliminar Empleado', '¿Quitar a "'+nombre+'" como empleado fijo del tratamiento?', async function(){
+    try{
+      const d=await api.del('/api/tratamientos/'+idTrat+'/empleados-fijos/'+idEmp);
+      if(!d.success) throw new Error(d.error);
+      toast('Empleado removido del tratamiento');
+      loadTratamientoPanel(idTrat);
+    }catch(e){
+      toast(e.message||'Error',false);
+    }
+  });
 }
 function toggleTratamiento(id){
   const panel=$(('tratPanel_'+id));
@@ -1331,10 +1394,146 @@ SCREENS['admin-distritos']=async()=>{
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-map-pin','Sin datos','No hay distritos registrados.','Agregar','window[\'openModalCRUD_admin-distritos\']()');return;}
     const allData=d.data||[];
     const data=allData.filter(di=>!distritosSearch||(di.nombre||'').toLowerCase().includes(distritosSearch.toLowerCase()));
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Distritos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-distritos\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar distrito..." value="'+distritosSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="distritosSearch=this.value;navigate(\'admin-distritos\')"></div><div class="space-y-2">'+data.map(di=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleDistrito('+di.iddistrito+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-map-pin text-red-400"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+di.nombre+'</h4></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-distritos\','+di.iddistrito+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/distritos\','+di.iddistrito+',\'admin-distritos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedDistrito===di.iddistrito?'rotate-180':'')+'"></i></div></div><div id="distPanel_'+di.iddistrito+'" class="'+(expandedDistrito===di.iddistrito?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4 flex items-center gap-3 text-sm text-[#6b7280]"><i class="fa-solid fa-people-group text-menta"></i><span>Empleados asignados: <strong>'+(di.empleados||0)+'</strong></span></div></div></div>').join('')+'</div></div>';
-    if(expandedDistrito){const p=$(('distPanel_'+expandedDistrito));if(p)p.classList.remove('hidden');}
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Distritos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-distritos\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar distrito..." value="'+distritosSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="distritosSearch=this.value;navigate(\'admin-distritos\')"></div><div class="space-y-2">'+data.map(di=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleDistrito('+di.iddistrito+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center"><i class="fa-solid fa-map-pin text-red-400"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+di.nombre+'</h4><p class="text-xs text-[#6b7280]" id="distEmpCount_'+di.iddistrito+'">'+di.empleados+' empleados</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-distritos\','+di.iddistrito+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();eliminarDistritoConEmpleados('+di.iddistrito+',\''+di.nombre+'\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedDistrito===di.iddistrito?'rotate-180':'')+'"></i></div></div><div id="distPanel_'+di.iddistrito+'" class="'+(expandedDistrito===di.iddistrito?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="distContent_'+di.iddistrito+'">'+(expandedDistrito===di.iddistrito?showLoading():'')+'</div></div></div>').join('')+'</div></div>';
+    if(expandedDistrito) loadDistritoPanel(expandedDistrito);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-distritos\')')}
 };
+
+// ============================================
+// FUNCIONES PARA DISTRITOS
+// ============================================
+async function loadDistritoPanel(id){
+  const ct=$('distContent_'+id);
+  if(!ct) return;
+  try{
+    const[empleadosRes, otrosDistritos]=await Promise.all([
+      api.get('/api/distritos/'+id+'/empleados'),
+      api.get('/api/distritos')
+    ]);
+    
+    const empleados=empleadosRes.success?empleadosRes.data||[]:[];
+    const otros=(otrosDistritos.success?otrosDistritos.data||[]:[]).filter(d=>d.iddistrito!==id);
+    
+    if(empleados.length===0){
+      ct.innerHTML='<p class="text-sm text-[#9ca3af] text-center py-4">No hay empleados en este distrito</p>';
+      return;
+    }
+    
+    ct.innerHTML='<div class="space-y-3"><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-users text-menta mr-1"></i>Empleados ('+empleados.length+')</h5>'+(otros.length?'<button onclick="moverTodosEmpleadosDistrito('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium px-2 py-1 rounded-lg bg-menta-50"><i class="fa-solid fa-arrow-right"></i> Mover todos</button>':'')+'</div><div class="space-y-2 max-h-96 overflow-y-auto">'+empleados.map(function(emp){
+      return '<div class="flex items-center justify-between px-3 py-2.5 bg-white rounded-xl border border-[#e8ecf1]"><div><p class="text-sm font-medium text-[#2c3e50]">'+emp.nombre+'</p><p class="text-xs text-[#6b7280]">'+(emp.especialidad||'Sin especialidad')+'</p></div>'+(otros.length?'<div class="flex items-center gap-2"><select id="moverEmp_'+emp.idempleado+'" class="px-2 py-1 border border-[#d1d5db] rounded-lg text-xs">'+otros.map(function(o){return '<option value="'+o.iddistrito+'">'+o.nombre+'</option>';}).join('')+'</select><button onclick="moverEmpleadoDistrito('+emp.idempleado+','+id+')" class="px-2 py-1 bg-menta text-white text-xs rounded-lg hover:bg-menta-600"><i class="fa-solid fa-arrow-right"></i></button></div>':'<span class="text-xs text-[#9ca3af]">No hay otros distritos</span>')+'</div>';
+    }).join('')+'</div></div>';
+  } catch(e){
+    ct.innerHTML='<p class="text-sm text-red-400">Error al cargar empleados</p>';
+  }
+}
+
+async function moverEmpleadoDistrito(idEmpleado, idDistritoOrigen){
+  const select=document.getElementById('moverEmp_'+idEmpleado);
+  const idDistritoDestino=select?.value;
+  if(!idDistritoDestino){
+    toast('Selecciona un distrito destino',false);
+    return;
+  }
+  try{
+    const res=await api.put('/api/empleados/'+idEmpleado,{iddistrito:parseInt(idDistritoDestino)});
+    if(!res.success) throw new Error(res.error);
+    toast('Empleado movido correctamente');
+    loadDistritoPanel(idDistritoOrigen);
+    const badge=document.getElementById('distEmpCount_'+idDistritoOrigen);
+    if(badge){
+      var newCount=parseInt(badge.textContent)-1;
+      badge.textContent=newCount+' empleados';
+    }
+  } catch(e){
+    toast(e.message||'Error al mover empleado',false);
+  }
+}
+
+async function moverTodosEmpleadosDistrito(idDistritoOrigen){
+  try{
+    const otros=await api.get('/api/distritos');
+    const otrosData=(otros.success?otros.data||[]:[]).filter(d=>d.iddistrito!==idDistritoOrigen);
+    if(otrosData.length===0){
+      toast('No hay otros distritos para mover los empleados',false);
+      return;
+    }
+    openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-people-arrows text-menta mr-2"></i>Mover todos los empleados</h3><p class="text-sm text-[#6b7280] mb-4">Selecciona el distrito destino para todos los empleados:</p><select id="moverTodosDestino" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">'+otrosData.map(function(d){return '<option value="'+d.iddistrito+'">'+d.nombre+'</option>';}).join('')+'</select><div class="flex gap-2"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl">Cancelar</button><button onclick="confirmarMoverTodosEmpleados('+idDistritoOrigen+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl shadow-sm">Mover todos</button></div></div>');
+  } catch(e){
+    toast('Error al cargar distritos',false);
+  }
+}
+
+async function confirmarMoverTodosEmpleados(idDistritoOrigen){
+  const idDestino=document.getElementById('moverTodosDestino')?.value;
+  if(!idDestino) return;
+  try{
+    const res=await api.post('/api/distritos/'+idDistritoOrigen+'/empleados/mover',{iddistritoDestino:parseInt(idDestino)});
+    if(!res.success) throw new Error(res.error);
+    toast('Todos los empleados fueron movidos');
+    closeModal();
+    navigate('admin-distritos');
+  } catch(e){
+    toast(e.message||'Error al mover empleados',false);
+  }
+}
+
+function eliminarDistritoConEmpleados(id, nombre){
+  openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Distrito: '+nombre+'</h3><p class="text-sm text-[#6b7280] mb-4">Este distrito tiene empleados asignados. ¿Qué deseas hacer?</p><div class="space-y-3"><button onclick="eliminarDistritoConMover('+id+',true)" class="w-full px-4 py-3 bg-menta text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-arrow-right"></i><div><p class="font-medium">Mover empleados a otro distrito</p><p class="text-xs text-white/80">Los empleados serán reasignados</p></div></button><button onclick="eliminarDistritoConMover('+id+',false)" class="w-full px-4 py-3 bg-red-500 text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-trash"></i><div><p class="font-medium">Eliminar solo si no hay empleados</p><p class="text-xs text-white/80">Solo si el distrito está vacío</p></div></button></div><button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl">Cancelar</button></div>');
+}
+
+async function eliminarDistritoConMover(id, moverEmpleados){
+  closeModal();
+  if(moverEmpleados){
+    try{
+      const otros=await api.get('/api/distritos');
+      const otrosData=(otros.success?otros.data||[]:[]).filter(d=>d.iddistrito!==id);
+      if(otrosData.length===0){
+        toast('No hay otros distritos para mover los empleados',false);
+        return;
+      }
+      openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4">Mover empleados antes de eliminar</h3><select id="moverDestinoDistrito" class="w-full px-4 py-2.5 border rounded-xl mb-4">'+otrosData.map(function(d){return '<option value="'+d.iddistrito+'">'+d.nombre+'</option>';}).join('')+'</select><div class="flex gap-2"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl">Cancelar</button><button onclick="confirmarEliminarDistrito('+id+')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl">Eliminar y mover</button></div></div>');
+    } catch(e){ toast('Error',false); }
+  } else {
+    try{
+      const res=await api.del('/api/distritos/'+id);
+      if(!res.success) throw new Error(res.error);
+      toast('Distrito eliminado');
+      navigate('admin-distritos');
+    } catch(e){
+      toast(e.message||'No se puede eliminar: tiene empleados asignados',false);
+    }
+  }
+}
+
+async function confirmarEliminarDistrito(id){
+  const destino=document.getElementById('moverDestinoDistrito')?.value;
+  if(!destino) return;
+  try{
+    const res=await api.del('/api/distritos/'+id+'?migrarA='+destino);
+    if(!res.success) throw new Error(res.error);
+    toast('Distrito eliminado y empleados reasignados');
+    closeModal();
+    navigate('admin-distritos');
+  } catch(e){
+    toast(e.message||'Error',false);
+  }
+}
+
+function toggleDistrito(id){
+  const p=document.getElementById('distPanel_'+id);
+  if(expandedDistrito===id){
+    expandedDistrito=null;
+    if(p) p.classList.add('hidden');
+    return;
+  }
+  if(expandedDistrito){
+    const old=document.getElementById('distPanel_'+expandedDistrito);
+    if(old) old.classList.add('hidden');
+  }
+  expandedDistrito=id;
+  if(p) p.classList.remove('hidden');
+  loadDistritoPanel(id);
+}
 function toggleDistrito(id){const p=$(('distPanel_'+id));if(expandedDistrito===id){expandedDistrito=null;p.classList.add('hidden');return;}if(expandedDistrito){const old=$(('distPanel_'+expandedDistrito));if(old)old.classList.add('hidden')}expandedDistrito=id;p.classList.remove('hidden');}
 function deleteDistritoMigrar(id,nombre,data){
   const otros=data.filter(d=>d.iddistrito!==id);
@@ -1370,14 +1569,26 @@ SCREENS['admin-areas']=async()=>{
 async function loadAreaPanel(id){
   const ct=$('areaContent_'+id);if(!ct)return;
   try{
-    const[emps,cat]=await Promise.all([api.get('/api/areas/'+id+'/empleados'),api.get('/api/categorias/area/'+id)]);
-    const empList=emps.success?emps.data||[]:[];
+    const[empsTodos,cat]=await Promise.all([
+      api.get('/api/areas/'+id+'/empleados-todos'),
+      api.get('/api/categorias/area/'+id)
+    ]);
+    const empList=empsTodos.success?empsTodos.data||[]:[];
     const catList=cat.success?cat.data||[]:[];
-    // Update counter badge in the card header
+    
     const badge=$('areaEmpCount_'+id);
-    if(badge)badge.textContent=empList.length+' empleados fijos';
-    var empHtml=empList.length?'<div class="space-y-1.5">'+empList.map(function(e){return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+e.nombre+'</span><button onclick="quitarEmpleadoArea('+id+','+e.idempleado+',\''+e.nombre.replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-circle-xmark"></i></button></div>'}).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>';
-    var catHtml=catList.length?'<div class="space-y-1.5">'+catList.map(function(c){return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+(c.categorianombre||c.nombre||'')+'</span><button onclick="eliminarCategoria('+c.idcategoria+',\''+((c.categorianombre||c.nombre||'')).replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-trash-can"></i></button></div>'}).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin categorías</p>';
+    if(badge) badge.textContent=empList.length+' empleados totales';
+    
+    var empHtml=empList.length?'<div class="space-y-1.5">'+empList.map(function(e){
+      var esFijo=e.esfijo===true||e.esfijo===1||e.esfijo==='true';
+      var fijoBadge=esFijo?'<span class="text-xs text-menta ml-2"><i class="fa-solid fa-check-circle"></i> Fijo</span>':'<span class="text-xs text-amber-500 ml-2"><i class="fa-solid fa-clock"></i> Suplente</span>';
+      return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><div><span class="font-medium">'+e.nombre+'</span>'+fijoBadge+'</div><button onclick="quitarEmpleadoArea('+id+','+e.idempleado+',\''+e.nombre.replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-circle-xmark"></i></button></div>';
+    }).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin empleados asignados</p>';
+    
+    var catHtml=catList.length?'<div class="space-y-1.5">'+catList.map(function(c){
+      return '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#e8ecf1] text-sm"><span>'+(c.categorianombre||c.nombre||'')+'</span><button onclick="eliminarCategoria('+c.idcategoria+',\''+((c.categorianombre||c.nombre||'')).replace(/'/g,"\\'")+'\')" class="text-xs text-red-400 hover:text-red-500"><i class="fa-regular fa-trash-can"></i></button></div>';
+    }).join('')+'</div>':'<p class="text-xs text-[#9ca3af] py-2">Sin categorías</p>';
+    
     ct.innerHTML='<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-menta mr-1"></i>Empleados</h5><button onclick="agregarEmpleadoArea('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+empHtml+'</div><div><div class="flex items-center justify-between mb-2"><h5 class="text-xs font-semibold text-[#6b7280] uppercase tracking-wider"><i class="fa-solid fa-tags text-menta mr-1"></i>Categorías</h5><button onclick="agregarCategoriaArea('+id+')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+catHtml+'</div></div>';
   }catch(e){ct.innerHTML='<p class="text-xs text-red-400">Error al cargar panel</p>'}
 }
@@ -1497,6 +1708,70 @@ SCREENS['admin-informe-ingresos']=async()=>{
     ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-invoice-dollar text-menta mr-2"></i>Informe de Ingresos</h3><span class="px-3 py-1.5 bg-menta-50 text-menta-700 text-sm font-semibold rounded-full">Total: '+$$(totalGeneral)+'</span></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6"><div class="lg:col-span-2"><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-calendar-alt text-menta mr-1.5"></i>Por Mes</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">'+mesCards+'</div></div><div><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Top 3 Tratamientos</h4>'+topHtml+'</div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-ingresos\')')}
 };
+SCREENS['admin-ventas'] = async () => {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando ventas...');
+  try{
+    const citasRes = await api.get('/api/citas');
+    const paquetesRes = await api.get('/api/paquetes-vendidos');
+    
+    const citas = (citasRes.success ? citasRes.data || [] : []).filter(c => c.estado === 'realizada');
+    const paquetes = paquetesRes.success ? paquetesRes.data || [] : [];
+    
+    const totalCitas = citas.reduce((sum, c) => sum + (c.precio || 0), 0);
+    const totalPaquetes = paquetes.reduce((sum, p) => sum + (p.precio || 0), 0);
+    const totalGeneral = totalCitas + totalPaquetes;
+    
+    ct.innerHTML = '<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-chart-line text-menta mr-2"></i>Ventas - Resumen General</h3></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"><div class="bg-gradient-to-br from-menta-50 to-menta-100 rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-menta-700 font-medium">Tratamientos Individuales</p><p class="text-2xl font-bold text-menta-800 mt-1">'+$$(totalCitas)+'</p><p class="text-xs text-menta-600 mt-1">'+citas.length+' citas realizadas</p></div><div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center"><i class="fa-solid fa-spa text-menta text-xl"></i></div></div></div><div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-amber-700 font-medium">Paquetes Vendidos</p><p class="text-2xl font-bold text-amber-800 mt-1">'+$$(totalPaquetes)+'</p><p class="text-xs text-amber-600 mt-1">'+paquetes.length+' paquetes</p></div><div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center"><i class="fa-solid fa-gift text-amber-500 text-xl"></i></div></div></div><div class="bg-gradient-to-br from-[#2c3e50] to-[#34495e] rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-white/70 font-medium">Total General</p><p class="text-2xl font-bold text-white mt-1">'+$$(totalGeneral)+'</p><p class="text-xs text-white/50 mt-1">Ingresos totales</p></div><div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-coins text-white text-xl"></i></div></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="border-b border-[#e8ecf1]"><div class="flex gap-1 p-2"><button onclick="mostrarVentasTab(\'tratamientos\')" id="tabTratamientosBtn" class="px-4 py-2 text-sm font-medium rounded-lg bg-menta text-white shadow-sm">Tratamientos Individuales</button><button onclick="mostrarVentasTab(\'paquetes\')" id="tabPaquetesBtn" class="px-4 py-2 text-sm font-medium rounded-lg text-[#6b7280] hover:bg-gray-50">Paquetes Vendidos</button></div></div><div id="ventasTabContent" class="p-5">'+renderVentasTratamientos(citas)+'</div></div></div>';
+  } catch(e){
+    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error al cargar las ventas.');
+  }
+};
+
+function renderVentasTratamientos(citas){
+  if(!citas.length){
+    return '<div class="text-center py-12"><i class="fa-regular fa-calendar-xmark text-4xl text-[#d1d5db] mb-3 block"></i><p class="text-[#6b7280]">No hay tratamientos individuales realizados</p></div>';
+  }
+  return '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b-2 border-[#e8ecf1]"><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Fecha</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Cliente</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Tratamiento</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Empleado</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Precio</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Estado</th></tr></thead><tbody class="divide-y divide-[#f1f5f9]">'+citas.map(function(c){
+    return '<tr class="hover:bg-[#f8fafc] transition-colors"><td class="py-3 px-4 text-[#2c3e50]">'+formatDateShort(c.fecha)+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(c.clientenombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(c.tratamientonombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(c.empleadonombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+$$(c.precio)+'</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Realizada</span></td></tr>';
+  }).join('')+'</tbody></table></div>';
+}
+
+function renderVentasPaquetes(paquetes){
+  if(!paquetes.length){
+    return '<div class="text-center py-12"><i class="fa-regular fa-gift text-4xl text-[#d1d5db] mb-3 block"></i><p class="text-[#6b7280]">No hay paquetes vendidos</p></div>';
+  }
+  return '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b-2 border-[#e8ecf1]"><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Fecha Compra</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Cliente</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Paquete</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Precio</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Estado</th></tr></thead><tbody class="divide-y divide-[#f1f5f9]">'+paquetes.map(function(p){
+    var hoy=dayjs().format('YYYY-MM-DD');
+    var activo=p.fechainicio<=hoy&&p.fechafin>=hoy;
+    return '<tr class="hover:bg-[#f8fafc] transition-colors"><td class="py-3 px-4 text-[#2c3e50]">'+formatDateShort(p.fechacompra)+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(p.clientenombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(p.paquetenombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+$$(p.precio)+'</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-xs font-semibold rounded-full '+(activo?'bg-menta-50 text-menta-700':'bg-gray-100 text-gray-500')+'">'+(activo?'Activo':'Vencido')+'</span></td></tr>';
+  }).join('')+'</tbody></table></div>';
+}
+
+async function mostrarVentasTab(tab){
+  var tabTrat=document.getElementById('tabTratamientosBtn');
+  var tabPaq=document.getElementById('tabPaquetesBtn');
+  var content=document.getElementById('ventasTabContent');
+  if(tab==='tratamientos'){
+    tabTrat.classList.add('bg-menta','text-white');
+    tabTrat.classList.remove('text-[#6b7280]','hover:bg-gray-50');
+    tabPaq.classList.remove('bg-menta','text-white');
+    tabPaq.classList.add('text-[#6b7280]','hover:bg-gray-50');
+    content.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
+    var citasRes=await api.get('/api/citas');
+    var citas=(citasRes.success?citasRes.data||[]:[]).filter(function(c){return c.estado==='realizada';});
+    content.innerHTML=renderVentasTratamientos(citas);
+  } else {
+    tabPaq.classList.add('bg-menta','text-white');
+    tabPaq.classList.remove('text-[#6b7280]','hover:bg-gray-50');
+    tabTrat.classList.remove('bg-menta','text-white');
+    tabTrat.classList.add('text-[#6b7280]','hover:bg-gray-50');
+    content.innerHTML='<div class="flex justify-center py-8"><div class="w-8 h-8 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
+    var paqRes=await api.get('/api/paquetes-vendidos');
+    var paquetes=paqRes.success?paqRes.data||[]:[];
+    content.innerHTML=renderVentasPaquetes(paquetes);
+  }
+}
 
 // Admin: Informe Discrepancia — usa endpoint real /api/reportes/discrepancias/:anio/:mes
 SCREENS['admin-informe-discrepancia']=async()=>{

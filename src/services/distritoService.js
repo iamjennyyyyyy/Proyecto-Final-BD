@@ -45,7 +45,20 @@ const distritoService = {
             if (e.code === '23503') throw new Error('No se puede eliminar: el distrito tiene empleados asignados');
             throw e;
         }
-    }
+    },
+        async obtenerEmpleadosPorDistrito(id) {
+        const distrito = await distritoRepository.buscarPorId(id);
+        if (!distrito) throw new Error('Distrito no encontrado');
+        return await distritoRepository.buscarEmpleadosPorDistrito(id);
+    },
+
+    async moverEmpleados(origenId, destinoId) {
+        const origen = await distritoRepository.buscarPorId(origenId);
+        if (!origen) throw new Error('Distrito de origen no encontrado');
+        const destino = await distritoRepository.buscarPorId(destinoId);
+        if (!destino) throw new Error('Distrito de destino no encontrado');
+        return await distritoRepository.reasignarEmpleados(origenId, destinoId);
+    },
 };
 
 module.exports = distritoService;

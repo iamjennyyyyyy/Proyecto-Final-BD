@@ -94,7 +94,27 @@ const areaController = {
         catch(error){
             res.status(404).json({ success: false, error: error.message });
         }
-    }
+    },
+        async obtenerTodosEmpleadosPorArea(req, res) {
+        try {
+            const idArea = parseInt(req.params.idArea);
+            const empleados = await areaService.obtenerTodosEmpleadosPorArea(idArea);
+            res.json({ success: true, count: empleados.length, data: empleados });
+        } catch (error) {
+            res.status(404).json({ success: false, error: error.message });
+        }
+    },
+
+    async moverCategoriaAOtraArea(req, res) {
+        try {
+            const idCategoria = parseInt(req.params.idCategoria);
+            const idAreaNueva = parseInt(req.body.idAreaNueva);
+            const resultado = await areaService.moverCategoriaAOtraArea(idCategoria, idAreaNueva);
+            res.json({ success: true, data: resultado, mensaje: 'Categoría movida a otra área' });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
 }
 
 module.exports = areaController
