@@ -31,11 +31,22 @@ const reporteController = {
         }
     },
 
+    // ✅ CONTROLADOR CORREGIDO - Ahora recibe fechaInicio y fechaFin
     async buscarServiciosPorClientePorIntervalo(req, res) {
         try {
             const idCliente = parseInt(req.params.idCliente);
-            const { fecha } = req.query;
-            const servicios = await reporteService.buscarServiciosPorClientePorIntervalo(idCliente, fecha);
+            const { fechaInicio, fechaFin } = req.query;  // ← CAMBIADO: leer fechaInicio y fechaFin
+            
+            // Validar que ambas fechas existan
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'Las fechas de inicio y fin son obligatorias' 
+                });
+            }
+            
+            // Pasar ambas fechas al service
+            const servicios = await reporteService.buscarServiciosPorClientePorIntervalo(idCliente, fechaInicio, fechaFin);
             res.json({ success: true, count: servicios.length, data: servicios });
         } catch (error) {
             res.status(404).json({ success: false, error: error.message });
@@ -46,17 +57,14 @@ const reporteController = {
         try {
             const { anio, mes } = req.params;
             
-            
             const anioNum = parseInt(anio);
             const mesNum = parseInt(mes);
             
             const reporte = await reporteService.obtenerReporteDiscrepanciasCompleto(anioNum, mesNum);
             
-            
             const totalTratamientos = new Set(reporte.map(item => item.id_tratamiento)).size;
             const totalMateriales = reporte.filter(item => item.id_material).length;
             
-        
             const totalCitasPlanificadas = reporte.reduce((sum, item) => sum + (item.cantidad_planificada_citas || 0), 0);
             const totalCitasRealizadas = reporte.reduce((sum, item) => sum + (item.cantidad_realizada_citas || 0), 0);
             const totalDiscrepanciaCitas = reporte.reduce((sum, item) => sum + (item.discrepancia_citas || 0), 0);

@@ -28,23 +28,37 @@ const reporteService = {
         return await reporteRepository.obtenerEmpleadosPorCliente(id);
     },
 
-    async buscarServiciosPorClientePorIntervalo(idCliente, fecha) {
-        if (!idCliente) {
-            throw new Error('El ID del cliente es obligatorio');
-        }
-        if (!fecha) {
-            throw new Error('La fecha es obligatoria');
-        }
-        const id = parseInt(idCliente);
-        if (isNaN(id)) {
-            throw new Error('El ID del cliente debe ser un número válido');
-        }
-        const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!fechaRegex.test(fecha)) {
-            throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
-        }
-        return await reporteRepository.buscarServiciosPorClientePorIntervalo(id, fecha);
-    },
+    async buscarServiciosPorClientePorIntervalo(idCliente, fechaInicio, fechaFin) {
+    if (!idCliente) {
+        throw new Error('El ID del cliente es obligatorio');
+    }
+    if (!fechaInicio) {
+        throw new Error('La fecha de inicio es obligatoria');
+    }
+    if (!fechaFin) {
+        throw new Error('La fecha de fin es obligatoria');
+    }
+    
+    const id = parseInt(idCliente);
+    if (isNaN(id)) {
+        throw new Error('El ID del cliente debe ser un número válido');
+    }
+    
+    const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!fechaRegex.test(fechaInicio)) {
+        throw new Error('Formato de fecha de inicio inválido. Use YYYY-MM-DD');
+    }
+    if (!fechaRegex.test(fechaFin)) {
+        throw new Error('Formato de fecha de fin inválido. Use YYYY-MM-DD');
+    }
+    
+    // Validar que fechaInicio no sea mayor que fechaFin
+    if (fechaInicio > fechaFin) {
+        throw new Error('La fecha de inicio no puede ser mayor que la fecha de fin');
+    }
+    
+    return await reporteRepository.buscarServiciosPorClientePorIntervalo(id, fechaInicio, fechaFin);
+},
 
     async obtenerReporteDiscrepanciasCompleto(anio, mes) {
         if (!anio && anio !== 0) {

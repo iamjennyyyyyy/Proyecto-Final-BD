@@ -104,7 +104,7 @@ class Cliente {
         this.ci = Cliente.validarFormatoDNI(this.ci);
 
         // Validar teléfono
-        
+
         if (this.telefono) {
             const telLimpio = this.telefono.toString().replace(/[\s\-\(\)]/g, '');
             if (!/^\d+$/.test(telLimpio)) {
@@ -138,11 +138,11 @@ class Cliente {
         }
 
         // Validar DNI con formato de fecha si se actualiza
-        if (datos.dni !== undefined) {
-            if (!datos.dni || datos.dni.toString().trim() === '') {
+        if (datos.ci !== undefined) {
+            if (!datos.ci || datos.ci.toString().trim() === '') {
                 throw new Error('La cédula de identidad es obligatoria');
             }
-            datos.dni = this.validarFormatoDNI(datos.dni);
+            datos.ci = this.validarFormatoDNI(datos.ci);
         }
 
         // Validar teléfono si se actualiza

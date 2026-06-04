@@ -24,12 +24,13 @@ class ReporteRepository {
         return result.rows;
     }
 
-    async buscarServiciosPorClientePorIntervalo(idCLiente, fecha){
-        const result = await pool.query(
-            `SELECT * from buscarServiciosPorClientePorIntervalo($1, $2)`, [idCLiente, fecha]
-        )
-        return result.rows;
-    }
+    async buscarServiciosPorClientePorIntervalo(idCliente, fechaInicio, fechaFin) {
+    const result = await pool.query(
+        `SELECT * FROM buscarServiciosPorClientePorIntervalo($1, $2, $3)`, 
+        [idCliente, fechaInicio, fechaFin]
+    );
+    return result.rows;
+}
 
     async obtenerReporteDiscrepanciasCompleto(anio, mes) {
         const result = await pool.query(
