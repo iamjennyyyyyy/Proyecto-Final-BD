@@ -37,7 +37,7 @@ class materialesPorCitaRepository{
         return result.rows[0];
     }
 
-    async desasignarMaterialACita(idCita, idMaterial){
+    async desasignarMaterialDeCita(idata, idMaterial){
         const result = await pool.query(
             `DELETE FROM materialesporcita
             WHERE idmaterial = $1 AND idcita = $2 RETURNING *`, [idMaterial, idCita]

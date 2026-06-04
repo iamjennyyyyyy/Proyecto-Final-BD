@@ -1,6 +1,6 @@
 // 📁 jobs/refreshMaterializedViews.js
 const cron = require('node-cron');
-const { pool } = require('../config/database');
+const pool = require('../config/database');
 
 const refreshViews = async () => {
         try {
