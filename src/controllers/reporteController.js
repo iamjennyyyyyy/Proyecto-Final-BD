@@ -65,8 +65,8 @@ const reporteController = {
             const totalMaterialUtilizado = reporte.reduce((sum, item) => sum + (item.cantidad_utilizada_material || 0), 0);
             const totalDiscrepanciaMaterial = reporte.reduce((sum, item) => sum + (item.discrepancia_material || 0), 0);
             
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 params: {
                     anio: anioNum,
                     mes: mesNum

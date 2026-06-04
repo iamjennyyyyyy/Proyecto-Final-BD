@@ -64,7 +64,7 @@ const citaController = {
     async obtenerPorPaquete(req, res) {
         try {
             const idPaquete = parseInt(req.params.idPaquete);
-            const citas = await citaService.obtenerCitasPorTPaquete(idPaquete);
+            const citas = await citaService.obtenerCitasPorPaquete(idPaquete);
             res.json({ success: true, count: citas.length, data: citas });
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });

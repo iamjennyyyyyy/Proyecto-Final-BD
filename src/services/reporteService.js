@@ -54,7 +54,6 @@ const reporteService = {
         if (!mes && mes !== 0) {
             throw new Error('El mes es obligatorio');
         }
-       
         const anioNum = parseInt(anio);
         if (isNaN(anioNum)) {
             throw new Error('El año debe ser un número válido');

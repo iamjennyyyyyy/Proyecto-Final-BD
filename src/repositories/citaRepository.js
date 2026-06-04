@@ -79,10 +79,6 @@ class CitaRepository {
         return result.rows;
     }
 
-   
-
-     
-
     async crear(datos) {
         const valores = [];
         const campos = [];

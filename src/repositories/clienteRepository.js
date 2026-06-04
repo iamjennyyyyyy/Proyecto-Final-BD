@@ -45,25 +45,25 @@ class ClienteRepository {
 async buscarServiciosPorClientePorIntervalo(idCliente, fecha1, fecha2) {
     const result = await pool.query(`
         
-        SELECT 
+        SELECT
             p.nombre as nombre_servicio,
             pv.fechacompra as fecha,
             'PAQUETE' as tipo
         FROM paquetevendido pv
         JOIN paquetes p ON p.idpaquete = pv.idpaquete
-        WHERE pv.idCliente = $1 
-          AND pv.fechacompra BETWEEN $2 AND $3
+        WHERE pv.idCliente = $1
+        AND pv.fechacompra BETWEEN $2 AND $3
         
         UNION ALL
         
-        SELECT 
+        SELECT
             t.nombre as nombre_servicio,
             c.fecha as fecha,
             'TRATAMIENTO' as tipo
         FROM citas c
-        JOIN tratamiento t ON t.idtratamiento = c.idtratamiento
-        WHERE c.idCliente = $1 
-          AND c.fecha BETWEEN $2 AND $3
+        JOIN tratamientos t ON t.idtratamiento = c.idtratamiento
+        WHERE c.idCliente = $1
+        AND c.fecha BETWEEN $2 AND $3
         
         ORDER BY fecha DESC
     `, [idCliente, fecha1, fecha2]);

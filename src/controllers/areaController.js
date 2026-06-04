@@ -58,7 +58,7 @@ const areaController = {
         try{
             const idArea = parseInt(req.params.idArea);
             const idEmpleado = parseInt(req.params.idEmpleado);
-            await areaService.desasignarEmpleadoAUnArea(idArea, idEmpleado);
+            await areaService.desasignarEmpleadoDeUnArea(idArea, idEmpleado);
             res.json({success: true, mensaje: 'Empleado desasignado del área'});
         }
         catch(error){
