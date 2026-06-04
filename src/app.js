@@ -16,7 +16,8 @@ const citaRoutes = require('./routes/citaRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reporteRoutes = require('./routes/reporteRoutes');
 
-const { verificarToken } = require('../middlewares/authMiddleware');
+// En app.js - cambiar a:
+const { verificarToken, esAdministrador, esDependiente } = require('./middlewares/authMiddleware');
 
 require('./jobs/refreshMaterializedViews');
 

@@ -254,6 +254,7 @@ async function citaModal(editData) {
       
       var selTrat = $('citaTratamiento');
       if (selTrat && selTrat.value) loadEmps(selTrat.value);
+       actualizarPrecioMostrado();
       selTrat.addEventListener('change', function() {
         if (this.value) loadEmps(this.value);
         actualizarPrecioMostrado(); // Asegurar que se actualice
