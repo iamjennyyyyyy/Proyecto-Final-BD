@@ -143,58 +143,126 @@ async function aplicarCambioEstado(id,estado){
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
 function eliminarCita(id){toast('Las citas no se pueden eliminar. Puedes cancelarlas o marcarlas como realizadas.',false);}
-async function citaModal(editData){
-  editId=editData?.idcita||null;
-  try{
-    const t=await api.get('/api/tratamientos');
-    if(!t.success){toast('Error al cargar tratamientos',false);return;}
-    const loadEmps=async(tratId)=>{
-      var sel=$('citaEmpleado');
-      if(!tratId){if(sel)sel.innerHTML='<option value="">Selecciona un tratamiento primero</option>';return;}
-      try{
-        const e=await api.get('/api/tratamientos/'+tratId+'/empleados-fijos');
-        if(e.success&&e.data){
-          sel.innerHTML='';
-          if(!e.data.length){sel.innerHTML='<option value="">No hay empleados fijos para este tratamiento</option>';return;}
-          e.data.forEach(function(en){
-            var opt=document.createElement('option');opt.value=en.idempleado;
-            if(editData&&editData.idempleado==en.idempleado)opt.selected=true;
-            opt.textContent=en.nombre;sel.appendChild(opt);
-          });
-        }else{sel.innerHTML='<option value="">Error al cargar empleados</option>'}
-      }catch(e2){var sel2=$('citaEmpleado');if(sel2)sel2.innerHTML='<option value="">Error</option>'}
-    };
-    var tratOpts='';t.data.forEach(function(tr){tratOpts+='<option value="'+tr.idtratamiento+'" data-precio="'+tr.precio+'"'+(editData&&editData.idtratamiento==tr.idtratamiento?' selected':'')+'>'+tr.nombre+'</option>'});
-    var estadoHtml='';
-    var obsVal=editData?editData.observaciones||'':'';
-    var body='<div class="p-6" style="max-width:520px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-calendar-plus text-menta mr-2"></i>'+(editData?'Editar Cita':'Agendar Cita')+'</h3>';
-    body+='<div class="space-y-3.5">';
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label><div class="relative"><input type="text" id="citaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" placeholder="Nombre del cliente" value="'+(editData?editData.clientenombre||'':'')+'"><input type="hidden" id="citaClienteId" value="'+(editData?editData.idcliente||'':'')+'"><div id="clienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div></div></div>';
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label><select id="citaTratamiento" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" onchange="autoFillPrecio()">'+tratOpts+'</select></div>';
-    // Precio: BD lo asigna al crear; al editar es solo lectura
-    if(editData){
-      const _pvId=editData.idpaquetevendido||editData.paquetevendido||editData.id_paquete_vendido||editData.idpaquete_vendido;
-      const paqLabel=_pvId?'<span class="text-xs text-amber-600 font-medium ml-2"><i class="fa-solid fa-box mr-1"></i>Incluido en paquete (precio $0)</span>':'';
-      body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio</label><div class="w-full px-4 py-2.5 bg-gray-50 border border-[#e8ecf1] rounded-xl text-sm text-[#6b7280] flex items-center gap-2">'+$$(editData.precio||0)+paqLabel+'<span class="ml-auto text-xs text-[#9ca3af]"><i class="fa-solid fa-lock mr-1"></i>Solo lectura</span></div><input type="hidden" id="citaPrecio" value="'+(editData.precio||0)+'"></div>';
-      if(_pvId){
-        body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Paquete Vendido</label><div class="w-full px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 flex items-center gap-2"><i class="fa-solid fa-box"></i>Cita de paquete #'+_pvId+'<span class="ml-auto text-xs text-amber-500"><i class="fa-solid fa-lock mr-1"></i>No editable</span></div></div>';
-      }
+async function citaModal(editData) {
+  editId = editData?.idcita || null;
+  try {
+    const t = await api.get('/api/tratamientos');
+    if (!t.success) {
+      toast('Error al cargar tratamientos', false);
+      return;
     }
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Fecha *</label><input type="date" id="citaFecha" value="'+(editData?editData.fecha||'':todayStr())+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label><input type="time" id="citaHora" value="'+(editData?editData.hora||'':'09:00')+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Cargando...</option></select></div>';
-    body+=estadoHtml;
-    body+='<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Observaciones</label><textarea id="citaObservaciones" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+obsVal+'</textarea></div>';
-    body+='</div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarCita()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Agendar')+'</button></div></div>';
-    openModal(body,function(){
-      var inp=$('citaClienteInput');
-      if(inp)inp.addEventListener('input',debounce(autocompleteClientes,300));
-      // precio lo asigna la BD al crear
-      var selTrat=$('citaTratamiento');
-      if(selTrat&&selTrat.value)loadEmps(selTrat.value);
-      selTrat.addEventListener('change',function(){if(this.value)loadEmps(this.value)});
+    
+    const loadEmps = async (tratId) => {
+      var sel = $('citaEmpleado');
+      if (!tratId) {
+        if (sel) sel.innerHTML = '<option value="">Selecciona un tratamiento primero</option>';
+        return;
+      }
+      try {
+        const e = await api.get('/api/tratamientos/' + tratId + '/empleados-fijos');
+        if (e.success && e.data) {
+          sel.innerHTML = '';
+          if (!e.data.length) {
+            sel.innerHTML = '<option value="">No hay empleados fijos para este tratamiento</option>';
+            return;
+          }
+          e.data.forEach(function(en) {
+            var opt = document.createElement('option');
+            opt.value = en.idempleado;
+            if (editData && editData.idempleado == en.idempleado) opt.selected = true;
+            opt.textContent = en.nombre;
+            sel.appendChild(opt);
+          });
+        } else {
+          sel.innerHTML = '<option value="">Error al cargar empleados</option>';
+        }
+      } catch (e2) {
+        var sel2 = $('citaEmpleado');
+        if (sel2) sel2.innerHTML = '<option value="">Error</option>';
+      }
+    };
+    
+    // Construir opciones del tratamiento con data-precio
+    var tratOpts = '';
+    t.data.forEach(function(tr) {
+      tratOpts += '<option value="' + tr.idtratamiento + '" data-precio="' + tr.precio + '"' + 
+        (editData && editData.idtratamiento == tr.idtratamiento ? ' selected' : '') + '>' + 
+        tr.nombre + '</option>';
     });
-  }catch(e){toast(e.message||'Error al cargar formulario',false)}
+    
+    var obsVal = editData ? editData.observaciones || '' : '';
+    
+    // Calcular precio inicial
+    let precioInicial = 0;
+    if (editData && editData.precio) {
+      precioInicial = editData.precio;
+    } else if (t.data && t.data.length > 0) {
+      precioInicial = t.data[0].precio;
+    }
+    
+    var body = '<div class="p-6" style="max-width:520px">' +
+      '<h3 class="text-lg font-semibold text-[#2c3e50] mb-5">' +
+      '<i class="fa-regular fa-calendar-plus text-menta mr-2"></i>' + (editData ? 'Editar Cita' : 'Agendar Cita') + '</h3>';
+    
+    body += '<div class="space-y-3.5">';
+    
+    // Cliente
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Cliente *</label>' +
+      '<div class="relative">' +
+      '<input type="text" id="citaClienteInput" autocomplete="off" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" placeholder="Nombre del cliente" value="' + (editData ? editData.clientenombre || '' : '') + '">' +
+      '<input type="hidden" id="citaClienteId" value="' + (editData ? editData.idcliente || '' : '') + '">' +
+      '<div id="clienteAutocomplete" class="absolute z-50 w-full bg-white border border-[#e8ecf1] rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto hidden"></div>' +
+      '</div></div>';
+    
+    // Tratamiento
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Tratamiento *</label>' +
+      '<select id="citaTratamiento" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm" onchange="actualizarPrecioMostrado()">' + 
+      tratOpts + '</select></div>';
+    
+    // Precio (SOLO LECTURA)
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Precio</label>' +
+      '<div class="w-full px-4 py-2.5 bg-gray-100 border border-[#e8ecf1] rounded-xl text-sm text-[#6b7280] flex items-center gap-2">' +
+      '<i class="fa-solid fa-dollar-sign text-menta text-xs"></i>' +
+      '<span id="precioMostrado">' + $$(precioInicial) + '</span>' +
+      '<span class="ml-auto text-xs text-[#9ca3af]"><i class="fa-solid fa-lock mr-1"></i>El precio lo asigna el sistema</span>' +
+      '</div></div>';
+    
+    // Fecha
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Fecha *</label>' +
+      '<input type="date" id="citaFecha" value="' + (editData ? editData.fecha || '' : todayStr()) + '" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    
+    // Hora
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label>' +
+      '<input type="time" id="citaHora" value="' + (editData ? editData.hora || '' : '09:00') + '" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
+    
+    // Empleado
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label>' +
+      '<select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Cargando...</option></select></div>';
+    
+    // Observaciones
+    body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Observaciones</label>' +
+      '<textarea id="citaObservaciones" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">' + obsVal + '</textarea></div>';
+    
+    body += '</div><div class="flex gap-2 mt-6">' +
+      '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>' +
+      '<button onclick="guardarCita()" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">' + 
+      (editData ? 'Guardar Cambios' : 'Agendar') + '</button></div></div>';
+    
+    openModal(body, function() {
+      var inp = $('citaClienteInput');
+      if (inp) inp.addEventListener('input', debounce(autocompleteClientes, 300));
+      
+      var selTrat = $('citaTratamiento');
+      if (selTrat && selTrat.value) loadEmps(selTrat.value);
+      selTrat.addEventListener('change', function() {
+        if (this.value) loadEmps(this.value);
+        actualizarPrecioMostrado(); // Asegurar que se actualice
+      });
+    });
+    
+  } catch (e) {
+    toast(e.message || 'Error al cargar formulario', false);
+  }
 }
 function autoFillPrecio(){
   const sel=$('citaTratamiento');
@@ -230,21 +298,49 @@ async function autocompleteClientes(){
   }catch(e){}
 }
 function seleccionarCliente(id,nombre){$('citaClienteId').value=id;$('citaClienteInput').value=nombre;$('clienteAutocomplete').classList.add('hidden');}
-async function guardarCita(){
-  const idcliente=$('citaClienteId').value,idtratamiento=$('citaTratamiento').value,fecha=$('citaFecha').value,hora=$('citaHora').value,idempleado=$('citaEmpleado').value,observaciones=$('citaObservaciones')?.value||'',estado=editId?($('citaEstado')?.value||null):null;
-  if(!idcliente)return toast('Selecciona un cliente',false);
-  if(!idtratamiento)return toast('Selecciona un tratamiento',false);
-  if(!fecha)return toast('Selecciona una fecha',false);
-  if(!hora)return toast('Selecciona una hora',false);
-  if(!idempleado)return toast('Selecciona un empleado',false);
-  // El precio lo asigna la BD automáticamente
-  const data={idcliente:Number(idcliente),idtratamiento:Number(idtratamiento),fecha,hora,idempleado:Number(idempleado),observaciones};
-  if(estado)data.estado=estado;
-  try{
-    const d=editId?await api.put('/api/citas/'+editId,data):await api.post('/api/citas',data);
-    if(!d.success){toast(d.error||'Error al guardar',false);return;} // Keep modal open
-    toast(editId?'Cita actualizada':'Cita agendada exitosamente');closeModal();SCREENS.citas();
-  }catch(e){toast(e.message||'Error de conexión',false);} // Keep modal open
+async function guardarCita() {
+  const idcliente = $('citaClienteId').value;
+  const idtratamiento = $('citaTratamiento').value;
+  const fecha = $('citaFecha').value;
+  const hora = $('citaHora').value;
+  const idempleado = $('citaEmpleado').value;
+  const observaciones = $('citaObservaciones')?.value || '';
+  const estado = editId ? ($('citaEstado')?.value || null) : null;
+  
+  // Obtener el precio del tratamiento seleccionado
+  const selTrat = $('citaTratamiento');
+  const precio = selTrat ? selTrat.options[selTrat.selectedIndex]?.dataset?.precio : null;
+  
+  if (!idcliente) return toast('Selecciona un cliente', false);
+  if (!idtratamiento) return toast('Selecciona un tratamiento', false);
+  if (!fecha) return toast('Selecciona una fecha', false);
+  if (!hora) return toast('Selecciona una hora', false);
+  if (!idempleado) return toast('Selecciona un empleado', false);
+  
+  // ✅ Incluir precio en el objeto data
+  const data = {
+    idcliente: Number(idcliente),
+    idtratamiento: Number(idtratamiento),
+    fecha,
+    hora,
+    idempleado: Number(idempleado),
+    observaciones,
+    precio: Number(precio) || 0  // ← AGREGAR PRECIO
+  };
+  if (estado) data.estado = estado;
+  
+  try {
+    const d = editId ? await api.put('/api/citas/' + editId, data) : await api.post('/api/citas', data);
+    if (!d.success) {
+      toast(d.error || 'Error al guardar', false);
+      return;
+    }
+    toast(editId ? 'Cita actualizada' : 'Cita agendada exitosamente');
+    closeModal();
+    SCREENS.citas();
+  } catch (e) {
+    toast(e.message || 'Error de conexión', false);
+  }
 }
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)};}
 
@@ -257,6 +353,29 @@ SCREENS.tratamientos=async()=>{
     ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+d.data.length+'</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">'+d.data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-start gap-3"><div class="w-10 h-10 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-spa text-spa"></i></div><div class="min-w-0"><h4 class="font-semibold text-[#2c3e50] truncate">'+t.nombre+'</h4><p class="text-xs text-[#6b7280] mt-0.5 line-clamp-2">'+(t.descripcion||'Sin descripción')+'</p></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-[#e8ecf1]"><span class="text-lg font-bold text-menta">'+$$(t.precio)+'</span><div class="text-right"><span class="text-xs text-[#6b7280]">'+t.duracion+' min</span>'+(t.categorianombre?'<br><span class="text-xs text-menta font-medium">'+t.categorianombre+'</span>':'')+'</div></div></div>').join('')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error al cargar tratamientos.','Reintentar','navigate(\'tratamientos\')')}
 };
+function actualizarPrecioMostrado() {
+  const sel = document.getElementById('citaTratamiento');
+  if (!sel) {
+    console.log('No se encontró el select citaTratamiento');
+    return;
+  }
+  
+  const selectedOption = sel.options[sel.selectedIndex];
+  if (!selectedOption) {
+    console.log('No hay opción seleccionada');
+    return;
+  }
+  
+  const precio = selectedOption.getAttribute('data-precio');
+  console.log('Precio obtenido:', precio);
+  
+  const precioSpan = document.getElementById('precioMostrado');
+  if (precioSpan && precio) {
+    precioSpan.textContent = $$(Number(precio));
+  } else if (precioSpan) {
+    precioSpan.textContent = '$0.00';
+  }
+}
 // Dependiente: Paquetes (read-only w/ detail)
 SCREENS.paquetes=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading();
