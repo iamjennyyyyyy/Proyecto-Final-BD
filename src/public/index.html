@@ -88,8 +88,8 @@
     <div class="relative z-10 w-full max-w-md mx-4 fade-in">
       <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/40 scale-in">
         <div class="text-center mb-8">
-          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-menta-400 to-spa-500 flex items-center justify-center shadow-lg">
-            <i class="fa-solid fa-spa text-white text-3xl"></i>
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-menta-400 to-spa-500 flex items-center justify-center shadow-lg overflow-hidden">
+            <i class="fa-solid fa-spa text-white text-3xl drop-shadow-sm"></i>
           </div>
           <h1 class="text-2xl font-bold text-[#2c3e50]">Belleza & Relax</h1>
           <p class="text-[#6b7280] text-sm mt-1 font-light">Tu espacio de calma, cuidado y bienestar</p>
@@ -135,12 +135,12 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full bg-white shadow-[2px_0_12px_rgba(0,0,0,0.04)] z-30 flex flex-col overflow-hidden" style="width: 260px;">
       <div class="flex items-center gap-3 px-5 h-[64px] border-b border-[#e8ecf1] flex-shrink-0">
-        <button onclick="toggleSidebar()" class="text-[#6b7280] hover:text-[#2c3e50] text-lg transition-colors flex-shrink-0">
-          <i class="fa-solid fa-bars"></i>
+        <button onclick="toggleSidebar()" class="text-[#6b7280] hover:text-[#2c3e50] transition-colors flex-shrink-0">
+          <i class="fa-solid fa-bars text-lg"></i>
         </button>
         <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-menta to-spa-500 flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-spa text-white text-sm"></i>
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-menta to-spa-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <i class="fa-solid fa-spa text-white text-lg"></i>
           </div>
           <span id="sidebarBrand" class="font-semibold text-[#2c3e50] text-sm whitespace-nowrap sidebar-text">SPA Belleza</span>
         </div>
@@ -148,7 +148,7 @@
       <nav id="sidebarNav" class="flex-1 overflow-y-auto px-3 py-4 space-y-1 hide-scrollbar"></nav>
       <div class="px-3 pb-4 border-t border-[#e8ecf1] pt-3">
         <button onclick="logout()" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[#6b7280] hover:text-red-500 hover:bg-red-50 transition-all text-sm">
-          <i class="fa-solid fa-right-from-bracket w-5 text-center text-base"></i>
+          <i class="fa-solid fa-right-from-bracket text-sm opacity-60"></i>
           <span class="sidebar-text">Cerrar Sesión</span>
         </button>
       </div>
@@ -188,7 +188,13 @@
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
+  <script src="/js/utils.js"></script>
   <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/dep-citas.js"></script>
+  <script src="/js/dep-screens.js"></script>
+  <script src="/js/admin-crud.js"></script>
+  <script src="/js/admin-screens.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>
