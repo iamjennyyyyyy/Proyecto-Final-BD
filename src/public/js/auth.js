@@ -28,7 +28,6 @@ const MENU_DEP=[{id:'inicio',icon:'fa-house',label:'Inicio'},{id:'citas',icon:'f
 const MENU_ADM=[
   {id:'admin-tratamientos', icon:'fa-spa', label:'Tratamientos'},
   {id:'admin-paquetes', icon:'fa-box', label:'Paquetes'},
-  {id:'admin-paquetes-vendidos', icon:'fa-receipt', label:'Paquetes Vendidos'},
   {id:'admin-ventas', icon:'fa-chart-line', label:'Ventas'},
   {id:'admin-empleados', icon:'fa-user-tie', label:'Empleados'},
   {id:'admin-clientes', icon:'fa-users', label:'Clientes'},
@@ -40,7 +39,7 @@ const MENU_ADM=[
   {id:'admin-informe-ingresos', icon:'fa-file-invoice-dollar', label:'Informe Ingresos'},
   {id:'admin-informe-discrepancia', icon:'fa-file-excel', label:'Informe Discrepancia'}
 ];const TITLES={inicio:'Inicio',citas:'Citas',paquetes:'Paquetes', 'admin-ventas': 'Ventas',tratamientos:'Tratamientos',reportes:'Reportes',mapa:'Mapa y Contactos','admin-tratamientos':'Tratamientos','admin-paquetes':'Paquetes','admin-empleados':'Empleados','admin-clientes':'Clientes','admin-materiales':'Materiales','admin-categorias':'Categorías','admin-distritos':'Distritos','admin-areas':'Áreas','admin-reportes':'Reportes','admin-informe-ingresos':'Informe de Ingresos','admin-informe-discrepancia':'Informe de Discrepancia','paquetes-vendidos': 'Paquetes Vendidos',
-  'admin-paquetes-vendidos': 'Paquetes Vendidos'};
+  };
 const SCREENS={};
 function renderSidebar(){const nav=$('sidebarNav');if(!nav)return;const items=user?.rol==='administrador'?MENU_ADM:MENU_DEP;nav.innerHTML=items.map(i=>'<a href="#'+i.id+'" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all '+(currentPage===i.id?'bg-menta text-white font-medium shadow-sm':'text-[#6b7280] hover:bg-lavender-50 hover:text-[#2c3e50]')+'"><i class="fa-solid '+i.icon+' w-5 text-center text-base"></i><span class="sidebar-text">'+i.label+'</span></a>').join('');}
 function toggleSidebar(){const sb=$('sidebar'),mc=$('mainContent');if(window.innerWidth<=768){sb.style.transform=sb.style.transform==='translateX(0%)'?'translateX(-100%)':'translateX(0%)';$('sidebarOverlay').classList.toggle('hidden')}else{sidebarCollapsed=!sidebarCollapsed;sb.style.width=sidebarCollapsed?'70px':'260px';mc.style.marginLeft=sidebarCollapsed?'70px':'260px';qq('.sidebar-text').forEach(el=>el.style.display=sidebarCollapsed?'none':'');$('sidebarBrand').style.display=sidebarCollapsed?'none':'';}}

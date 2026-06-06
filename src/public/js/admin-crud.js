@@ -1,6 +1,13 @@
 /* admin-crud.js — Motor CRUD genérico: crudScreen, crudForm, saveCRUD, deleteCRUD */
 // CRUD Builder
 const _crudConfigs={};
+
+// Mapeo de campos: cuando la API devuelve un nombre diferente al del formulario
+const _fieldMappings = {
+  '/api/paquetes': { 'paquetenombre': 'nombre' },
+  '/api/categorias': { 'categorianombre': 'nombre' }
+};
+
 function crudScreen(opts){
   const{page,endpoint,entity,fields,titleField,customCols,customRender,onCreated}=opts;
   _crudConfigs[page]={endpoint,entity,fields,onCreated};
@@ -16,14 +23,29 @@ function crudScreen(opts){
   };
   window['openModalCRUD_'+page]=()=>crudForm(page,endpoint,entity,fields,null,onCreated);
 }
+
 window['editCRUD']=async(p,id)=>{
   const cfg=_crudConfigs[p];if(!cfg)return toast('Configuración no encontrada',false);
   try{
     const d=await api.get(cfg.endpoint+'/'+id);
     if(!d.success)return toast(d.error||'Error',false);
-    crudForm(p,cfg.endpoint,cfg.entity,cfg.fields,d.data,cfg.onCreated);
+    
+    // Aplicar mapeo de campos antes de pasar al formulario
+    let editData = d.data;
+    if (editData) {
+      const mappings = _fieldMappings[cfg.endpoint] || {};
+      Object.keys(mappings).forEach(apiField => {
+        const formField = mappings[apiField];
+        if (editData[apiField] !== undefined && editData[formField] === undefined) {
+          editData[formField] = editData[apiField];
+        }
+      });
+    }
+    
+    crudForm(p,cfg.endpoint,cfg.entity,cfg.fields,editData,cfg.onCreated);
   }catch(e){toast('Error al cargar datos',false)}
 };
+
 async function crudForm(page,endpoint,entity,fields,editData,onCreated){
   editId=editData?editData[Object.keys(editData).find(k=>k.toLowerCase().includes('id'))]:null;
   let body='<div class="p-6" style="max-width: 480px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-regular fa-'+(editData?'pen-to-square':'square-plus')+' text-menta mr-2"></i>'+(editData?'Editar ':'Nuevo ')+entity+'</h3><form id="crudForm" class="space-y-3.5" onsubmit="return false">';
@@ -50,6 +72,7 @@ async function crudForm(page,endpoint,entity,fields,editData,onCreated){
   body+='</form><div id="crudFormError" class="hidden mt-2 text-sm text-red-500 bg-red-50 rounded-xl px-3 py-2 border border-red-100"></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="saveCRUD(\''+endpoint+'\',\''+page+'\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">'+(editData?'Guardar Cambios':'Crear '+entity)+'</button></div></div>';
   openModal(body,()=>{if(onCreated)setTimeout(onCreated,50);});
 }
+
 // Reemplazar la función saveCRUD completa
 async function saveCRUD(endpoint,page,hasCallback){
   const form=$('crudForm');if(!form)return;
@@ -57,11 +80,15 @@ async function saveCRUD(endpoint,page,hasCallback){
   fd.forEach((v,k)=>{data[k]=v});
   form.querySelectorAll('input[type="checkbox"]').forEach(cb=>{data[cb.name]=cb.checked;});
   
-  // Para paquetes, mapear 'nombre' a 'paquetenombre'
-  if(endpoint==='/api/paquetes' && data.nombre){
-    data.paquetenombre = data.nombre;
-    delete data.nombre;
-  }
+  // Aplicar mapeo inverso: del formulario a la API
+  const mappings = _fieldMappings[endpoint] || {};
+  Object.keys(mappings).forEach(apiField => {
+    const formField = mappings[apiField];
+    if (data[formField] !== undefined) {
+      data[apiField] = data[formField];
+     // delete data[formField];
+    }
+  });
   
   ['precio','duracion','cantidad','iddistrito','idcategoria','idarea','horastrabajo','duraciontotal'].forEach(k=>{
     if(data[k]!==undefined&&data[k]!=='')data[k]=isNaN(Number(data[k]))?data[k]:Number(data[k]);
@@ -72,6 +99,7 @@ async function saveCRUD(endpoint,page,hasCallback){
     toast(editId?'Actualizado':'Creado exitosamente');closeModal();navigate(page);
   }catch(e){toast(e.message||'Error de conexión',false);}
 }
+
 window.deleteCRUD=async(endpoint,id,page)=>{
   openConfirm('Eliminar','¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.',async()=>{
     try{
@@ -96,4 +124,3 @@ window.deleteCRUD=async(endpoint,id,page)=>{
     }
   });
 };
-

@@ -47,16 +47,29 @@ const empleadoService = {
         const empleado = await empleadoRepository.buscarPorId(id);
         if (!empleado) throw new Error('Empleado no encontrado');
         try {
+            // Si el empleado es fijo, eliminar primero sus asignaciones fijas
+            if (empleado.esfijo) {
+                await empleadoRepository.eliminarDeTratamientosFijos(id);
+            }
             await empleadoRepository.eliminar(id);
         } catch (e) {
             if (e.code === '23503') throw new Error('No se puede eliminar: el empleado tiene citas, áreas o tratamientos asociados');
             throw e;
         }
     },
-        async cambiarEsFijo(id) {
+
+    async cambiarEsFijo(id) {
         const empleado = await empleadoRepository.buscarPorId(id);
         if (!empleado) throw new Error('Empleado no encontrado');
+        
         const nuevoValor = !empleado.esfijo;
+        
+        // Si se está desmarcando como fijo (nuevoValor === false), 
+        // eliminar todos los registros de empleadofijo
+        if (nuevoValor === false) {
+            await empleadoRepository.eliminarDeTratamientosFijos(id);
+        }
+        
         return await empleadoRepository.cambiarEsFijo(id, nuevoValor);
     },
 };

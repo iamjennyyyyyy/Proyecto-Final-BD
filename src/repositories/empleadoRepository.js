@@ -151,12 +151,22 @@ class EmpleadoRepository{
         const result = await pool.query(`DELETE FROM empleados WHERE idempleado = $1 RETURNING *`, [id]);
         return result.rows[0];
     }
-        async cambiarEsFijo(id, esFijo) {
+    
+    async cambiarEsFijo(id, esFijo) {
         const result = await pool.query(
             `UPDATE empleados SET esfijo = $1 WHERE idempleado = $2 RETURNING *`,
             [esFijo, id]
         );
         return result.rows[0];
+    }
+
+    // NUEVO MÉTODO: Eliminar empleado de todos los tratamientos fijos
+    async eliminarDeTratamientosFijos(idEmpleado) {
+        const result = await pool.query(
+            `DELETE FROM empleadofijo WHERE idempleado = $1 RETURNING *`,
+            [idEmpleado]
+        );
+        return result.rows;
     }
 }
 

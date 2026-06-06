@@ -54,17 +54,7 @@ const areaController = {
         }
     },
 
-    async desasignarEmpleadoAUnArea(req, res) {
-        try{
-            const idArea = parseInt(req.params.idArea);
-            const idEmpleado = parseInt(req.params.idEmpleado);
-            await areaService.desasignarEmpleadoDeUnArea(idArea, idEmpleado);
-            res.json({success: true, mensaje: 'Empleado desasignado del área'});
-        }
-        catch(error){
-            res.status(400).json({success: false, error: error.message});
-        }
-    },
+    
 
     async crear(req, res) {
         try {
@@ -113,6 +103,64 @@ const areaController = {
             res.json({ success: true, data: resultado, mensaje: 'Categoría movida a otra área' });
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });
+        }
+    },
+      async desasignarEmpleadoDeUnArea(req, res) {
+        try {
+            const { idArea, idEmpleado } = req.params;
+            
+            // Validar que los parámetros existan
+            if (!idArea || !idEmpleado) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Los parámetros idArea e idEmpleado son requeridos'
+                });
+            }
+            
+            const resultado = await areaService.desasignarEmpleadoDeUnArea(idArea, idEmpleado);
+            
+            return res.status(200).json({
+                success: true,
+                message: resultado.message,
+                data: resultado.data
+            });
+            
+        } catch (error) {
+            console.error('Error en desasignarEmpleadoDeUnArea:', error);
+            
+            // Manejo específico de errores
+            if (error.message.includes('requeridos')) {
+                return res.status(400).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            if (error.message.includes('válidos')) {
+                return res.status(400).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            if (error.message.includes('no existe')) {
+                return res.status(404).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            if (error.message.includes('no está asignado')) {
+                return res.status(404).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            return res.status(500).json({
+                success: false,
+                error: 'Error interno del servidor al desasignar el empleado'
+            });
         }
     },
 }

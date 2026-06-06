@@ -9,10 +9,91 @@ SCREENS['admin-tratamientos']=async()=>{
     if(!r.success){ct.innerHTML=showEmpty('fa-regular fa-spa','Sin datos','No hay tratamientos registrados.','Agregar','crudTratamientoForm(null)');return;}
     const data=(r.data||[]).filter(t=>!tratFilterCategoria||t.idcategoria==tratFilterCategoria);
     const catData=cat.success?cat.data||[]:[];
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><select id="tratFiltroCat" class="px-3 py-1.5 border border-[#d1d5db] rounded-lg text-xs" onchange="tratFilterCategoria=this.value;navigate(\'admin-tratamientos\')"><option value="">Todas las categorías</option>'+(catData.map(c=>'<option value="'+c.idcategoria+'"'+(tratFilterCategoria==c.idcategoria?' selected':'')+'>'+(c.categorianombre||c.nombre||'')+'</option>').join(''))+'</select><button onclick="crudTratamientoForm(null)" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="space-y-3">'+data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleTratamiento('+t.idtratamiento+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-spa text-spa text-sm"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+t.nombre+'</h4><p class="text-xs text-[#6b7280]">'+$$(t.precio)+' | '+t.duracion+' min</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editTratamiento('+t.idtratamiento+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/tratamientos\','+t.idtratamiento+',\'admin-tratamientos\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedTratamiento===t.idtratamiento?'rotate-180':'')+'"></i></div></div><div id="tratPanel_'+t.idtratamiento+'" class="'+(expandedTratamiento===t.idtratamiento?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="tratContent_'+t.idtratamiento+'">'+showLoading()+'</div></div></div>').join('')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Tratamientos</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><select id="tratFiltroCat" class="px-3 py-1.5 border border-[#d1d5db] rounded-lg text-xs" onchange="tratFilterCategoria=this.value;navigate(\'admin-tratamientos\')"><option value="">Todas las categorías</option>'+(catData.map(c=>'<option value="'+c.idcategoria+'"'+(tratFilterCategoria==c.idcategoria?' selected':'')+'>'+(c.categorianombre||c.nombre||'')+'</option>').join(''))+'</select><button onclick="crudTratamientoForm(null)" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="space-y-3">'+data.map(t=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleTratamiento('+t.idtratamiento+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-spa text-spa text-sm"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+t.nombre+'</h4><p class="text-xs text-[#6b7280]">'+$$(t.precio)+' | '+t.duracion+' min</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editTratamiento('+t.idtratamiento+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteTratamiento('+t.idtratamiento+',\''+t.nombre.replace(/'/g,"\\'")+'\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedTratamiento===t.idtratamiento?'rotate-180':'')+'"></i></div></div><div id="tratPanel_'+t.idtratamiento+'" class="'+(expandedTratamiento===t.idtratamiento?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="tratContent_'+t.idtratamiento+'">'+showLoading()+'</div></div></div>').join('')+'</div></div>';
     if(expandedTratamiento)loadTratamientoPanel(expandedTratamiento);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-tratamientos\')')}
 };
+async function deleteTratamiento(id, nombre) {
+  try {
+    // Verificar si el tratamiento tiene citas asociadas
+    const citasRes = await api.get('/api/citas?tratamiento=' + id);
+    const citas = citasRes.success ? (citasRes.data || []) : [];
+    
+    if (citas.length > 0) {
+      // Si tiene citas, preguntar si desea moverlas a otra categoría/tratamiento
+      const [cats, trats] = await Promise.all([
+        api.get('/api/categorias'),
+        api.get('/api/tratamientos')
+      ]);
+      
+      const categoriasDisponibles = cats.success ? (cats.data || []) : [];
+      const tratamientosDisponibles = trats.success ? (trats.data || []).filter(t => t.idtratamiento !== id) : [];
+      
+      let modalHtml = '<div class="p-6" style="max-width:500px">';
+      modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Tratamiento</h3>';
+      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">El tratamiento <strong>"' + nombre + '"</strong> tiene ' + citas.length + ' cita(s) asociada(s).</p>';
+      
+      if (tratamientosDisponibles.length > 0) {
+        modalHtml += '<div class="mb-4">';
+        modalHtml += '<label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Mover citas a otro tratamiento</label>';
+        modalHtml += '<select id="tratDestinoSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">';
+        modalHtml += '<option value="">Seleccionar tratamiento destino...</option>';
+        modalHtml += tratamientosDisponibles.map(t => '<option value="' + t.idtratamiento + '">' + t.nombre + '</option>').join('');
+        modalHtml += '</select></div>';
+      }
+      
+      modalHtml += '<div class="flex gap-2">';
+      modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
+      modalHtml += '<button onclick="confirmarDeleteTratamiento(' + id + ')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-red-600">Eliminar</button>';
+      modalHtml += '</div></div>';
+      
+      openModal(modalHtml);
+    } else {
+      // Si no tiene citas, eliminar directamente
+      openConfirm('Eliminar Tratamiento', '¿Eliminar "' + nombre + '"?', async () => {
+        try {
+          const d = await api.del('/api/tratamientos/' + id);
+          if (!d.success) throw new Error(d.error);
+          toast('Tratamiento eliminado');
+          navigate('admin-tratamientos');
+        } catch(e) {
+          toast(e.message || 'Error al eliminar', false);
+        }
+      });
+    }
+  } catch(e) {
+    toast(e.message || 'Error de conexión', false);
+  }
+}
+
+// Función para confirmar eliminación de tratamiento con movimiento de citas
+async function confirmarDeleteTratamiento(idTrat) {
+  const destinoSelect = document.getElementById('tratDestinoSelect');
+  const idDestino = destinoSelect ? destinoSelect.value : null;
+  
+  try {
+    if (idDestino) {
+      // Mover citas al tratamiento destino
+      const moveRes = await api.put('/api/tratamientos/' + idTrat + '/citas/mover', { 
+        idtratamiento_destino: parseInt(idDestino) 
+      });
+      if (!moveRes.success) {
+        toast(moveRes.error || 'Error al mover citas', false);
+        return;
+      }
+    }
+    
+    // Eliminar el tratamiento
+    const delRes = await api.del('/api/tratamientos/' + idTrat);
+    if (!delRes.success) throw new Error(delRes.error);
+    
+    toast('Tratamiento eliminado exitosamente');
+    closeModal();
+    navigate('admin-tratamientos');
+  } catch(e) {
+    toast(e.message || 'Error al eliminar', false);
+  }
+}
 async function loadTratamientoPanel(id){
   const ct=$('tratContent_'+id);if(!ct)return;
   try{
@@ -68,6 +149,8 @@ async function eliminarEmpleadoFijoTratamiento(idTrat, idEmp, nombre){
     }
   });
 }
+
+
 function toggleTratamiento(id){
   const panel=$(('tratPanel_'+id));
   if(expandedTratamiento===id){expandedTratamiento=null;panel.classList.add('hidden');return;}
@@ -132,7 +215,7 @@ async function agregarEmpleadoTratamiento(idTrat){
     const todosEmps=await api.get('/api/empleados');
     if(!todosEmps.success)return toast('Error al cargar empleados',false);
     const yaAsignados=(emps.success?(emps.data||[]):[]).map(e=>e.idempleado);
-    const disponibles=(todosEmps.data||[]).filter(e=>(e.esfijo===true||e.esfijo===1||e.esfijo==='true'||e.esfijo==='t')&&!yaAsignados.includes(e.idempleado));
+    const disponibles=(todosEmps.data||[]).filter(e=>!yaAsignados.includes(e.idempleado));
     if(!disponibles.length)return toast('No hay empleados fijos disponibles para asignar',false);
     openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-user-tie text-menta mr-2"></i>Agregar Empleado Fijo</h3><div class="space-y-3.5"><div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label><select id="empSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Seleccionar empleado...</option>'+disponibles.map(e=>'<option value="'+e.idempleado+'">'+e.nombre+'</option>').join('')+'</select></div></div><div class="flex gap-2 mt-6"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="guardarEmpTrat('+idTrat+')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Agregar</button></div></div>');
   }catch(e){toast(e.message||'Error de conexión',false)}
@@ -146,6 +229,8 @@ async function guardarEmpTrat(idTrat){
     toast('Empleado agregado');closeModal();loadTratamientoPanel(idTrat);
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
+
+
 
 // Admin: Paquetes
 crudScreen({page:'admin-paquetes',endpoint:'/api/paquetes',entity:'Paquetes',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'precio',label:'Precio',type:'number',required:true},{name:'duraciontotal',label:'Duración Total (min)',type:'number'}],titleField:'paquetenombre',customCols:[{label:'Nombre',render:r=>r.paquetenombre||r.nombre||'-'},{label:'Precio',render:r=>$$(r.precio)},{label:'Duración',render:r=>r.duraciontotal?r.duraciontotal+' min':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="window.verPaqueteAdmin('+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Contenido"><i class="fa-solid fa-list"></i></button><button onclick="editCRUD(\'admin-paquetes\','+r.idpaquete+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/paquetes\','+r.idpaquete+',\'admin-paquetes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
@@ -183,26 +268,81 @@ async function quitarTratamientoPaquete(idPaq,idTrat,nombre){
   });
 }
 
+
+
+
+
 // Admin: Empleados
-crudScreen({page:'admin-empleados',endpoint:'/api/empleados',entity:'Empleados',titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.nombre||'-'},{label:'DNI',render:r=>r.dni||'-'},{label:'Teléfono',render:r=>r.telefono||'-'},{label:'Especialidad',render:r=>r.especialidad||'-'},{label:'Fijo',render:r=>{const esFijo=r.esfijo===true||r.esfijo===1||r.esfijo==='true'||r.esfijo==='t';return esFijo?'<span class="text-menta"><i class="fa-solid fa-check"></i></span>':'<span class="text-[#d1d5db]"><i class="fa-solid fa-xmark"></i></span>'}},{label:'Distrito',render:r=>r.distritonombre||'-'},{label:'Horas',render:r=>r.horastrabajo!=null?r.horastrabajo+' h':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-empleados\','+r.idempleado+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/empleados\','+r.idempleado+',\'admin-empleados\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'dni',label:'DNI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'especialidad',label:'Especialidad',type:'text'},{name:'direccion',label:'Dirección',type:'text'},{name:'iddistrito',label:'Distrito',type:'select',loadEndpoint:'/api/distritos',optionValue:'iddistrito',optionLabel:'nombre'},{name:'esfijo',label:'Es Fijo',type:'checkbox'}]});
-// Custom modal for empleados to load distrito options
-const _empleadoFields=[
-  {name:'nombre',label:'Nombre',type:'text',required:true},{name:'dni',label:'DNI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'especialidad',label:'Especialidad',type:'text'},{name:'direccion',label:'Dirección',type:'text'},{name:'iddistrito',label:'Distrito',type:'select',options:[]},{name:'esfijo',label:'Es Fijo',type:'checkbox'}
+const _empleadoFieldsWithWarning=[
+  {name:'nombre',label:'Nombre',type:'text',required:true},
+  {name:'dni',label:'DNI',type:'text',required:true},
+  {name:'telefono',label:'Teléfono',type:'text'},
+  {name:'especialidad',label:'Especialidad',type:'text'},
+  {name:'direccion',label:'Dirección',type:'text'},
+  {name:'iddistrito',label:'Distrito',type:'select',options:[]},
 ];
-async function _loadDistritoSelect(fields){try{const d=await api.get('/api/distritos');if(d.success&&d.data)return fields.map(f=>f.name==='iddistrito'?{...f,options:d.data.map(r=>({value:r.iddistrito,label:r.nombre}))}:f);}catch(e){}return fields;}
-async function _loadAreaSelect(fields){try{const d=await api.get('/api/areas');if(d.success&&d.data)return fields.map(f=>f.name==='idarea'?{...f,options:d.data.map(r=>({value:r.idarea,label:r.nombre}))}:f);}catch(e){}return fields;}
+
+crudScreen({page:'admin-empleados',endpoint:'/api/empleados',entity:'Empleados',titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.nombre||'-'},{label:'DNI',render:r=>r.dni||'-'},{label:'Teléfono',render:r=>r.telefono||'-'},{label:'Especialidad',render:r=>r.especialidad||'-'},{label:'Fijo',render:r=>{const esFijo=r.esfijo===true||r.esfijo===1||r.esfijo==='true'||r.esfijo==='t';return esFijo?'<span class="text-menta"><i class="fa-solid fa-check"></i></span>':'<span class="text-[#d1d5db]"><i class="fa-solid fa-xmark"></i></span>'}},{label:'Distrito',render:r=>r.distritonombre||'-'},{label:'Horas',render:r=>r.horastrabajo!=null?r.horastrabajo+' h':'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-empleados\','+r.idempleado+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/empleados\','+r.idempleado+',\'admin-empleados\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],fields:_empleadoFieldsWithWarning});
+
+// Custom modal for empleados to load distrito options and handle esfijo warning
+const _empleadoFields=[
+  {name:'nombre',label:'Nombre',type:'text',required:true},
+  {name:'dni',label:'DNI',type:'text',required:true},
+  {name:'telefono',label:'Teléfono',type:'text'},
+  {name:'especialidad',label:'Especialidad',type:'text'},
+  {name:'direccion',label:'Dirección',type:'text'},
+  {name:'iddistrito',label:'Distrito',type:'select',options:[]},
+  
+];
+
+async function _loadDistritoSelect(fields){
+  try{
+    const d=await api.get('/api/distritos');
+    if(d.success&&d.data)return fields.map(f=>f.name==='iddistrito'?{...f,options:d.data.map(r=>({value:r.iddistrito,label:r.nombre}))}:f);
+  }catch(e){}
+  return fields;
+}
+
+async function _loadAreaSelect(fields){
+  try{
+    const d=await api.get('/api/areas');
+    if(d.success&&d.data)return fields.map(f=>f.name==='idarea'?{...f,options:d.data.map(r=>({value:r.idarea,label:r.nombre}))}:f);
+  }catch(e){}
+  return fields;
+}
+
 const _origEditCRUD=window.editCRUD;
 window.editCRUD=async(p,id)=>{
-  const cfg=_crudConfigs[p];if(!cfg)return toast('Configuración no encontrada',false);
+  const cfg=_crudConfigs[p];
+  if(!cfg)return toast('Configuración no encontrada',false);
   try{
     const d=await api.get(cfg.endpoint+'/'+id);
     if(!d.success)return toast(d.error||'Error',false);
     let fields=cfg.fields;
     if(p==='admin-empleados')fields=await _loadDistritoSelect(fields);
     if(p==='admin-categorias')fields=await _loadAreaSelect(fields);
-    crudForm(p,cfg.endpoint,cfg.entity,fields,d.data,cfg.onCreated);
+    
+  
+        // Apply field mappings (paquetenombre→nombre, categorianombre→nombre)
+    let editData = d.data;
+    if (editData) {
+      const mappings = (_fieldMappings[cfg.endpoint] || {});
+      Object.keys(mappings).forEach(apiField => {
+        const formField = mappings[apiField];
+        if (editData[apiField] !== undefined && editData[formField] === undefined) {
+          editData[formField] = editData[apiField];
+        }
+      });
+    }
+    crudForm(p,cfg.endpoint,cfg.entity,fields,editData,cfg.onCreated);
   }catch(e){toast(e.message||'Error al cargar datos',false)}
 };
+
+
+
+
+
+// Admin: Clientes
 const _origOpenEmpleados=window['openModalCRUD_admin-empleados'];
 window['openModalCRUD_admin-empleados']=async()=>{
   try{
@@ -214,7 +354,7 @@ window['openModalCRUD_admin-empleados']=async()=>{
   }catch(e){_origOpenEmpleados()}
 };
 
-// Admin: Clientes
+// Admin: Clientes - ELIMINADO {label:'Gasto Total',render:r=>$$(r.total_gastado||0)}
 crudScreen({page:'admin-clientes',endpoint:'/api/clientes',entity:'Cliente',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'ci',label:'CI',type:'text',required:true},{name:'telefono',label:'Teléfono',type:'text'},{name:'email',label:'Email',type:'email'}],titleField:'nombre'});
 let clientesSearch='';
 SCREENS['admin-clientes']=async()=>{
@@ -223,7 +363,7 @@ SCREENS['admin-clientes']=async()=>{
     const d=await api.get('/api/clientes');
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-users','Sin datos','No hay clientes registrados.');return;}
     const data=(d.data||[]).filter(c=>!clientesSearch||(c.nombre||'').toLowerCase().includes(clientesSearch.toLowerCase())||(c.ci||'').includes(clientesSearch));
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-clientes\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" id="clienteSearch" placeholder="Buscar por nombre o CI..." value="'+clientesSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="clientesSearch=this.value;clearTimeout(window._clienteSearchTimer);window._clienteSearchTimer=setTimeout(function(){const prevFocus=document.activeElement?.id;SCREENS[\'admin-clientes\']().then(function(){if(prevFocus){const el=document.getElementById(prevFocus);if(el){el.focus();const v=el.value;el.value=\'\';el.value=v;}}})},400)"></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([{label:'Nombre',render:r=>r.nombre},{label:'CI',render:r=>r.ci||'-'},{label:'Teléfono',field:'telefono'},{label:'Email',field:'email'},{label:'Citas',render:r=>'<span class="px-2 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+(r.total_citas||0)+'</span>'},{label:'Gasto Total',render:r=>$$(r.total_gastado||0)},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="verHistorialCliente('+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Ver historial"><i class="fa-regular fa-clock"></i></button><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-clientes\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" id="clienteSearch" placeholder="Buscar por nombre o CI..." value="'+clientesSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="clientesSearch=this.value;clearTimeout(window._clienteSearchTimer);window._clienteSearchTimer=setTimeout(function(){const prevFocus=document.activeElement?.id;SCREENS[\'admin-clientes\']().then(function(){if(prevFocus){const el=document.getElementById(prevFocus);if(el){el.focus();const v=el.value;el.value=\'\';el.value=v;}}})},400)"></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([{label:'Nombre',render:r=>r.nombre},{label:'CI',render:r=>r.ci||'-'},{label:'Teléfono',field:'telefono'},{label:'Email',field:'email'},{label:'Citas',render:r=>'<span class="px-2 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+(r.total_citas||0)+'</span>'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="verHistorialCliente('+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Ver historial"><i class="fa-regular fa-clock"></i></button><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-clientes\')')}
 };
 async function verHistorialCliente(id){
@@ -237,12 +377,98 @@ async function verHistorialCliente(id){
 // Admin: Materiales
 crudScreen({page:'admin-materiales',endpoint:'/api/materiales',entity:'Materiales',fields:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'cantidad',label:'Stock Inicial',type:'number',required:true}],titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.nombre||'-'},{label:'Stock',render:r=>'<span class="font-semibold '+(Number(r.cantidad||0)<=5?'text-red-500':'text-[#2c3e50]')+'">'+(r.cantidad||0)+'</span>'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-materiales\','+r.idmaterial+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/materiales\','+r.idmaterial+',\'admin-materiales\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
 
+
+
+
 // Admin: Categorías (with area select)
 const _catFields=[
   {name:'nombre',label:'Nombre',type:'text',required:true},
   {name:'idarea',label:'Área',type:'select',required:true,options:[]}
 ];
-crudScreen({page:'admin-categorias',endpoint:'/api/categorias',entity:'Categoría',fields:_catFields,titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.categorianombre||r.nombre||'-'},{label:'Área',render:r=>r.areanombre||'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-categorias\','+r.idcategoria+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/categorias\','+r.idcategoria+',\'admin-categorias\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
+crudScreen({page:'admin-categorias',endpoint:'/api/categorias',entity:'Categoría',fields:_catFields,titleField:'nombre',customCols:[{label:'Nombre',render:r=>r.categorianombre||r.nombre||'-'},{label:'Área',render:r=>r.areanombre||'-'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-categorias\','+r.idcategoria+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCategoriaConTratamientos('+r.idcategoria+',\''+(r.categorianombre||r.nombre||'').replace(/'/g,"\\'")+'\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}]});
+
+// Función personalizada para eliminar categoría con manejo de tratamientos
+async function deleteCategoriaConTratamientos(idCategoria, nombre) {
+  try {
+    // Verificar si la categoría tiene tratamientos
+    const tratsRes = await api.get('/api/tratamientos?categoria=' + idCategoria);
+    const tratamientos = tratsRes.success ? (tratsRes.data || []) : [];
+    
+    if (tratamientos.length > 0) {
+      // Si tiene tratamientos, preguntar a qué categoría moverlos
+      const catsRes = await api.get('/api/categorias');
+      const categorias = catsRes.success ? (catsRes.data || []).filter(c => c.idcategoria !== idCategoria) : [];
+      
+      if (categorias.length === 0) {
+        toast('No hay otras categorías disponibles para mover los tratamientos', false);
+        return;
+      }
+      
+      let modalHtml = '<div class="p-6" style="max-width:500px">';
+      modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Categoría</h3>';
+      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">La categoría <strong>"' + nombre + '"</strong> tiene ' + tratamientos.length + ' tratamiento(s). Selecciona a qué categoría moverlos:</p>';
+      modalHtml += '<select id="catDestinoSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">';
+      modalHtml += '<option value="">Seleccionar categoría destino...</option>';
+      modalHtml += categorias.map(c => '<option value="' + c.idcategoria + '">' + (c.categorianombre || c.nombre || '') + '</option>').join('');
+      modalHtml += '</select>';
+      modalHtml += '<div class="flex gap-2">';
+      modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
+      modalHtml += '<button onclick="confirmarDeleteCategoria(' + idCategoria + ')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-red-600">Eliminar y Mover</button>';
+      modalHtml += '</div></div>';
+      
+      openModal(modalHtml);
+    } else {
+      // Si no tiene tratamientos, eliminar directamente
+      openConfirm('Eliminar Categoría', '¿Eliminar "' + nombre + '"?', async () => {
+        try {
+          const d = await api.del('/api/categorias/' + idCategoria);
+          if (!d.success) throw new Error(d.error);
+          toast('Categoría eliminada');
+          navigate('admin-categorias');
+        } catch(e) {
+          toast(e.message || 'Error al eliminar', false);
+        }
+      });
+    }
+  } catch(e) {
+    toast(e.message || 'Error de conexión', false);
+  }
+}
+
+// Función para confirmar eliminación de categoría con movimiento de tratamientos
+async function confirmarDeleteCategoria(idCat) {
+  const destinoSelect = document.getElementById('catDestinoSelect');
+  const idDestino = destinoSelect ? destinoSelect.value : null;
+  
+  if (!idDestino) {
+    toast('Selecciona una categoría destino', false);
+    return;
+  }
+  
+  try {
+    // Primero mover los tratamientos a la nueva categoría
+    const moveRes = await api.put('/api/categorias/' + idCat + '/tratamientos/mover', { 
+      idcategoria_destino: parseInt(idDestino) 
+    });
+    
+    if (!moveRes.success) {
+      // Si hay error en el movimiento, puede que algunos tratamientos no se hayan movido
+      toast(moveRes.error || 'Error al mover tratamientos', false);
+      return;
+    }
+    
+    // Luego eliminar la categoría
+    const delRes = await api.del('/api/categorias/' + idCat);
+    if (!delRes.success) throw new Error(delRes.error);
+    
+    toast('Categoría eliminada y tratamientos movidos exitosamente');
+    closeModal();
+    navigate('admin-categorias');
+  } catch(e) {
+    toast(e.message || 'Error al eliminar', false);
+  }
+}
+
 const _origOpenCats=window['openModalCRUD_admin-categorias'];
 window['openModalCRUD_admin-categorias']=async()=>{
   try{
@@ -253,6 +479,10 @@ window['openModalCRUD_admin-categorias']=async()=>{
     }else _origOpenCats();
   }catch(e){_origOpenCats()}
 };
+
+
+
+
 
 // Admin: Distritos
 crudScreen({page:'admin-distritos',endpoint:'/api/distritos',entity:'Distrito',fields:[{name:'nombre',label:'Nombre',type:'text',required:true}],titleField:'nombre'});
@@ -268,6 +498,7 @@ SCREENS['admin-distritos']=async()=>{
     if(expandedDistrito) loadDistritoPanel(expandedDistrito);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-distritos\')')}
 };
+
 
 // ============================================
 // FUNCIONES PARA DISTRITOS
@@ -333,6 +564,7 @@ async function moverTodosEmpleadosDistrito(idDistritoOrigen){
   }
 }
 
+
 async function confirmarMoverTodosEmpleados(idDistritoOrigen){
   const idDestino=document.getElementById('moverTodosDestino')?.value;
   if(!idDestino) return;
@@ -347,13 +579,17 @@ async function confirmarMoverTodosEmpleados(idDistritoOrigen){
   }
 }
 
+// MODIFICADO: eliminarDistritoConEmpleados con dos opciones
 function eliminarDistritoConEmpleados(id, nombre){
-  openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Distrito: '+nombre+'</h3><p class="text-sm text-[#6b7280] mb-4">Este distrito tiene empleados asignados. ¿Qué deseas hacer?</p><div class="space-y-3"><button onclick="eliminarDistritoConMover('+id+',true)" class="w-full px-4 py-3 bg-menta text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-arrow-right"></i><div><p class="font-medium">Mover empleados a otro distrito</p><p class="text-xs text-white/80">Los empleados serán reasignados</p></div></button><button onclick="eliminarDistritoConMover('+id+',false)" class="w-full px-4 py-3 bg-red-500 text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-trash"></i><div><p class="font-medium">Eliminar solo si no hay empleados</p><p class="text-xs text-white/80">Solo si el distrito está vacío</p></div></button></div><button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl">Cancelar</button></div>');
+  openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Distrito: '+nombre+'</h3><p class="text-sm text-[#6b7280] mb-4">Este distrito tiene empleados asignados. ¿Qué deseas hacer?</p><div class="space-y-3"><button onclick="eliminarDistritoConMover('+id+',\'todos\')" class="w-full px-4 py-3 bg-menta text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-arrow-right"></i><div><p class="font-medium">Mover todos a otro distrito</p><p class="text-xs text-white/80">Todos los empleados serán reasignados a un distrito destino</p></div></button><button onclick="eliminarDistritoConMover('+id+',\'individual\')" class="w-full px-4 py-3 bg-amber-500 text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-list-check"></i><div><p class="font-medium">Mover uno a uno</p><p class="text-xs text-white/80">Abrir el panel y mover empleados individualmente</p></div></button><button onclick="eliminarDistritoConMover('+id+',\'vacio\')" class="w-full px-4 py-3 bg-red-500 text-white rounded-xl text-left flex items-center gap-3"><i class="fa-solid fa-trash"></i><div><p class="font-medium">Eliminar solo si no hay empleados</p><p class="text-xs text-white/80">Solo si el distrito está vacío</p></div></button></div><button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl">Cancelar</button></div>');
 }
 
-async function eliminarDistritoConMover(id, moverEmpleados){
+// MODIFICADO: eliminarDistritoConMover con opciones múltiples
+async function eliminarDistritoConMover(id, modo){
   closeModal();
-  if(moverEmpleados){
+  
+  if (modo === 'todos') {
+    // Mover todos a otro distrito
     try{
       const otros=await api.get('/api/distritos');
       const otrosData=(otros.success?otros.data||[]:[]).filter(d=>d.iddistrito!==id);
@@ -363,7 +599,31 @@ async function eliminarDistritoConMover(id, moverEmpleados){
       }
       openModal('<div class="p-6" style="max-width:420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4">Mover empleados antes de eliminar</h3><select id="moverDestinoDistrito" class="w-full px-4 py-2.5 border rounded-xl mb-4">'+otrosData.map(function(d){return '<option value="'+d.iddistrito+'">'+d.nombre+'</option>';}).join('')+'</select><div class="flex gap-2"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 rounded-xl">Cancelar</button><button onclick="confirmarEliminarDistrito('+id+')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl">Eliminar y mover</button></div></div>');
     } catch(e){ toast('Error',false); }
-  } else {
+  } else if (modo === 'individual') {
+    // Abrir el panel y mostrar botones individuales
+    closeModal();
+    
+    // Expandir el distrito para mostrar el panel
+    if (expandedDistrito !== id) {
+      toggleDistrito(id);
+    }
+    
+    // Mostrar mensaje
+    toast('Mueve los empleados individualmente antes de eliminar el distrito', true);
+    
+    // Esperar a que se cargue el panel
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Agregar un banner informativo en el panel
+    const panelContent = document.getElementById('distContent_' + id);
+    if (panelContent) {
+      const banner = document.createElement('div');
+      banner.className = 'mb-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700';
+      banner.innerHTML = '<i class="fa-solid fa-info-circle mr-1"></i> Mueve los empleados a otros distritos usando los selectores. Cuando el distrito esté vacío, podrás eliminarlo.';
+      panelContent.insertBefore(banner, panelContent.firstChild);
+    }
+  } else if (modo === 'vacio') {
+    // Eliminar solo si no hay empleados
     try{
       const res=await api.del('/api/distritos/'+id);
       if(!res.success) throw new Error(res.error);
@@ -389,6 +649,7 @@ async function confirmarEliminarDistrito(id){
   }
 }
 
+
 function toggleDistrito(id){
   const p=document.getElementById('distPanel_'+id);
   if(expandedDistrito===id){
@@ -404,22 +665,7 @@ function toggleDistrito(id){
   if(p) p.classList.remove('hidden');
   loadDistritoPanel(id);
 }
-function toggleDistrito(id){const p=$(('distPanel_'+id));if(expandedDistrito===id){expandedDistrito=null;p.classList.add('hidden');return;}if(expandedDistrito){const old=$(('distPanel_'+expandedDistrito));if(old)old.classList.add('hidden')}expandedDistrito=id;p.classList.remove('hidden');}
-function deleteDistritoMigrar(id,nombre,data){
-  const otros=data.filter(d=>d.iddistrito!==id);
-  openModal('<div class="p-6" style="max-width: 420px"><h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Distrito</h3><p class="text-sm text-[#6b7280] mb-4">Al eliminar <strong>'+nombre+'</strong>, los empleados deben ser reasignados. Selecciona un distrito destino:</p><select id="migrarADistrito" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">'+(otros.length?otros.map(o=>'<option value="'+o.iddistrito+'">'+o.nombre+'</option>').join(''):'<option value="">No hay otros distritos</option>')+'</select><div class="flex gap-2"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button><button onclick="confirmarDeleteDistrito('+id+')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-red-600" '+(otros.length?'':'disabled')+'>Confirmar y Reasignar</button></div></div>');
-}
-async function confirmarDeleteDistrito(id){
-  const migrarA=$('migrarADistrito')?.value;
-  if(!migrarA)return toast('Selecciona un distrito destino',false);
-  try{
-    const d=await api.del('/api/distritos/'+id+'?migrarA='+migrarA);
-    if(!d.success)return toast(d.error||'Error',false);
-    toast('Distrito eliminado y empleados reasignados');closeModal();navigate('admin-distritos');
-  }catch(e){toast(e.message||'Error de conexión',false)}
-}
-// Patch delete button for distritos
-setTimeout(()=>{const oldDelete=window.deleteCRUD;if(!oldDelete)return;window.deleteCRUD=function(ep,id,page){if(ep==='/api/distritos'){const data=window._distritosData||[];const item=data.find(d=>d.iddistrito===id);if(item){deleteDistritoMigrar(id,item.nombre,data);return}}oldDelete(ep,id,page)};const scr=SCREENS['admin-distritos'];const orig=scr;SCREENS['admin-distritos']=async function(){const ct=$('pageContent');ct.innerHTML='<div class="flex items-center justify-center py-24"><div class="w-10 h-10 border-3 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';try{const d=await api.get('/api/distritos');if(d.success)window._distritosData=d.data;return orig.apply(this,arguments)}catch(e){return orig.apply(this,arguments)}}},100);
+
 
 // Admin: Áreas
 // Admin: Áreas — solo nombre, cantidadpersonalfijo es automático
@@ -432,10 +678,170 @@ SCREENS['admin-areas']=async()=>{
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-building','Sin datos','No hay áreas registradas.','Agregar','window[\'openModalCRUD_admin-areas\']()');return;}
     const allData=d.data||[];
     const data=allData.filter(a=>!areasSearch||(a.nombre||'').toLowerCase().includes(areasSearch.toLowerCase()));
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Áreas</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-areas\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar área..." value="'+areasSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="areasSearch=this.value;navigate(\'admin-areas\')"></div><div class="space-y-2">'+data.map(a=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleArea('+a.idarea+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-building text-spa"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+a.nombre+'</h4><p class="text-xs text-[#6b7280]" id="areaEmpCount_'+a.idarea+'">'+(a.cantidadpersonalfijo!=null?a.cantidadpersonalfijo+' empleados fijos':'')+'</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-areas\','+a.idarea+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteCRUD(\'/api/areas\','+a.idarea+',\'admin-areas\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedArea===a.idarea?'rotate-180':'')+'"></i></div></div><div id="areaPanel_'+a.idarea+'" class="'+(expandedArea===a.idarea?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="areaContent_'+a.idarea+'">'+(expandedArea===a.idarea?showLoading():'')+'</div></div></div>').join('')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Áreas</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-areas\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" placeholder="Buscar área..." value="'+areasSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="areasSearch=this.value;navigate(\'admin-areas\')"></div><div class="space-y-2">'+data.map(a=>'<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleArea('+a.idarea+')"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-building text-spa"></i></div><div><h4 class="font-medium text-[#2c3e50]">'+a.nombre+'</h4><p class="text-xs text-[#6b7280]" id="areaEmpCount_'+a.idarea+'">'+(a.cantidadpersonalfijo!=null?a.cantidadpersonalfijo+' empleados fijos':'')+'</p></div></div><div class="flex items-center gap-2"><div class="flex gap-1"><button onclick="event.stopPropagation();editCRUD(\'admin-areas\','+a.idarea+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deleteAreaConCategorias('+a.idarea+',\''+a.nombre.replace(/'/g,"\\'")+'\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div><i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform '+(expandedArea===a.idarea?'rotate-180':'')+'"></i></div></div><div id="areaPanel_'+a.idarea+'" class="'+(expandedArea===a.idarea?'':'hidden')+' border-t border-[#e8ecf1] bg-[#f8fafc]"><div class="p-4" id="areaContent_'+a.idarea+'">'+(expandedArea===a.idarea?showLoading():'')+'</div></div></div>').join('')+'</div></div>';
     if(expandedArea)loadAreaPanel(expandedArea);
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-areas\')')}
 };
+
+async function deleteAreaConCategorias(idArea, nombre) {
+  try {
+    // Verificar si el área tiene categorías
+    const catsRes = await api.get('/api/categorias/area/' + idArea);
+    const categorias = catsRes.success ? (catsRes.data || []) : [];
+    
+    if (categorias.length > 0) {
+      // Si tiene categorías, preguntar a qué área moverlas
+      const areasRes = await api.get('/api/areas');
+      const areas = areasRes.success ? (areasRes.data || []).filter(a => a.idarea !== idArea) : [];
+      
+      if (areas.length === 0) {
+        toast('No hay otras áreas disponibles para mover las categorías', false);
+        return;
+      }
+      
+      let modalHtml = '<div class="p-6" style="max-width:500px">';
+      modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Área</h3>';
+      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">El área <strong>"' + nombre + '"</strong> tiene ' + categorias.length + ' categoría(s). Selecciona a qué área moverlas:</p>';
+      
+      // Mostrar lista de categorías que se moverán
+      modalHtml += '<div class="mb-3 text-xs text-[#6b7280] bg-[#f8fafc] rounded-xl p-3 max-h-32 overflow-y-auto">';
+      modalHtml += '<p class="font-semibold mb-1">Categorías a mover:</p>';
+      modalHtml += categorias.map(c => '<div class="py-0.5">• ' + (c.categorianombre || c.nombre || 'Sin nombre') + '</div>').join('');
+      modalHtml += '</div>';
+      
+      modalHtml += '<select id="areaDestinoSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">';
+      modalHtml += '<option value="">Seleccionar área destino...</option>';
+      modalHtml += areas.map(a => '<option value="' + a.idarea + '">' + a.nombre + '</option>').join('');
+      modalHtml += '</select>';
+      
+      // También preguntar por empleados
+      modalHtml += '<div class="mb-4">';
+      modalHtml += '<label class="block text-xs font-semibold text-[#6b7280] mb-1.5">¿Qué hacer con los empleados del área?</label>';
+      modalHtml += '<select id="empAreaDestinoSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">';
+      modalHtml += '<option value="0">Dejar sin área (desasignar)</option>';
+      modalHtml += areas.map(a => '<option value="' + a.idarea + '">Mover a: ' + a.nombre + '</option>').join('');
+      modalHtml += '</select></div>';
+      
+      modalHtml += '<div class="flex gap-2">';
+      modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
+      modalHtml += '<button onclick="confirmarDeleteArea(' + idArea + ')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-red-600">Eliminar y Mover</button>';
+      modalHtml += '</div></div>';
+      
+      openModal(modalHtml);
+    } else {
+      // Si no tiene categorías, verificar empleados
+      const empsRes = await api.get('/api/areas/' + idArea + '/empleados-todos');
+      const empleados = empsRes.success ? (empsRes.data || []) : [];
+      
+      if (empleados.length > 0) {
+        // Tiene empleados pero no categorías
+        const areasRes = await api.get('/api/areas');
+        const areas = areasRes.success ? (areasRes.data || []).filter(a => a.idarea !== idArea) : [];
+        
+        let modalHtml = '<div class="p-6" style="max-width:500px">';
+        modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Eliminar Área</h3>';
+        modalHtml += '<p class="text-sm text-[#6b7280] mb-4">El área <strong>"' + nombre + '"</strong> tiene ' + empleados.length + ' empleado(s). ¿Deseas moverlos?</p>';
+        modalHtml += '<select id="empAreaDestinoSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">';
+        modalHtml += '<option value="0">Dejar sin área (desasignar)</option>';
+        modalHtml += areas.map(a => '<option value="' + a.idarea + '">Mover a: ' + a.nombre + '</option>').join('');
+        modalHtml += '</select>';
+        modalHtml += '<div class="flex gap-2">';
+        modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl">Cancelar</button>';
+        modalHtml += '<button onclick="confirmarDeleteAreaSimple(' + idArea + ')" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl">Eliminar</button>';
+        modalHtml += '</div></div>';
+        
+        openModal(modalHtml);
+      } else {
+        // Sin categorías ni empleados, eliminar directamente
+        openConfirm('Eliminar Área', '¿Eliminar "' + nombre + '"?', async () => {
+          try {
+            const d = await api.del('/api/areas/' + idArea);
+            if (!d.success) throw new Error(d.error);
+            toast('Área eliminada');
+            navigate('admin-areas');
+          } catch(e) {
+            toast(e.message || 'Error al eliminar', false);
+          }
+        });
+      }
+    }
+  } catch(e) {
+    toast(e.message || 'Error de conexión', false);
+  }
+}
+
+// Confirmar eliminación de área con categorías y empleados
+async function confirmarDeleteArea(idArea) {
+  const areaDestinoSelect = document.getElementById('areaDestinoSelect');
+  const empDestinoSelect = document.getElementById('empAreaDestinoSelect');
+  
+  const idAreaDestino = areaDestinoSelect ? areaDestinoSelect.value : null;
+  const idEmpDestino = empDestinoSelect ? empDestinoSelect.value : '0';
+  
+  if (!idAreaDestino) {
+    toast('Selecciona un área destino para las categorías', false);
+    return;
+  }
+  
+  try {
+    // Mover categorías al área destino
+    const catsRes = await api.get('/api/categorias/area/' + idArea);
+    const categorias = catsRes.success ? (catsRes.data || []) : [];
+    
+    for (const cat of categorias) {
+      await api.put('/api/categorias/' + cat.idcategoria, { idarea: parseInt(idAreaDestino) });
+    }
+    
+    // Mover empleados si se seleccionó un destino
+    if (idEmpDestino !== '0') {
+      const empsRes = await api.get('/api/areas/' + idArea + '/empleados-todos');
+      const empleados = empsRes.success ? (empsRes.data || []) : [];
+      
+      for (const emp of empleados) {
+        await api.post('/api/areas/' + parseInt(idEmpDestino) + '/empleados/' + emp.idempleado);
+      }
+    }
+    
+    // Eliminar el área
+    const delRes = await api.del('/api/areas/' + idArea);
+    if (!delRes.success) throw new Error(delRes.error);
+    
+    toast('Área eliminada y recursos reasignados');
+    closeModal();
+    navigate('admin-areas');
+  } catch(e) {
+    toast(e.message || 'Error al eliminar', false);
+  }
+}
+
+// Confirmar eliminación simple de área (solo empleados)
+async function confirmarDeleteAreaSimple(idArea) {
+  const empDestinoSelect = document.getElementById('empAreaDestinoSelect');
+  const idEmpDestino = empDestinoSelect ? empDestinoSelect.value : '0';
+  
+  try {
+    // Mover empleados si se seleccionó un destino
+    if (idEmpDestino !== '0') {
+      const empsRes = await api.get('/api/areas/' + idArea + '/empleados-todos');
+      const empleados = empsRes.success ? (empsRes.data || []) : [];
+      
+      for (const emp of empleados) {
+        await api.post('/api/areas/' + parseInt(idEmpDestino) + '/empleados/' + emp.idempleado);
+      }
+    }
+    
+    // Eliminar el área
+    const delRes = await api.del('/api/areas/' + idArea);
+    if (!delRes.success) throw new Error(delRes.error);
+    
+    toast('Área eliminada');
+    closeModal();
+    navigate('admin-areas');
+  } catch(e) {
+    toast(e.message || 'Error al eliminar', false);
+  }
+}
+
 async function loadAreaPanel(id){
   const ct=$('areaContent_'+id);if(!ct)return;
   try{
@@ -481,14 +887,8 @@ async function guardarCategoriaArea(idArea){
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function eliminarCategoria(id,nombre){
-  openConfirm('Eliminar Categoría','¿Eliminar "'+nombre+'"?',async()=>{
-    try{
-      const d=await api.del('/api/categorias/'+id);
-      if(!d.success)return toast(d.error||'Error',false);
-      toast('Categoría eliminada');
-      for(const k of Object.keys(SCREENS))if(k.startsWith('admin-areas')){navigate(k);break;}
-    }catch(e){toast(e.message||'Error de conexión',false)}
-  });
+  // Usar la nueva función que maneja el movimiento de tratamientos
+  deleteCategoriaConTratamientos(id, nombre);
 }
 async function agregarEmpleadoArea(idArea){
   try{
@@ -509,75 +909,273 @@ async function guardarEmpleadoArea(idArea){
     toast('Empleado asignado al área');closeModal();loadAreaPanel(idArea);
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
-function quitarEmpleadoArea(idArea,idEmpleado,nombre){
-  openConfirm('Quitar Empleado','¿Quitar "'+nombre+'" del área?',async function(){
-    try{
-      var d=await api.del('/api/areas/'+idArea+'/empleados/'+idEmpleado);
-      if(!d.success)return toast(d.error||'Error',false);
-      toast('Empleado quitado del área');loadAreaPanel(idArea);
-    }catch(e){toast(e.message||'Error de conexión',false)}
-  });
+async function quitarEmpleadoArea(idArea, idEmpleado, nombre){
+  try {
+    // Intentar quitar el empleado del área
+    const d = await api.del('/api/areas/' + idArea + '/empleados/' + idEmpleado);
+    if (!d.success) {
+      // Si hay error, ofrecer mover a otra área
+      const areasRes = await api.get('/api/areas');
+      const areas = areasRes.success ? (areasRes.data || []).filter(a => a.idarea !== idArea) : [];
+      
+      if (areas.length === 0) {
+        toast(d.error || 'Error al quitar empleado', false);
+        return;
+      }
+      
+      let modalHtml = '<div class="p-6" style="max-width:450px">';
+      modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>No se puede quitar empleado</h3>';
+      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">' + (d.error || 'Error al quitar el empleado del área.') + '</p>';
+      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">¿Deseas mover a <strong>"' + nombre + '"</strong> a otra área?</p>';
+      modalHtml += '<select id="moverEmpAreaSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">';
+      modalHtml += '<option value="">Seleccionar área destino...</option>';
+      modalHtml += areas.map(a => '<option value="' + a.idarea + '">' + a.nombre + '</option>').join('');
+      modalHtml += '</select>';
+      modalHtml += '<div class="flex gap-2">';
+      modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
+      modalHtml += '<button onclick="moverEmpleadoAOtraArea(' + idArea + ',' + idEmpleado + ')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Mover a otra área</button>';
+      modalHtml += '</div></div>';
+      
+      openModal(modalHtml);
+    } else {
+      toast('Empleado quitado del área');
+      loadAreaPanel(idArea);
+    }
+  } catch(e) {
+    toast(e.message || 'Error de conexión', false);
+  }
 }
+
+// Función para mover empleado a otra área
+async function moverEmpleadoAOtraArea(idAreaOrigen, idEmpleado) {
+  const areaDestinoSelect = document.getElementById('moverEmpAreaSelect');
+  const idAreaDestino = areaDestinoSelect ? areaDestinoSelect.value : null;
+  
+  if (!idAreaDestino) {
+    toast('Selecciona un área destino', false);
+    return;
+  }
+  
+  try {
+    const d = await api.post('/api/areas/' + parseInt(idAreaDestino) + '/empleados/' + idEmpleado);
+    if (!d.success) throw new Error(d.error);
+    
+    toast('Empleado movido a la nueva área');
+    closeModal();
+    loadAreaPanel(idAreaOrigen);
+  } catch(e) {
+    toast(e.message || 'Error al mover empleado', false);
+  }
+}
+
+
+
 
 // Admin: Reportes hub — acceso a informes + reportes generales
 SCREENS['admin-reportes']=async()=>{
   const ct=$('pageContent');
-  ct.innerHTML='<div class="fade-in"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-chart-pie text-menta mr-2"></i>Informes y Reportes</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6"><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-ingresos\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-menta-50 flex items-center justify-center"><i class="fa-solid fa-file-invoice-dollar text-menta text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Ingresos</h4><p class="text-sm text-[#6b7280] mt-0.5">Resumen mensual de ingresos por tratamientos y paquetes</p></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="navigate(\'admin-informe-discrepancia\')"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center"><i class="fa-solid fa-file-excel text-amber-500 text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Informe de Discrepancia</h4><p class="text-sm text-[#6b7280] mt-0.5">Comparativa de materiales planificados vs. utilizados</p></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="_renderReporteScreen($(\'pageContent\'))"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-chart-bar text-spa text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Reportes Generales</h4><p class="text-sm text-[#6b7280] mt-0.5">Top tratamientos, historial de clientes, estadísticas del día</p></div></div></div></div></div>';
-};
+  ct.innerHTML='<div class="fade-in"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-chart-pie text-menta mr-2"></i>Reportes</h3><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="_renderReporteScreen($(\'pageContent\'))"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-chart-bar text-spa text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Reportes Generales</h4><p class="text-sm text-[#6b7280] mt-0.5">Top tratamientos, historial de clientes, estadísticas del día</p></div></div></div></div>';};
 
-// Admin: Informe Ingresos — usa endpoint real /api/reportes/ingresos + top tratamientos
+// Admin: Informe Ingresos — MODIFICADO: muestra todos los meses con detalle expandible
 SCREENS['admin-informe-ingresos']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading('Generando informe de ingresos...');
   try{
     const mesesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const[ingRes,topRes]=await Promise.all([
-      api.get('/api/reportes/ingresos'),
-      api.get('/api/reportes/top-tratamientos')
-    ]);
-    // Informe ingresos por mes desde la BD
-    const ingData=ingRes.success?ingRes.data||[]:[];
-    const topData=topRes.success?topRes.data||[]:[];
-    const totalGeneral=ingData.reduce((s,m)=>s+Number(m.total||m.ingresos||0),0);
-    const topColors=['bg-amber-100 text-amber-600','bg-gray-100 text-gray-500','bg-orange-50 text-orange-400'];
-    const topHtml=topData.length?'<div class="space-y-2">'+topData.map((t,i)=>'<div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold '+topColors[i]+'">'+(i+1)+'</div><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[#2c3e50] truncate">'+(t.tratamientonombre||t.nombre||'-')+'</p><p class="text-xs text-[#6b7280]">'+(t.totalcitas||t.cantidad||0)+' citas</p></div><span class="text-sm font-semibold text-menta">'+$$(t.ingresos||t.total||0)+'</span></div>').join('')+'</div>':'<p class="text-sm text-[#9ca3af] py-3 text-center">Sin datos de top tratamientos</p>';
-    // Construir tarjetas por mes
-    let mesCards='';
-    if(ingData.length){
-      // BD devuelve filas con mes/anio/total — construir display
-      const sorted=[...ingData].sort((a,b)=>{
-        const ka=(a.anio||a.year||0)+'-'+(String(a.mes||a.month||0).padStart(2,'0'));
-        const kb=(b.anio||b.year||0)+'-'+(String(b.mes||b.month||0).padStart(2,'0'));
+    
+    // Obtener todos los meses disponibles desde marzo 2026
+    const fechaInicio = dayjs('2026-03-01');
+    const fechaFin = dayjs();
+    const mesesDisponibles = [];
+    let fechaActual = fechaInicio;
+    
+    while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
+      mesesDisponibles.push({
+        valor: fechaActual.format('YYYY-MM'),
+        anio: fechaActual.year(),
+        mes: fechaActual.month() + 1,
+        label: mesesNom[fechaActual.month()] + ' ' + fechaActual.format('YYYY')
+      });
+      fechaActual = fechaActual.add(1, 'month');
+    }
+    
+    // Intentar obtener datos del endpoint real
+    let ingData = [];
+    let topData = [];
+    let totalGeneral = 0;
+    
+    try {
+      const [ingRes, topRes] = await Promise.all([
+        api.get('/api/reportes/ingresos'),
+        api.get('/api/reportes/top-tratamientos')
+      ]);
+      
+      ingData = ingRes.success ? ingRes.data || [] : [];
+      topData = topRes.success ? topRes.data || [] : [];
+      totalGeneral = ingData.reduce((s, m) => s + Number(m.total || m.ingresos || 0), 0);
+    } catch(e) {
+      // Si falla el endpoint, generar datos desde las citas y paquetes
+      const [citas, pqv] = await Promise.all([
+        api.get('/api/citas'),
+        api.get('/api/paquetes-vendidos')
+      ]);
+      
+      const realizadas = (citas.success ? (citas.data || []) : []).filter(c => c.estado === 'realizada');
+      const paqVend = pqv.success ? pqv.data || [] : [];
+      
+      // Procesar datos por mes
+      const mesesData = {};
+      mesesDisponibles.forEach(m => {
+        mesesData[m.valor] = {
+          ...m,
+          cantidad_paquetes_vendidos: 0,
+          ingresos_paquete: 0,
+          cantidad_tratamientos_individuales: 0,
+          ingresos_tratamientos: 0,
+          ingresos_totales: 0
+        };
+      });
+      
+      realizadas.forEach(c => {
+        if (!c.fecha) return;
+        const key = dayjs(c.fecha).format('YYYY-MM');
+        if (mesesData[key]) {
+          mesesData[key].cantidad_tratamientos_individuales++;
+          mesesData[key].ingresos_tratamientos += Number(c.precio || 0);
+        }
+      });
+      
+      paqVend.forEach(p => {
+        if (!p.fechacompra) return;
+        const key = dayjs(p.fechacompra).format('YYYY-MM');
+        if (mesesData[key]) {
+          mesesData[key].cantidad_paquetes_vendidos++;
+          mesesData[key].ingresos_paquete += Number(p.precio || 0);
+        }
+      });
+      
+      // Calcular totales
+      Object.values(mesesData).forEach(m => {
+        m.ingresos_totales = m.ingresos_tratamientos + m.ingresos_paquete;
+      });
+      
+      ingData = Object.values(mesesData).sort((a, b) => b.valor.localeCompare(a.valor));
+      totalGeneral = ingData.reduce((s, m) => s + m.ingresos_totales, 0);
+    }
+    
+    // Construir tarjetas expandibles por mes
+    let mesCards = '';
+    
+    if (ingData.length > 0) {
+      const sortedData = [...ingData].sort((a, b) => {
+        const ka = (a.anio || a.year || 0) + '-' + String(a.mes || a.month || 0).padStart(2, '0');
+        const kb = (b.anio || b.year || 0) + '-' + String(b.mes || b.month || 0).padStart(2, '0');
         return kb.localeCompare(ka);
       });
-      mesCards=sorted.map(m=>{
-        const mes=Number(m.mes||m.month||1)-1;
-        const anio=m.anio||m.year||'';
-        const label=(mesesNom[mes]||'')+' '+anio;
-        const tot=Number(m.total||m.ingresos||0);
-        const citasCnt=Number(m.citas||m.totalcitas||0);
-        const paqCnt=Number(m.paquetes||m.totalpaquetes||0);
-        return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center justify-between mb-3"><h4 class="font-semibold text-[#2c3e50] text-sm">'+label+'</h4><span class="text-lg font-bold text-menta">'+$$(tot)+'</span></div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-[#6b7280]">Tratamientos</span><span>'+citasCnt+' citas</span></div><div class="flex justify-between"><span class="text-[#6b7280]">Paquetes</span><span>'+paqCnt+' vendidos</span></div></div></div>';
+      
+      mesCards = sortedData.map((m, index) => {
+        const mesKey = m.valor || (m.anio + '-' + String(m.mes).padStart(2, '0'));
+        const label = m.label || (mesesNom[(m.mes || 1) - 1] + ' ' + (m.anio || ''));
+        const tot = Number(m.total || m.ingresos || m.ingresos_totales || 0);
+        const citasCnt = Number(m.citas || m.totalcitas || m.cantidad_tratamientos_individuales || 0);
+        const paqCnt = Number(m.paquetes || m.totalpaquetes || m.cantidad_paquetes_vendidos || 0);
+        const ingresosTrat = Number(m.ingresos_tratamientos || 0);
+        const ingresosPaq = Number(m.ingresos_paquete || 0);
+        
+        return `<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
+          <div class="p-5 cursor-pointer hover:bg-[#f8fafc] transition-colors" onclick="toggleMesDetalle('mesDetalle_${index}')">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-semibold text-[#2c3e50] text-sm">${label}</h4>
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-bold text-menta">${$$(tot)}</span>
+                <i class="fa-solid fa-chevron-down text-[#9ca3af] transition-transform mesChevron_${index}"></i>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-[#6b7280]">Tratamientos</span>
+                <span class="font-medium">${citasCnt} (${$$(ingresosTrat)})</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#6b7280]">Paquetes</span>
+                <span class="font-medium">${paqCnt} (${$$(ingresosPaq)})</span>
+              </div>
+            </div>
+          </div>
+          <div id="mesDetalle_${index}" class="hidden border-t border-[#e8ecf1] bg-[#f8fafc] p-5">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-[#e8ecf1]">
+                <div>
+                  <p class="text-sm font-medium text-[#2c3e50]">Tratamientos Individuales</p>
+                  <p class="text-xs text-[#6b7280]">Cantidad de citas realizadas</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-menta">${citasCnt}</p>
+                  <p class="text-xs text-[#6b7280]">${$$(ingresosTrat)}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-[#e8ecf1]">
+                <div>
+                  <p class="text-sm font-medium text-[#2c3e50]">Paquetes Vendidos</p>
+                  <p class="text-xs text-[#6b7280]">Cantidad de paquetes vendidos</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-amber-600">${paqCnt}</p>
+                  <p class="text-xs text-[#6b7280]">${$$(ingresosPaq)}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-menta-50 to-menta-100 rounded-xl border border-menta-200">
+                <div>
+                  <p class="text-sm font-semibold text-[#2c3e50]">Total del Mes</p>
+                  <p class="text-xs text-[#6b7280]">Ingresos totales</p>
+                </div>
+                <p class="text-xl font-bold text-menta">${$$(tot)}</p>
+              </div>
+            </div>
+          </div>
+        </div>`;
       }).join('');
-    }else{
-      // Fallback: construir desde citas locales
-      const[citas,pqv]=await Promise.all([api.get('/api/citas'),api.get('/api/paquetes-vendidos')]);
-      const realizadas = (citas.success ? (citas.data || []) : []).filter(c => c.estado === 'realizada');
-      const paqVend=pqv.success?pqv.data||[]:[];
-      const meses={};
-      for(let i=0;i<12;i++){
-        const m2=dayjs().subtract(i,'month');const key=m2.format('YYYY-MM');
-        meses[key]={label:mesesNom[m2.month()]+' '+m2.format('YYYY'),citas:0,ingresosCitas:0,paquetes:0,ingresosPaq:0,ingresosTotal:0};
-      }
-      realizadas.forEach(c=>{if(!c.fecha)return;const key=dayjs(c.fecha).format('YYYY-MM');if(meses[key]){meses[key].citas++;meses[key].ingresosCitas+=Number(c.precio||0)}});
-      paqVend.forEach(p=>{if(!p.fechacompra)return;const key=dayjs(p.fechacompra).format('YYYY-MM');if(meses[key]){meses[key].paquetes++;meses[key].ingresosPaq+=Number(p.precio||0)}});
-      Object.keys(meses).forEach(k=>{meses[k].ingresosTotal=meses[k].ingresosCitas+meses[k].ingresosPaq});
-      const sorted2=Object.keys(meses).sort().reverse();
-      const totalGeneral2=sorted2.reduce((s,k)=>s+meses[k].ingresosTotal,0);
-      mesCards=sorted2.map(k=>{const m2=meses[k];return '<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 hover:shadow-md transition-shadow"><div class="flex items-center justify-between mb-3"><h4 class="font-semibold text-[#2c3e50] text-sm">'+m2.label+'</h4><span class="text-lg font-bold text-menta">'+$$(m2.ingresosTotal)+'</span></div><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-[#6b7280]">Tratamientos</span><span>'+m2.citas+' citas — '+$$(m2.ingresosCitas)+'</span></div><div class="flex justify-between"><span class="text-[#6b7280]">Paquetes</span><span>'+m2.paquetes+' vendidos — '+$$(m2.ingresosPaq)+'</span></div></div></div>';}).join('');
+    } else {
+      mesCards = '<p class="text-sm text-[#9ca3af] text-center py-8">No hay datos de ingresos disponibles</p>';
     }
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-invoice-dollar text-menta mr-2"></i>Informe de Ingresos</h3><span class="px-3 py-1.5 bg-menta-50 text-menta-700 text-sm font-semibold rounded-full">Total: '+$$(totalGeneral)+'</span></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6"><div class="lg:col-span-2"><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-calendar-alt text-menta mr-1.5"></i>Por Mes</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">'+mesCards+'</div></div><div><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Top 3 Tratamientos</h4>'+topHtml+'</div></div></div>';
-  }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-ingresos\')')}
+    
+    // Top tratamientos
+    const topColors = ['bg-amber-100 text-amber-600', 'bg-gray-100 text-gray-500', 'bg-orange-50 text-orange-400'];
+    const topHtml = topData.length ? '<div class="space-y-2">' + topData.map((t, i) => 
+      '<div class="flex items-center gap-3 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]">' +
+      '<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ' + topColors[i] + '">' + (i + 1) + '</div>' +
+      '<div class="flex-1 min-w-0">' +
+      '<p class="text-sm font-medium text-[#2c3e50] truncate">' + (t.tratamientonombre || t.nombre || '-') + '</p>' +
+      '<p class="text-xs text-[#6b7280]">' + (t.totalcitas || t.cantidad || 0) + ' citas</p>' +
+      '</div>' +
+      '<span class="text-sm font-semibold text-menta">' + $$(t.ingresos || t.total || 0) + '</span>' +
+      '</div>'
+    ).join('') + '</div>' : '<p class="text-sm text-[#9ca3af] py-3 text-center">Sin datos de top tratamientos</p>';
+    
+    ct.innerHTML = '<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-invoice-dollar text-menta mr-2"></i>Informe de Ingresos</h3><span class="px-3 py-1.5 bg-menta-50 text-menta-700 text-sm font-semibold rounded-full">Total General: ' + $$(totalGeneral) + '</span></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6"><div class="lg:col-span-2"><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-calendar-alt text-menta mr-1.5"></i>Ingresos por Mes</h4><div class="space-y-3">' + mesCards + '</div></div><div><h4 class="font-semibold text-[#2c3e50] mb-3 text-sm"><i class="fa-solid fa-trophy text-amber-500 mr-1.5"></i>Top 3 Tratamientos</h4>' + topHtml + '</div></div></div>';
+  } catch(e) {
+    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error al generar el informe.', 'Reintentar', "navigate('admin-informe-ingresos')");
+  }
 };
+function toggleMesDetalle(id) {
+  const detalle = document.getElementById(id);
+  if (!detalle) return;
+  
+  const index = id.replace('mesDetalle_', '');
+  const chevron = document.querySelector('.mesChevron_' + index);
+  
+  if (detalle.classList.contains('hidden')) {
+    detalle.classList.remove('hidden');
+    if (chevron) chevron.classList.add('rotate-180');
+  } else {
+    detalle.classList.add('hidden');
+    if (chevron) chevron.classList.remove('rotate-180');
+  }
+}
+
+
+
+
+
 SCREENS['admin-ventas'] = async () => {
   const ct = $('pageContent');
   ct.innerHTML = showLoading('Cargando ventas...');
@@ -648,24 +1246,178 @@ SCREENS['admin-informe-discrepancia']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading('Cargando informe de discrepancia...');
   try{
     const mesesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const mesesOp=[];for(let i=0;i<12;i++){const m=dayjs().subtract(i,'month');mesesOp.push({val:m.format('YYYY-MM'),anio:m.year(),mes:m.month()+1,label:mesesNom[m.month()]+' '+m.format('YYYY')})}
+    
+    // Generar meses desde marzo 2026 hasta la fecha actual
+    const fechaInicio = dayjs('2026-03-01');
+    const fechaFin = dayjs();
+    const mesesOp = [];
+    let fechaActual = fechaInicio;
+    
+    while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
+      mesesOp.push({
+        val: fechaActual.format('YYYY-MM'),
+        anio: fechaActual.year(),
+        mes: fechaActual.month() + 1,
+        label: mesesNom[fechaActual.month()] + ' ' + fechaActual.format('YYYY')
+      });
+      fechaActual = fechaActual.add(1, 'month');
+    }
+    
+    // Ordenar del más reciente al más antiguo
+    mesesOp.reverse();
+    
     ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia</h3></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 mb-5"><div class="flex flex-wrap items-end gap-3"><div class="flex-1 min-w-48"><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Seleccionar Mes</label><select id="discMes" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+mesesOp.map(m=>'<option value="'+m.anio+'/'+m.mes+'">'+m.label+'</option>').join('')+'</select></div><button onclick="generarInformeDiscrepancia()" class="px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm"><i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i>Generar Informe</button></div></div><div id="discResultado"><div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-hand-point-up text-2xl text-[#d1d5db] block mb-3"></i>Selecciona un mes y haz clic en "Generar Informe"</div></div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-discrepancia\')')}
 };
+
+
+
+
+
 async function generarInformeDiscrepancia(){
   const mesVal=$('discMes')?.value;if(!mesVal)return toast('Selecciona un mes',false);
   const ct=$('discResultado');if(!ct)return;
   ct.innerHTML='<div class="flex items-center justify-center py-10"><div class="w-8 h-8 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
   try{
-    const d=await api.get('/api/reportes/discrepancias/'+mesVal);
-    if(!d.success){ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+( d.error||'Error al cargar discrepancias')+'</div>';return;}
-    const data=d.data||[];
-    if(!data.length){ct.innerHTML='<div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-calendar-xmark text-2xl text-[#d1d5db] block mb-3"></i>No hay datos de discrepancia para este mes</div>';return;}
-    // data es array de {material, cantidadplanificada, cantidadusada, diferencia, ...}
-    const hayDiferencia=data.some(r=>Number(r.diferencia||r.discrepancia||0)!==0);
-    ct.innerHTML='<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h4 class="font-semibold text-[#2c3e50]">Discrepancias de Materiales</h4>'+(hayDiferencia?'<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Hay discrepancias</span>':'<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full border border-mentaverde-200"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>')+'</div>'+renderTable([{label:'Material',render:r=>r.nombrematerial||r.material||r.nombre||'-'},{label:'Planificado',render:r=>'<span class="font-medium">'+Number(r.cantidadplanificada||r.planificado||0)+'</span>'},{label:'Utilizado',render:r=>'<span class="font-medium">'+Number(r.cantidadusada||r.usado||r.utilizado||0)+'</span>'},{label:'Diferencia',render:r=>{const diff=Number(r.diferencia||r.discrepancia||0);return'<span class="font-semibold '+(diff<0?'text-red-500':diff>0?'text-amber-500':'text-menta')+'">'+(diff>0?'+':'')+diff+'</span>'}},{label:'Estado',render:r=>{const diff=Number(r.diferencia||r.discrepancia||0);return diff<0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>':diff>0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>':'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700 border border-mentaverde-200">OK</span>';}}],data,'No hay datos de materiales')+'</div>';
-  }catch(e){ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+(e.message||'Error al conectar')+'</div>'}
+    // Intentar obtener datos del endpoint real
+    let data = [];
+    let errorMsg = '';
+    
+    try {
+      const d = await api.get('/api/reportes/discrepancias/' + mesVal);
+      if (d.success) {
+        data = d.data || [];
+      } else {
+        errorMsg = d.error || 'Error al cargar discrepancias';
+      }
+    } catch(e) {
+      // Si falla el endpoint, intentar con el endpoint completo
+      try {
+        const d = await api.get('/api/reportes/discrepancias_completo/' + mesVal);
+        if (d.success) {
+          data = d.data || [];
+        } else {
+          errorMsg = d.error || 'Error al cargar informe completo';
+        }
+      } catch(e2) {
+        errorMsg = 'No se pudo conectar con el servidor';
+      }
+    }
+    
+    if (errorMsg && !data.length) {
+      ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>' + errorMsg + '</div>';
+      return;
+    }
+    
+    if(!data.length){
+      ct.innerHTML='<div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-calendar-xmark text-2xl text-[#d1d5db] block mb-3"></i>No hay datos de discrepancia para este mes</div>';
+      return;
+    }
+    
+    // Calcular resumen
+    const resumen = {
+      totalPlanificado: data.reduce((s, r) => s + Number(r.cantidadplanificada || r.planificado || 0), 0),
+      totalUsado: data.reduce((s, r) => s + Number(r.cantidadusada || r.usado || r.utilizado || 0), 0),
+      totalDiferencia: data.reduce((s, r) => s + Number(r.diferencia || r.discrepancia || 0), 0),
+      materialesConDeficit: data.filter(r => Number(r.diferencia || r.discrepancia || 0) < 0).length,
+      materialesConExceso: data.filter(r => Number(r.diferencia || r.discrepancia || 0) > 0).length,
+      materialesOk: data.filter(r => Number(r.diferencia || r.discrepancia || 0) === 0).length
+    };
+    
+    const hayDiferencia = data.some(r => Number(r.diferencia || r.discrepancia || 0) !== 0);
+    
+    // Construir resumen en tarjetas
+    const resumenHtml = `
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
+          <p class="text-xs text-[#6b7280]">Planificado</p>
+          <p class="text-lg font-bold text-[#2c3e50]">${resumen.totalPlanificado}</p>
+        </div>
+        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
+          <p class="text-xs text-[#6b7280]">Utilizado</p>
+          <p class="text-lg font-bold text-[#2c3e50]">${resumen.totalUsado}</p>
+        </div>
+        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
+          <p class="text-xs text-[#6b7280]">Diferencia</p>
+          <p class="text-lg font-bold ${resumen.totalDiferencia < 0 ? 'text-red-500' : resumen.totalDiferencia > 0 ? 'text-amber-500' : 'text-menta'}">${resumen.totalDiferencia > 0 ? '+' : ''}${resumen.totalDiferencia}</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3 text-center border border-red-100">
+          <p class="text-xs text-red-600">Déficit</p>
+          <p class="text-lg font-bold text-red-500">${resumen.materialesConDeficit}</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+          <p class="text-xs text-amber-600">Exceso</p>
+          <p class="text-lg font-bold text-amber-500">${resumen.materialesConExceso}</p>
+        </div>
+      </div>
+    `;
+    
+    // Tabla de materiales con opción de ver detalle
+    const tablaHtml = renderTable([
+      {label:'Material',render:r=>r.nombrematerial||r.material||r.nombre||'-'},
+      {label:'Planificado',render:r=>'<span class="font-medium">'+Number(r.cantidadplanificada||r.planificado||0)+'</span>'},
+      {label:'Utilizado',render:r=>'<span class="font-medium">'+Number(r.cantidadusada||r.usado||r.utilizado||0)+'</span>'},
+      {label:'Diferencia',render:r=>{
+        const diff=Number(r.diferencia||r.discrepancia||0);
+        return'<span class="font-semibold '+(diff<0?'text-red-500':diff>0?'text-amber-500':'text-menta')+'">'+(diff>0?'+':'')+diff+'</span>';
+      }},
+      {label:'Estado',render:r=>{
+        const diff=Number(r.diferencia||r.discrepancia||0);
+        return diff<0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>':
+               diff>0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>':
+               '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700 border border-menta-200">OK</span>';
+      }},
+      {label:'',render:r=>'<button onclick="verDetalleMaterialDiscrepancia('+r.idmaterial+',\''+(r.nombrematerial||r.material||r.nombre||'').replace(/'/g,"\\'")+'\',\''+mesVal+'\')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-magnifying-glass mr-1"></i>Detalle</button>'}
+    ], data, 'No hay datos de materiales');
+    
+    ct.innerHTML='<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h4 class="font-semibold text-[#2c3e50]">Discrepancias de Materiales</h4>'+(hayDiferencia?'<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Hay discrepancias</span>':'<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full border border-menta-200"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>')+'</div><div class="p-5">'+resumenHtml+tablaHtml+'</div></div>';
+  }catch(e){
+    ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+(e.message||'Error al conectar')+'</div>';
+  }
 }
+
+async function verDetalleMaterialDiscrepancia(idMaterial, nombreMaterial, mesVal) {
+  try {
+    // Intentar obtener el detalle completo del material
+    const d = await api.get('/api/reportes/discrepancias_completo/' + mesVal + '/' + idMaterial);
+    
+    if (!d.success) {
+      toast(d.error || 'Error al cargar detalle', false);
+      return;
+    }
+    
+    const detalle = d.data || [];
+    
+    let modalHtml = '<div class="p-6" style="max-width:600px">';
+    modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-magnifying-glass-chart text-menta mr-2"></i>Detalle: ' + nombreMaterial + '</h3>';
+    
+    if (detalle.length > 0) {
+      modalHtml += '<div class="space-y-3 max-h-96 overflow-y-auto">';
+      detalle.forEach(item => {
+        modalHtml += '<div class="bg-[#f8fafc] rounded-xl p-4 border border-[#e8ecf1]">';
+        modalHtml += '<p class="text-sm font-medium text-[#2c3e50]">' + (item.tratamientonombre || 'Tratamiento') + '</p>';
+        modalHtml += '<div class="grid grid-cols-2 gap-2 mt-2 text-xs">';
+        modalHtml += '<div><span class="text-[#6b7280]">Planificado:</span> <span class="font-medium">' + (item.cantidadplanificada || 0) + '</span></div>';
+        modalHtml += '<div><span class="text-[#6b7280]">Utilizado:</span> <span class="font-medium">' + (item.cantidadusada || 0) + '</span></div>';
+        if (item.fecha) {
+          modalHtml += '<div class="col-span-2"><span class="text-[#6b7280]">Fecha:</span> <span class="font-medium">' + formatDateShort(item.fecha) + '</span></div>';
+        }
+        modalHtml += '</div></div>';
+      });
+      modalHtml += '</div>';
+    } else {
+      modalHtml += '<p class="text-sm text-[#9ca3af] py-4 text-center">No hay detalle disponible para este material</p>';
+    }
+    
+    modalHtml += '<div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button></div></div>';
+    
+    openModal(modalHtml);
+  } catch(e) {
+    toast(e.message || 'Error al cargar detalle', false);
+  }
+}
+
+
 SCREENS.inicio=async()=>{
   const ct=$('pageContent');
   ct.innerHTML=showLoading();

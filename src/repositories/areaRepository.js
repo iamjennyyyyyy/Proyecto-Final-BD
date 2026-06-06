@@ -149,6 +149,36 @@ class AreaRepository {
         );
         return result.rows;
     }
+    async desasignarEmpleadoDeUnArea(idArea, idEmpleado) {
+        // Primero verificar si existe la asignación
+        const asignacion = await pool.query(
+            'SELECT * FROM empleadosporarea WHERE idarea = $1 AND idempleado = $2',
+            [idArea, idEmpleado]
+        );
+        
+        if (asignacion.rows.length === 0) {
+            throw new Error('El empleado no está asignado a esta área');
+        }
+        
+        // Si existe, proceder a eliminar
+        const result = await pool.query(
+            'DELETE FROM empleadosporarea WHERE idarea = $1 AND idempleado = $2 RETURNING *',
+            [idArea, idEmpleado]
+        );
+        
+        if (result.rowCount === 0) {
+            throw new Error('No se pudo desasignar el empleado del área');
+        }
+        
+        return {
+            rowCount: result.rowCount,
+            data: result.rows[0],
+            message: 'Empleado desasignado correctamente'
+        };
+    }
+
+
+    
 }
 
 module.exports = new AreaRepository();

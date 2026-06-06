@@ -25,16 +25,24 @@ class ReporteRepository {
     }
 
     async buscarServiciosPorClientePorIntervalo(idCliente, fechaInicio, fechaFin) {
-    const result = await pool.query(
-        `SELECT * FROM buscarServiciosPorClientePorIntervalo($1, $2, $3)`, 
-        [idCliente, fechaInicio, fechaFin]
-    );
-    return result.rows;
-}
+        const result = await pool.query(
+            `SELECT * FROM buscarServiciosPorClientePorIntervalo($1, $2, $3)`, 
+            [idCliente, fechaInicio, fechaFin]
+        );
+        return result.rows;
+    }
 
     async obtenerReporteDiscrepanciasCompleto(anio, mes) {
         const result = await pool.query(
-            `SELECT * FROM reporte_discrepancias_completo($1, $2)`,[anio, mes]
+            `SELECT * FROM reporte_discrepancias_completo($1, $2)`, [anio, mes]
+        );
+        return result.rows;
+    }
+
+    // NUEVO MÉTODO: Resumen por tratamiento
+    async obtenerReporteResumenPorTratamiento(anio, mes) {
+        const result = await pool.query(
+            `SELECT * FROM reporte_resumen_por_tratamiento($1, $2)`, [anio, mes]
         );
         return result.rows;
     }

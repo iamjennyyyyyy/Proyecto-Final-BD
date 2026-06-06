@@ -31,13 +31,11 @@ const reporteController = {
         }
     },
 
-    // ✅ CONTROLADOR CORREGIDO - Ahora recibe fechaInicio y fechaFin
     async buscarServiciosPorClientePorIntervalo(req, res) {
         try {
             const idCliente = parseInt(req.params.idCliente);
-            const { fechaInicio, fechaFin } = req.query;  // ← CAMBIADO: leer fechaInicio y fechaFin
+            const { fechaInicio, fechaFin } = req.query;
             
-            // Validar que ambas fechas existan
             if (!fechaInicio || !fechaFin) {
                 return res.status(400).json({ 
                     success: false, 
@@ -45,7 +43,6 @@ const reporteController = {
                 });
             }
             
-            // Pasar ambas fechas al service
             const servicios = await reporteService.buscarServiciosPorClientePorIntervalo(idCliente, fechaInicio, fechaFin);
             res.json({ success: true, count: servicios.length, data: servicios });
         } catch (error) {
@@ -91,6 +88,56 @@ const reporteController = {
                         planificados: totalMaterialPlanificado,
                         utilizados: totalMaterialUtilizado,
                         discrepancia: totalDiscrepanciaMaterial
+                    }
+                },
+                data: reporte
+            });
+        } catch (error) {
+            if (error.message.includes('año') || error.message.includes('mes')) {
+                res.status(400).json({ success: false, error: error.message });
+            } else {
+                res.status(500).json({ success: false, error: error.message });
+            }
+        }
+    },
+
+    // NUEVO MÉTODO: Resumen por tratamiento
+    async obtenerReporteResumenPorTratamiento(req, res) {
+        try {
+            const { anio, mes } = req.params;
+            
+            const anioNum = parseInt(anio);
+            const mesNum = parseInt(mes);
+            
+            const reporte = await reporteService.obtenerReporteResumenPorTratamiento(anioNum, mesNum);
+            
+            // Calcular resumen general
+            const totalTratamientos = reporte.length;
+            const totalCitasPlanificadas = reporte.reduce((sum, item) => sum + (item.citas_planificadas || 0), 0);
+            const totalCitasRealizadas = reporte.reduce((sum, item) => sum + (item.citas_realizadas || 0), 0);
+            const totalDiscrepanciaCitas = reporte.reduce((sum, item) => sum + (item.discrepancia_citas || 0), 0);
+            
+            const totalMaterialesPlanificados = reporte.reduce((sum, item) => sum + (item.materiales_planificados || 0), 0);
+            const totalMaterialesUsados = reporte.reduce((sum, item) => sum + (item.materiales_usados || 0), 0);
+            const totalDiscrepanciaMateriales = reporte.reduce((sum, item) => sum + (item.discrepancia_materiales || 0), 0);
+            
+            res.json({
+                success: true,
+                params: {
+                    anio: anioNum,
+                    mes: mesNum
+                },
+                summary: {
+                    total_tratamientos: totalTratamientos,
+                    citas: {
+                        planificadas: totalCitasPlanificadas,
+                        realizadas: totalCitasRealizadas,
+                        discrepancia: totalDiscrepanciaCitas
+                    },
+                    materiales: {
+                        planificados: totalMaterialesPlanificados,
+                        usados: totalMaterialesUsados,
+                        discrepancia: totalDiscrepanciaMateriales
                     }
                 },
                 data: reporte
