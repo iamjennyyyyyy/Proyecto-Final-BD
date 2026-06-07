@@ -363,7 +363,12 @@ SCREENS['admin-clientes']=async()=>{
     const d=await api.get('/api/clientes');
     if(!d.success){ct.innerHTML=showEmpty('fa-regular fa-users','Sin datos','No hay clientes registrados.');return;}
     const data=(d.data||[]).filter(c=>!clientesSearch||(c.nombre||'').toLowerCase().includes(clientesSearch.toLowerCase())||(c.ci||'').includes(clientesSearch));
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-clientes\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" id="clienteSearch" placeholder="Buscar por nombre o CI..." value="'+clientesSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="clientesSearch=this.value;clearTimeout(window._clienteSearchTimer);window._clienteSearchTimer=setTimeout(function(){const prevFocus=document.activeElement?.id;SCREENS[\'admin-clientes\']().then(function(){if(prevFocus){const el=document.getElementById(prevFocus);if(el){el.focus();const v=el.value;el.value=\'\';el.value=v;}}})},400)"></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([{label:'Nombre',render:r=>r.nombre},{label:'CI',render:r=>r.ci||'-'},{label:'Teléfono',field:'telefono'},{label:'Email',field:'email'},{label:'Citas',render:r=>'<span class="px-2 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+(r.total_citas||0)+'</span>'},{label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="verHistorialCliente('+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Ver historial"><i class="fa-regular fa-clock"></i></button><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
+    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]">Clientes</h3><div class="flex items-center gap-2"><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">'+data.length+'</span><button onclick="window[\'openModalCRUD_admin-clientes\']()" class="px-3 py-1.5 bg-menta text-white text-xs font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar</button></div></div><div class="mb-3"><input type="text" id="clienteSearch" placeholder="Buscar por nombre o CI..." value="'+clientesSearch+'" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm focus:ring-2 focus:ring-menta/30 focus:border-menta outline-none transition-all" oninput="clientesSearch=this.value;clearTimeout(window._clienteSearchTimer);window._clienteSearchTimer=setTimeout(function(){const prevFocus=document.activeElement?.id;SCREENS[\'admin-clientes\']().then(function(){if(prevFocus){const el=document.getElementById(prevFocus);if(el){el.focus();const v=el.value;el.value=\'\';el.value=v;}}})},400)"></div><div class="bg-white rounded-2xl shadow-sm border border-[#e8ecf1] overflow-hidden">'+renderTable([
+      {label:'Nombre',render:r=>r.nombre},
+      {label:'CI',render:r=>r.ci||'-'},
+      {label:'Teléfono',field:'telefono'},
+      {label:'Email',field:'email'},
+      {label:'',render:r=>'<div class="flex gap-1.5 justify-end"><button onclick="editCRUD(\'admin-clientes\','+r.idcliente+')" class="p-1.5 text-[#6b7280] hover:text-menta hover:bg-menta-50 rounded-lg" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button><button onclick="deleteCRUD(\'/api/clientes\','+r.idcliente+',\'admin-clientes\')" class="p-1.5 text-[#6b7280] hover:text-red-500 hover:bg-red-50 rounded-lg" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button></div>'}],data,'No hay clientes registrados.')+'</div></div>';
   }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-clientes\')')}
 };
 async function verHistorialCliente(id){
@@ -1186,8 +1191,15 @@ SCREENS['admin-ventas'] = async () => {
     const citas = (citasRes.success ? citasRes.data || [] : []).filter(c => c.estado === 'realizada');
     const paquetes = paquetesRes.success ? paquetesRes.data || [] : [];
     
-    const totalCitas = citas.reduce((sum, c) => sum + (c.precio || 0), 0);
-    const totalPaquetes = paquetes.reduce((sum, p) => sum + (p.precio || 0), 0);
+    const totalCitas = citas.reduce((sum, c) => {
+      const precio = parseFloat(c.precio) || parseFloat(c.monto) || parseFloat(c.total) || 0;
+      return sum + precio;
+    }, 0);
+    
+    const totalPaquetes = paquetes.reduce((sum, p) => {
+      const precio = parseFloat(p.precio) || parseFloat(p.monto) || parseFloat(p.total) || 0;
+      return sum + precio;
+    }, 0);
     const totalGeneral = totalCitas + totalPaquetes;
     
     ct.innerHTML = '<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-chart-line text-menta mr-2"></i>Ventas - Resumen General</h3></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"><div class="bg-gradient-to-br from-menta-50 to-menta-100 rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-menta-700 font-medium">Tratamientos Individuales</p><p class="text-2xl font-bold text-menta-800 mt-1">'+$$(totalCitas)+'</p><p class="text-xs text-menta-600 mt-1">'+citas.length+' citas realizadas</p></div><div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center"><i class="fa-solid fa-spa text-menta text-xl"></i></div></div></div><div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-amber-700 font-medium">Paquetes Vendidos</p><p class="text-2xl font-bold text-amber-800 mt-1">'+$$(totalPaquetes)+'</p><p class="text-xs text-amber-600 mt-1">'+paquetes.length+' paquetes</p></div><div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center"><i class="fa-solid fa-gift text-amber-500 text-xl"></i></div></div></div><div class="bg-gradient-to-br from-[#2c3e50] to-[#34495e] rounded-2xl p-5 shadow-sm"><div class="flex items-center justify-between"><div><p class="text-xs text-white/70 font-medium">Total General</p><p class="text-2xl font-bold text-white mt-1">'+$$(totalGeneral)+'</p><p class="text-xs text-white/50 mt-1">Ingresos totales</p></div><div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-coins text-white text-xl"></i></div></div></div></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="border-b border-[#e8ecf1]"><div class="flex gap-1 p-2"><button onclick="mostrarVentasTab(\'tratamientos\')" id="tabTratamientosBtn" class="px-4 py-2 text-sm font-medium rounded-lg bg-menta text-white shadow-sm">Tratamientos Individuales</button><button onclick="mostrarVentasTab(\'paquetes\')" id="tabPaquetesBtn" class="px-4 py-2 text-sm font-medium rounded-lg text-[#6b7280] hover:bg-gray-50">Paquetes Vendidos</button></div></div><div id="ventasTabContent" class="p-5">'+renderVentasTratamientos(citas)+'</div></div></div>';
@@ -1241,11 +1253,12 @@ async function mostrarVentasTab(tab){
   }
 }
 
-// Admin: Informe Discrepancia — usa endpoint real /api/reportes/discrepancias/:anio/:mes
-SCREENS['admin-informe-discrepancia']=async()=>{
-  const ct=$('pageContent');ct.innerHTML=showLoading('Cargando informe de discrepancia...');
-  try{
-    const mesesNom=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+// Admin: Informe Discrepancia
+SCREENS['admin-informe-discrepancia'] = async () => {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando informe de discrepancia...');
+  try {
+    const mesesNom = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     
     // Generar meses desde marzo 2026 hasta la fecha actual
     const fechaInicio = dayjs('2026-03-01');
@@ -1255,7 +1268,6 @@ SCREENS['admin-informe-discrepancia']=async()=>{
     
     while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
       mesesOp.push({
-        val: fechaActual.format('YYYY-MM'),
         anio: fechaActual.year(),
         mes: fechaActual.month() + 1,
         label: mesesNom[fechaActual.month()] + ' ' + fechaActual.format('YYYY')
@@ -1266,154 +1278,375 @@ SCREENS['admin-informe-discrepancia']=async()=>{
     // Ordenar del más reciente al más antiguo
     mesesOp.reverse();
     
-    ct.innerHTML='<div class="fade-in"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia</h3></div><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-5 mb-5"><div class="flex flex-wrap items-end gap-3"><div class="flex-1 min-w-48"><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Seleccionar Mes</label><select id="discMes" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">'+mesesOp.map(m=>'<option value="'+m.anio+'/'+m.mes+'">'+m.label+'</option>').join('')+'</select></div><button onclick="generarInformeDiscrepancia()" class="px-5 py-2.5 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm"><i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i>Generar Informe</button></div></div><div id="discResultado"><div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-hand-point-up text-2xl text-[#d1d5db] block mb-3"></i>Selecciona un mes y haz clic en "Generar Informe"</div></div></div>';
-  }catch(e){ct.innerHTML=showEmpty('fa-regular fa-circle-exclamation','Error','Ocurrió un error.','Reintentar','navigate(\'admin-informe-discrepancia\')')}
-};
-
-
-
-
-
-async function generarInformeDiscrepancia(){
-  const mesVal=$('discMes')?.value;if(!mesVal)return toast('Selecciona un mes',false);
-  const ct=$('discResultado');if(!ct)return;
-  ct.innerHTML='<div class="flex items-center justify-center py-10"><div class="w-8 h-8 border-2 border-[#e8ecf1] border-t-menta rounded-full spin"></div></div>';
-  try{
-    // Intentar obtener datos del endpoint real
-    let data = [];
-    let errorMsg = '';
-    
-    try {
-      const d = await api.get('/api/reportes/discrepancias/' + mesVal);
-      if (d.success) {
-        data = d.data || [];
-      } else {
-        errorMsg = d.error || 'Error al cargar discrepancias';
-      }
-    } catch(e) {
-      // Si falla el endpoint, intentar con el endpoint completo
-      try {
-        const d = await api.get('/api/reportes/discrepancias_completo/' + mesVal);
-        if (d.success) {
-          data = d.data || [];
-        } else {
-          errorMsg = d.error || 'Error al cargar informe completo';
-        }
-      } catch(e2) {
-        errorMsg = 'No se pudo conectar con el servidor';
-      }
-    }
-    
-    if (errorMsg && !data.length) {
-      ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>' + errorMsg + '</div>';
-      return;
-    }
-    
-    if(!data.length){
-      ct.innerHTML='<div class="text-center py-12 text-sm text-[#6b7280]"><i class="fa-regular fa-calendar-xmark text-2xl text-[#d1d5db] block mb-3"></i>No hay datos de discrepancia para este mes</div>';
-      return;
-    }
-    
-    // Calcular resumen
-    const resumen = {
-      totalPlanificado: data.reduce((s, r) => s + Number(r.cantidadplanificada || r.planificado || 0), 0),
-      totalUsado: data.reduce((s, r) => s + Number(r.cantidadusada || r.usado || r.utilizado || 0), 0),
-      totalDiferencia: data.reduce((s, r) => s + Number(r.diferencia || r.discrepancia || 0), 0),
-      materialesConDeficit: data.filter(r => Number(r.diferencia || r.discrepancia || 0) < 0).length,
-      materialesConExceso: data.filter(r => Number(r.diferencia || r.discrepancia || 0) > 0).length,
-      materialesOk: data.filter(r => Number(r.diferencia || r.discrepancia || 0) === 0).length
-    };
-    
-    const hayDiferencia = data.some(r => Number(r.diferencia || r.discrepancia || 0) !== 0);
-    
-    // Construir resumen en tarjetas
-    const resumenHtml = `
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
-          <p class="text-xs text-[#6b7280]">Planificado</p>
-          <p class="text-lg font-bold text-[#2c3e50]">${resumen.totalPlanificado}</p>
+    ct.innerHTML = `
+      <div class="fade-in">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg font-semibold text-[#2c3e50]">
+            <i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia
+          </h3>
         </div>
-        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
-          <p class="text-xs text-[#6b7280]">Utilizado</p>
-          <p class="text-lg font-bold text-[#2c3e50]">${resumen.totalUsado}</p>
-        </div>
-        <div class="bg-[#f8fafc] rounded-xl p-3 text-center border border-[#e8ecf1]">
-          <p class="text-xs text-[#6b7280]">Diferencia</p>
-          <p class="text-lg font-bold ${resumen.totalDiferencia < 0 ? 'text-red-500' : resumen.totalDiferencia > 0 ? 'text-amber-500' : 'text-menta'}">${resumen.totalDiferencia > 0 ? '+' : ''}${resumen.totalDiferencia}</p>
-        </div>
-        <div class="bg-red-50 rounded-xl p-3 text-center border border-red-100">
-          <p class="text-xs text-red-600">Déficit</p>
-          <p class="text-lg font-bold text-red-500">${resumen.materialesConDeficit}</p>
-        </div>
-        <div class="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
-          <p class="text-xs text-amber-600">Exceso</p>
-          <p class="text-lg font-bold text-amber-500">${resumen.materialesConExceso}</p>
+        <p class="text-sm text-[#6b7280] mb-4">Selecciona un mes para ver el informe detallado:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          ${mesesOp.map(m => `
+            <button onclick="verResumenDiscrepancias(${m.anio}, ${m.mes}, '${m.label}')" 
+              class="flex items-center gap-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-4 hover:shadow-md hover:border-menta/30 transition-all text-left group">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0 group-hover:bg-menta-50 transition-colors">
+                <i class="fa-regular fa-calendar text-amber-500 group-hover:text-menta transition-colors"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-[#2c3e50] text-sm">${m.label}</p>
+                <p class="text-xs text-[#6b7280]">Ver discrepancias</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[#9ca3af] text-xs"></i>
+            </button>
+          `).join('')}
         </div>
       </div>
     `;
+  } catch (e) {
+    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error.', 'Reintentar', "navigate('admin-informe-discrepancia')");
+  }
+};
+
+// Ver resumen de discrepancias por tratamiento (usando endpoint /discrepancias/resumen/:anio/:mes)
+async function verResumenDiscrepancias(anio, mes, label) {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando resumen de tratamientos...');
+  
+  try {
+    // Llamar al endpoint de resumen: /api/reportes/discrepancias/resumen/:anio/:mes
+    const d = await api.get(`/api/reportes/discrepancias/resumen/${anio}/${mes}`);
     
-    // Tabla de materiales con opción de ver detalle
-    const tablaHtml = renderTable([
-      {label:'Material',render:r=>r.nombrematerial||r.material||r.nombre||'-'},
-      {label:'Planificado',render:r=>'<span class="font-medium">'+Number(r.cantidadplanificada||r.planificado||0)+'</span>'},
-      {label:'Utilizado',render:r=>'<span class="font-medium">'+Number(r.cantidadusada||r.usado||r.utilizado||0)+'</span>'},
-      {label:'Diferencia',render:r=>{
-        const diff=Number(r.diferencia||r.discrepancia||0);
-        return'<span class="font-semibold '+(diff<0?'text-red-500':diff>0?'text-amber-500':'text-menta')+'">'+(diff>0?'+':'')+diff+'</span>';
-      }},
-      {label:'Estado',render:r=>{
-        const diff=Number(r.diferencia||r.discrepancia||0);
-        return diff<0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>':
-               diff>0?'<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>':
-               '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700 border border-menta-200">OK</span>';
-      }},
-      {label:'',render:r=>'<button onclick="verDetalleMaterialDiscrepancia('+r.idmaterial+',\''+(r.nombrematerial||r.material||r.nombre||'').replace(/'/g,"\\'")+'\',\''+mesVal+'\')" class="text-xs text-menta hover:text-menta-600 font-medium"><i class="fa-solid fa-magnifying-glass mr-1"></i>Detalle</button>'}
-    ], data, 'No hay datos de materiales');
+    if (!d.success) {
+      throw new Error(d.error || 'Error al cargar resumen');
+    }
     
-    ct.innerHTML='<div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-[#e8ecf1] flex items-center justify-between"><h4 class="font-semibold text-[#2c3e50]">Discrepancias de Materiales</h4>'+(hayDiferencia?'<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Hay discrepancias</span>':'<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full border border-menta-200"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>')+'</div><div class="p-5">'+resumenHtml+tablaHtml+'</div></div>';
-  }catch(e){
-    ct.innerHTML='<div class="text-center py-8 text-sm text-red-400"><i class="fa-solid fa-circle-exclamation mr-1.5"></i>'+(e.message||'Error al conectar')+'</div>';
+    const data = d.data || [];
+    renderResumenDiscrepancias(ct, data, anio, mes, label);
+    
+  } catch (e) {
+    ct.innerHTML = `
+      <div class="fade-in">
+        <div class="flex items-center gap-3 mb-5">
+          <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+          </button>
+          <span class="text-[#9ca3af]">/</span>
+          <h3 class="text-lg font-semibold text-[#2c3e50]">${label}</h3>
+        </div>
+        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-8 text-center">
+          <i class="fa-solid fa-circle-exclamation text-red-400 text-4xl mb-3 block"></i>
+          <p class="text-red-500">${e.message || 'Error al cargar los datos'}</p>
+          <button onclick="navigate('admin-informe-discrepancia')" class="mt-4 px-4 py-2 bg-menta text-white rounded-xl text-sm">Volver</button>
+        </div>
+      </div>
+    `;
   }
 }
 
-async function verDetalleMaterialDiscrepancia(idMaterial, nombreMaterial, mesVal) {
+// Renderizar tabla de resumen por tratamiento
+function renderResumenDiscrepancias(ct, data, anio, mes, label) {
+  const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
+  
+  const colorDisc = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
+  const badgeDisc = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+  
+  const hayDiscrep = data.some(r => (r.discrepancia || r.diferencia || 0) !== 0);
+  
+  const filas = data.length ? data.map(r => {
+    const cantPlan = Number(r.cantidad_planificada || r.planificados || 0);
+    const cantReal = Number(r.cantidad_realizada || r.realizados || 0);
+    const discTrat = Number(r.discrepancia || r.diferencia || 0) || (cantReal - cantPlan);
+    const matPlan = Number(r.materiales_planificados || r.mat_planificado || 0);
+    const matReal = Number(r.materiales_utilizados || r.mat_utilizado || 0);
+    const discMat = Number(r.discrepancia_materiales || 0) || (matReal - matPlan);
+    const idTrat = r.idtratamiento || r.id || '';
+    const nomTrat = (r.tratamiento || r.nombre || '—').replace(/'/g, "\\'");
+    
+    return `
+      <tr class="hover:bg-[#f8fafc] transition-colors border-b border-[#f1f5f9]">
+        <td class="py-3 px-3 text-sm font-medium text-[#2c3e50]">${nomTrat}</td>
+        <td class="py-3 px-3 text-center text-sm">${cantPlan}</td>
+        <td class="py-3 px-3 text-center text-sm">${cantReal}</td>
+        <td class="py-3 px-3 text-center"><span class="${colorDisc(discTrat)}">${discTrat > 0 ? '+' : ''}${discTrat}</span></td>
+        <td class="py-3 px-3 text-center text-sm">${matPlan}</td>
+        <td class="py-3 px-3 text-center text-sm">${matReal}</td>
+        <td class="py-3 px-3 text-center"><span class="${colorDisc(discMat)}">${discMat > 0 ? '+' : ''}${discMat}</span></td>
+        <td class="py-3 px-3 text-center">${badgeDisc(discTrat)}</td>
+        <td class="py-3 px-3 text-center">
+          ${idTrat ? `<button onclick="verDetalleDiscrepancias(${anio}, ${mes}, ${idTrat}, '${nomTrat}')" class="px-3 py-1.5 bg-lavender-100 text-spa text-xs font-medium rounded-lg hover:bg-lavender-200 transition-colors whitespace-nowrap"><i class="fa-solid fa-layer-group mr-1"></i>Ver materiales</button>` : '-'}
+        </td>
+      </tr>
+    `;
+  }).join('') : '<tr><td colspan="9" class="py-12 text-center text-[#6b7280] text-sm">No hay datos para este mes</td></tr>';
+  
+  ct.innerHTML = `
+    <div class="fade-in">
+      <div class="flex items-center gap-3 mb-5">
+        <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
+          <i class="fa-solid fa-arrow-left"></i> Volver
+        </button>
+        <span class="text-[#9ca3af]">/</span>
+        <h3 class="text-lg font-semibold text-[#2c3e50]">${mesLabel}</h3>
+        ${hayDiscrep ? '<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100 ml-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Con discrepancias</span>' : '<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full ml-1"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>'}
+      </div>
+      <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#f8fafc] border-b-2 border-[#e8ecf1]">
+                <th class="text-left py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase tracking-wider">Tratamiento</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Planif.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Realiz.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Disc.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Plan.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Util.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Disc. Mat.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Estado</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Detalle</th>
+              </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}// Admin: Informe Discrepancia
+SCREENS['admin-informe-discrepancia'] = async () => {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando informe de discrepancia...');
   try {
-    // Intentar obtener el detalle completo del material
-    const d = await api.get('/api/reportes/discrepancias_completo/' + mesVal + '/' + idMaterial);
+    const mesesNom = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    const fechaInicio = dayjs('2026-03-01');
+    const fechaFin = dayjs();
+    const mesesOp = [];
+    let fechaActual = fechaInicio;
+    
+    while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
+      mesesOp.push({
+        anio: fechaActual.year(),
+        mes: fechaActual.month() + 1,
+        label: mesesNom[fechaActual.month()] + ' ' + fechaActual.format('YYYY')
+      });
+      fechaActual = fechaActual.add(1, 'month');
+    }
+    
+    mesesOp.reverse();
+    
+    ct.innerHTML = `
+      <div class="fade-in">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg font-semibold text-[#2c3e50]">
+            <i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia
+          </h3>
+        </div>
+        <p class="text-sm text-[#6b7280] mb-4">Selecciona un mes para ver el informe detallado:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          ${mesesOp.map(m => `
+            <button onclick="verResumenDiscrepancias(${m.anio}, ${m.mes}, '${m.label}')" 
+              class="flex items-center gap-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-4 hover:shadow-md hover:border-menta/30 transition-all text-left group">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0 group-hover:bg-menta-50 transition-colors">
+                <i class="fa-regular fa-calendar text-amber-500 group-hover:text-menta transition-colors"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-[#2c3e50] text-sm">${m.label}</p>
+                <p class="text-xs text-[#6b7280]">Ver discrepancias</p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[#9ca3af] text-xs"></i>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error.', 'Reintentar', "navigate('admin-informe-discrepancia')");
+  }
+};
+
+// Ver resumen de discrepancias por tratamiento
+async function verResumenDiscrepancias(anio, mes, label) {
+  const ct = $('pageContent');
+  ct.innerHTML = showLoading('Cargando resumen de tratamientos...');
+  
+  try {
+    const d = await api.get(`/api/reportes/discrepancias/resumen/${anio}/${mes}`);
     
     if (!d.success) {
-      toast(d.error || 'Error al cargar detalle', false);
-      return;
+      throw new Error(d.error || 'Error al cargar resumen');
     }
     
-    const detalle = d.data || [];
+    const data = d.data || [];
+    renderResumenDiscrepancias(ct, data, anio, mes, label);
     
-    let modalHtml = '<div class="p-6" style="max-width:600px">';
-    modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-magnifying-glass-chart text-menta mr-2"></i>Detalle: ' + nombreMaterial + '</h3>';
+  } catch (e) {
+    ct.innerHTML = `
+      <div class="fade-in">
+        <div class="flex items-center gap-3 mb-5">
+          <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+          </button>
+          <span class="text-[#9ca3af]">/</span>
+          <h3 class="text-lg font-semibold text-[#2c3e50]">${label}</h3>
+        </div>
+        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-8 text-center">
+          <i class="fa-solid fa-circle-exclamation text-red-400 text-4xl mb-3 block"></i>
+          <p class="text-red-500">${e.message || 'Error al cargar los datos'}</p>
+          <button onclick="navigate('admin-informe-discrepancia')" class="mt-4 px-4 py-2 bg-menta text-white rounded-xl text-sm">Volver</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Renderizar tabla de resumen por tratamiento
+function renderResumenDiscrepancias(ct, data, anio, mes, label) {
+  const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
+  
+  const colorDisc = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
+  const badgeDisc = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+  
+  const hayDiscrep = data.some(r => (r.discrepancia || r.diferencia || 0) !== 0);
+  
+  const filas = data.length ? data.map(r => {
+    const cantPlan = Number(r.cantidad_planificada || r.planificados || 0);
+    const cantReal = Number(r.cantidad_realizada || r.realizados || 0);
+    const discTrat = Number(r.discrepancia || r.diferencia || 0) || (cantReal - cantPlan);
+    const matPlan = Number(r.materiales_planificados || r.mat_planificado || 0);
+    const matReal = Number(r.materiales_utilizados || r.mat_utilizado || 0);
+    const discMat = Number(r.discrepancia_materiales || 0) || (matReal - matPlan);
+    const idTrat = r.idtratamiento || r.id || '';
+    const nomTrat = (r.tratamiento || r.nombre || '—').replace(/'/g, "\\'");
     
-    if (detalle.length > 0) {
-      modalHtml += '<div class="space-y-3 max-h-96 overflow-y-auto">';
-      detalle.forEach(item => {
-        modalHtml += '<div class="bg-[#f8fafc] rounded-xl p-4 border border-[#e8ecf1]">';
-        modalHtml += '<p class="text-sm font-medium text-[#2c3e50]">' + (item.tratamientonombre || 'Tratamiento') + '</p>';
-        modalHtml += '<div class="grid grid-cols-2 gap-2 mt-2 text-xs">';
-        modalHtml += '<div><span class="text-[#6b7280]">Planificado:</span> <span class="font-medium">' + (item.cantidadplanificada || 0) + '</span></div>';
-        modalHtml += '<div><span class="text-[#6b7280]">Utilizado:</span> <span class="font-medium">' + (item.cantidadusada || 0) + '</span></div>';
-        if (item.fecha) {
-          modalHtml += '<div class="col-span-2"><span class="text-[#6b7280]">Fecha:</span> <span class="font-medium">' + formatDateShort(item.fecha) + '</span></div>';
-        }
-        modalHtml += '</div></div>';
-      });
-      modalHtml += '</div>';
+    return `
+      <tr class="hover:bg-[#f8fafc] transition-colors border-b border-[#f1f5f9]">
+        <td class="py-3 px-3 text-sm font-medium text-[#2c3e50]">${nomTrat}</td>
+        <td class="py-3 px-3 text-center text-sm">${cantPlan}</td>
+        <td class="py-3 px-3 text-center text-sm">${cantReal}</td>
+        <td class="py-3 px-3 text-center"><span class="${colorDisc(discTrat)}">${discTrat > 0 ? '+' : ''}${discTrat}</span></td>
+        <td class="py-3 px-3 text-center text-sm">${matPlan}</td>
+        <td class="py-3 px-3 text-center text-sm">${matReal}</td>
+        <td class="py-3 px-3 text-center"><span class="${colorDisc(discMat)}">${discMat > 0 ? '+' : ''}${discMat}</span></td>
+        <td class="py-3 px-3 text-center">${badgeDisc(discTrat)}</td>
+        <td class="py-3 px-3 text-center">
+          ${idTrat ? `<button onclick="verDetalleDiscrepanciasTratamiento(${anio}, ${mes}, ${idTrat}, '${nomTrat}')" class="px-3 py-1.5 bg-lavender-100 text-spa text-xs font-medium rounded-lg hover:bg-lavender-200 transition-colors whitespace-nowrap"><i class="fa-solid fa-layer-group mr-1"></i>Ver materiales</button>` : '-'}
+        </td>
+      </table>
+    `;
+  }).join('') : '<tr><td colspan="9" class="py-12 text-center text-[#6b7280] text-sm">No hay datos para este mes</td></tr>';
+  
+  ct.innerHTML = `
+    <div class="fade-in">
+      <div class="flex items-center gap-3 mb-5">
+        <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
+          <i class="fa-solid fa-arrow-left"></i> Volver
+        </button>
+        <span class="text-[#9ca3af]">/</span>
+        <h3 class="text-lg font-semibold text-[#2c3e50]">${mesLabel}</h3>
+        ${hayDiscrep ? '<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100 ml-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Con discrepancias</span>' : '<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full ml-1"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>'}
+      </div>
+      <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#f8fafc] border-b-2 border-[#e8ecf1]">
+                <th class="text-left py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase tracking-wider">Tratamiento</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Planif.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Realiz.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Disc.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Plan.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Util.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Disc. Mat.</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Estado</th>
+                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Detalle</th>
+              </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// NOTA: La función verDetalleDiscrepanciasTratamiento necesita que el backend tenga el endpoint:
+// GET /api/reportes/discrepancias/:anio/:mes/tratamiento/:idTratamiento
+
+async function verDetalleDiscrepanciasTratamiento(anio, mes, idTratamiento, nomTrat) {
+  openModal(showLoading('Cargando materiales...'));
+  
+  try {
+    // Este endpoint debe existir en el backend
+    const d = await api.get(`/api/reportes/discrepancias/${anio}/${mes}/tratamiento/${idTratamiento}`);
+    
+    if (!d.success) {
+      throw new Error(d.error || 'Error al cargar detalle');
+    }
+    
+    const materiales = d.data || [];
+    const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
+    
+    const colorD = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
+    const badgeD = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+    
+    const filasMat = materiales.length ? materiales.map(r => {
+      const plan = Number(r.cantidad_planificada || r.planificado || 0);
+      const usada = Number(r.cantidad_utilizada || r.utilizado || 0);
+      const diff = Number(r.discrepancia || r.diferencia || 0) || (usada - plan);
+      return `
+        <tr class="border-b border-[#f1f5f9] hover:bg-[#f8fafc]">
+          <td class="py-2.5 px-4 text-sm font-medium text-[#2c3e50]">${r.nombrematerial || r.material || r.nombre || '—'}</td>
+          <td class="py-2.5 px-4 text-center text-sm">${plan}</td>
+          <td class="py-2.5 px-4 text-center text-sm">${usada}</td>
+          <td class="py-2.5 px-4 text-center"><span class="${colorD(diff)}">${diff > 0 ? '+' : ''}${diff}</span></td>
+          <td class="py-2.5 px-4 text-center">${badgeD(diff)}</td>
+        </tr>
+      `;
+    }).join('') : '<tr><td colspan="5" class="py-8 text-center text-[#6b7280] text-sm">Sin datos de materiales</td></tr>';
+    
+    const modalContent = `
+      <div class="p-6" style="max-width: 560px">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-[#2c3e50]">
+            <i class="fa-solid fa-layer-group text-menta mr-2"></i>${nomTrat}
+          </h3>
+          <button onclick="closeModal()" class="text-[#9ca3af] hover:text-[#2c3e50] p-1 rounded-lg hover:bg-gray-100">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+        <p class="text-xs text-[#9ca3af] mb-4">Detalle por material — ${mesLabel}</p>
+        <div class="overflow-x-auto rounded-xl border border-[#e8ecf1]">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#f8fafc] border-b border-[#e8ecf1]">
+                <th class="text-left py-2.5 px-4 text-xs font-semibold text-[#6b7280] uppercase">Material</th>
+                <th class="text-center py-2.5 px-4 text-xs font-semibold text-[#6b7280] uppercase">Planificado</th>
+                <th class="text-center py-2.5 px-4 text-xs font-semibold text-[#6b7280] uppercase">Utilizado</th>
+                <th class="text-center py-2.5 px-4 text-xs font-semibold text-[#6b7280] uppercase">Diferencia</th>
+                <th class="text-center py-2.5 px-4 text-xs font-semibold text-[#6b7280] uppercase">Estado</th>
+              </tr>
+            </thead>
+            <tbody>${filasMat}</tbody>
+          </table>
+        </div>
+        <button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button>
+      </div>
+    `;
+    
+    const mb = document.getElementById('modalBody');
+    if (mb) {
+      mb.innerHTML = modalContent;
     } else {
-      modalHtml += '<p class="text-sm text-[#9ca3af] py-4 text-center">No hay detalle disponible para este material</p>';
+      openModal(modalContent);
     }
     
-    modalHtml += '<div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button></div></div>';
-    
-    openModal(modalHtml);
-  } catch(e) {
-    toast(e.message || 'Error al cargar detalle', false);
+  } catch (e) {
+    closeModal();
+    toast(e.message || 'Error al cargar materiales', false);
   }
 }
 

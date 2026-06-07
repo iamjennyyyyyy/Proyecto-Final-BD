@@ -87,7 +87,6 @@ const reporteService = {
         return await reporteRepository.obtenerReporteDiscrepanciasCompleto(anioNum, mesNum);
     },
 
-    // NUEVO MÉTODO: Resumen por tratamiento
     async obtenerReporteResumenPorTratamiento(anio, mes) {
         if (!anio && anio !== 0) {
             throw new Error('El año es obligatorio');

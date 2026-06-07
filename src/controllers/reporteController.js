@@ -101,7 +101,6 @@ const reporteController = {
         }
     },
 
-    // NUEVO MÉTODO: Resumen por tratamiento
     async obtenerReporteResumenPorTratamiento(req, res) {
         try {
             const { anio, mes } = req.params;

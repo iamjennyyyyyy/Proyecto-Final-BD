@@ -17,9 +17,9 @@ class ReporteRepository {
         return result.rows;
     }
 
-    async obtenerEmpleadosPorCliente(idCLiente) {
+    async obtenerEmpleadosPorCliente(idCliente) {
         const result = await pool.query(
-            `SELECT * FROM buscar_empleados_por_cliente($1)`, [idCLiente]
+            `SELECT * FROM buscar_empleados_por_cliente($1)`, [idCliente]
         );
         return result.rows;
     }
@@ -39,7 +39,6 @@ class ReporteRepository {
         return result.rows;
     }
 
-    // NUEVO MÉTODO: Resumen por tratamiento
     async obtenerReporteResumenPorTratamiento(anio, mes) {
         const result = await pool.query(
             `SELECT * FROM reporte_resumen_por_tratamiento($1, $2)`, [anio, mes]
