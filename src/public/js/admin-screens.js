@@ -977,10 +977,58 @@ async function moverEmpleadoAOtraArea(idAreaOrigen, idEmpleado) {
 
 
 // Admin: Reportes hub — acceso a informes + reportes generales
-SCREENS['admin-reportes']=async()=>{
-  const ct=$('pageContent');
-  ct.innerHTML='<div class="fade-in"><h3 class="text-lg font-semibold text-[#2c3e50] mb-5"><i class="fa-solid fa-chart-pie text-menta mr-2"></i>Reportes</h3><div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="_renderReporteScreen($(\'pageContent\'))"><div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center"><i class="fa-solid fa-chart-bar text-spa text-2xl"></i></div><div><h4 class="font-semibold text-[#2c3e50]">Reportes Generales</h4><p class="text-sm text-[#6b7280] mt-0.5">Top tratamientos, historial de clientes, estadísticas del día</p></div></div></div></div>';};
+SCREENS['admin-reportes'] = async () => {
+  const ct = $('pageContent');
+  ct.innerHTML = `
+    <div class="fade-in">
+      <h3 class="text-lg font-semibold text-[#2c3e50] mb-5">
+        <i class="fa-solid fa-chart-pie text-menta mr-2"></i>Reportes
+      </h3>
+      <div class="flex flex-col gap-4">
 
+        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+             onclick="_renderReporteScreen($('pageContent'))">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center">
+              <i class="fa-solid fa-chart-bar text-spa text-2xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-[#2c3e50]">Reportes Generales</h4>
+              <p class="text-sm text-[#6b7280] mt-0.5">Top tratamientos, historial de clientes, estadísticas del día</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+             onclick="navigate('admin-informe-ingresos')">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-menta-50 flex items-center justify-center">
+              <i class="fa-solid fa-dollar-sign text-menta text-2xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-[#2c3e50]">Informe de Ingresos</h4>
+              <p class="text-sm text-[#6b7280] mt-0.5">Ingresos por mes, paquetes vendidos y tratamientos individuales</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+             onclick="navigate('admin-informe-discrepancia')">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center">
+              <i class="fa-solid fa-triangle-exclamation text-amber-500 text-2xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-[#2c3e50]">Informe de Discrepancias</h4>
+              <p class="text-sm text-[#6b7280] mt-0.5">Comparación entre tratamientos planificados y realizados por mes</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+};
 // Admin: Informe Ingresos — MODIFICADO: muestra todos los meses con detalle expandible
 SCREENS['admin-informe-ingresos']=async()=>{
   const ct=$('pageContent');ct.innerHTML=showLoading('Generando informe de ingresos...');
@@ -1253,19 +1301,16 @@ async function mostrarVentasTab(tab){
   }
 }
 
-// Admin: Informe Discrepancia
 SCREENS['admin-informe-discrepancia'] = async () => {
   const ct = $('pageContent');
   ct.innerHTML = showLoading('Cargando informe de discrepancia...');
   try {
-    const mesesNom = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    // Generar meses desde marzo 2026 hasta la fecha actual
+    const mesesNom = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const fechaInicio = dayjs('2026-03-01');
     const fechaFin = dayjs();
     const mesesOp = [];
     let fechaActual = fechaInicio;
-    
+
     while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
       mesesOp.push({
         anio: fechaActual.year(),
@@ -1274,10 +1319,8 @@ SCREENS['admin-informe-discrepancia'] = async () => {
       });
       fechaActual = fechaActual.add(1, 'month');
     }
-    
-    // Ordenar del más reciente al más antiguo
     mesesOp.reverse();
-    
+
     ct.innerHTML = `
       <div class="fade-in">
         <div class="flex items-center justify-between mb-5">
@@ -1288,7 +1331,7 @@ SCREENS['admin-informe-discrepancia'] = async () => {
         <p class="text-sm text-[#6b7280] mb-4">Selecciona un mes para ver el informe detallado:</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           ${mesesOp.map(m => `
-            <button onclick="verResumenDiscrepancias(${m.anio}, ${m.mes}, '${m.label}')" 
+            <button onclick="verResumenDiscrepancias(${m.anio}, ${m.mes}, '${m.label}')"
               class="flex items-center gap-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-4 hover:shadow-md hover:border-menta/30 transition-all text-left group">
               <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0 group-hover:bg-menta-50 transition-colors">
                 <i class="fa-regular fa-calendar text-amber-500 group-hover:text-menta transition-colors"></i>
@@ -1308,22 +1351,13 @@ SCREENS['admin-informe-discrepancia'] = async () => {
   }
 };
 
-// Ver resumen de discrepancias por tratamiento (usando endpoint /discrepancias/resumen/:anio/:mes)
 async function verResumenDiscrepancias(anio, mes, label) {
   const ct = $('pageContent');
   ct.innerHTML = showLoading('Cargando resumen de tratamientos...');
-  
   try {
-    // Llamar al endpoint de resumen: /api/reportes/discrepancias/resumen/:anio/:mes
     const d = await api.get(`/api/reportes/discrepancias/resumen/${anio}/${mes}`);
-    
-    if (!d.success) {
-      throw new Error(d.error || 'Error al cargar resumen');
-    }
-    
-    const data = d.data || [];
-    renderResumenDiscrepancias(ct, data, anio, mes, label);
-    
+    if (!d.success) throw new Error(d.error || 'Error al cargar resumen');
+    renderResumenDiscrepancias(ct, d.data || [], anio, mes, label);
   } catch (e) {
     ct.innerHTML = `
       <div class="fade-in">
@@ -1344,43 +1378,52 @@ async function verResumenDiscrepancias(anio, mes, label) {
   }
 }
 
-// Renderizar tabla de resumen por tratamiento
 function renderResumenDiscrepancias(ct, data, anio, mes, label) {
-  const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
-  
   const colorDisc = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
-  const badgeDisc = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
-  
-  const hayDiscrep = data.some(r => (r.discrepancia || r.diferencia || 0) !== 0);
-  
-  const filas = data.length ? data.map(r => {
-    const cantPlan = Number(r.cantidad_planificada || r.planificados || 0);
-    const cantReal = Number(r.cantidad_realizada || r.realizados || 0);
-    const discTrat = Number(r.discrepancia || r.diferencia || 0) || (cantReal - cantPlan);
-    const matPlan = Number(r.materiales_planificados || r.mat_planificado || 0);
-    const matReal = Number(r.materiales_utilizados || r.mat_utilizado || 0);
-    const discMat = Number(r.discrepancia_materiales || 0) || (matReal - matPlan);
-    const idTrat = r.idtratamiento || r.id || '';
-    const nomTrat = (r.tratamiento || r.nombre || '—').replace(/'/g, "\\'");
-    
-    return `
-      <tr class="hover:bg-[#f8fafc] transition-colors border-b border-[#f1f5f9]">
-        <td class="py-3 px-3 text-sm font-medium text-[#2c3e50]">${nomTrat}</td>
-        <td class="py-3 px-3 text-center text-sm">${cantPlan}</td>
-        <td class="py-3 px-3 text-center text-sm">${cantReal}</td>
-        <td class="py-3 px-3 text-center"><span class="${colorDisc(discTrat)}">${discTrat > 0 ? '+' : ''}${discTrat}</span></td>
-        <td class="py-3 px-3 text-center text-sm">${matPlan}</td>
-        <td class="py-3 px-3 text-center text-sm">${matReal}</td>
-        <td class="py-3 px-3 text-center"><span class="${colorDisc(discMat)}">${discMat > 0 ? '+' : ''}${discMat}</span></td>
-        <td class="py-3 px-3 text-center">${badgeDisc(discTrat)}</td>
-        <td class="py-3 px-3 text-center">
-          ${idTrat ? `<button onclick="verDetalleDiscrepancias(${anio}, ${mes}, ${idTrat}, '${nomTrat}')" class="px-3 py-1.5 bg-lavender-100 text-spa text-xs font-medium rounded-lg hover:bg-lavender-200 transition-colors whitespace-nowrap"><i class="fa-solid fa-layer-group mr-1"></i>Ver materiales</button>` : '-'}
-        </td>
-      </tr>
-    `;
-  }).join('') : '<tr><td colspan="9" class="py-12 text-center text-[#6b7280] text-sm">No hay datos para este mes</td></tr>';
-  
+  const badgeDisc = (d) => d < 0
+    ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>'
+    : d > 0
+    ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
+    : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+
+  const hayDiscrep = data.some(r => Number(r.discrepancia_citas || r.discrepancia || r.diferencia || 0) !== 0);
+
+  const filas = data.length
+    ? data.map(r => {
+        const cantPlan = Number(r.total_citas_planificadas || r.citas_planificadas || r.cantidad_planificada || r.planificados || 0);
+        const cantReal = Number(r.total_citas_realizadas  || r.citas_realizadas  || r.cantidad_realizada  || r.realizados  || 0);
+        const discTrat = Number(r.discrepancia_citas || r.discrepancia || r.diferencia || 0) || (cantReal - cantPlan);
+        const matPlan  = Number(r.total_material_planificado || r.materiales_planificados || r.mat_planificado || 0);
+        const matReal  = Number(r.total_material_utilizado || r.materiales_usados || r.materiales_utilizados || r.mat_utilizado || 0);
+        const discMat  = Number(r.discrepancia_material || r.discrepancia_materiales || 0) || (matReal - matPlan);
+        const idTrat   = r.id_tratamiento || r.idtratamiento || r.id || '';
+        const nomTrat  = (r.nombre_tratamiento || r.tratamiento || r.nombre || '—').replace(/'/g, "\\'");
+
+        return `
+          <tr class="hover:bg-[#f8fafc] transition-colors border-b border-[#f1f5f9]">
+            <td class="py-3 px-3 text-sm font-medium text-[#2c3e50]">${nomTrat}</td>
+            <td class="py-3 px-3 text-center text-sm">${cantPlan}</td>
+            <td class="py-3 px-3 text-center text-sm">${cantReal}</td>
+            <td class="py-3 px-3 text-center"><span class="${colorDisc(discTrat)}">${discTrat > 0 ? '+' : ''}${discTrat}</span></td>
+            <td class="py-3 px-3 text-center text-sm">${matPlan}</td>
+            <td class="py-3 px-3 text-center text-sm">${matReal}</td>
+            <td class="py-3 px-3 text-center"><span class="${colorDisc(discMat)}">${discMat > 0 ? '+' : ''}${discMat}</span></td>
+            <td class="py-3 px-3 text-center">${badgeDisc(discTrat)}</td>
+            <td class="py-3 px-3 text-center">
+              ${idTrat
+                ? `<button onclick="verDetalleDiscrepanciasTratamiento(${anio}, ${mes}, ${idTrat}, '${nomTrat}')"
+                    class="px-3 py-1.5 bg-lavender-100 text-spa text-xs font-medium rounded-lg hover:bg-lavender-200 transition-colors whitespace-nowrap">
+                    <i class="fa-solid fa-layer-group mr-1"></i>Ver materiales
+                  </button>`
+                : '-'}
+            </td>
+          </tr>
+        `;
+      }).join('')
+    : '<tr><td colspan="9" class="py-12 text-center text-[#6b7280] text-sm">No hay datos para este mes</td></tr>';
+
   ct.innerHTML = `
     <div class="fade-in">
       <div class="flex items-center gap-3 mb-5">
@@ -1389,164 +1432,9 @@ function renderResumenDiscrepancias(ct, data, anio, mes, label) {
         </button>
         <span class="text-[#9ca3af]">/</span>
         <h3 class="text-lg font-semibold text-[#2c3e50]">${mesLabel}</h3>
-        ${hayDiscrep ? '<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100 ml-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Con discrepancias</span>' : '<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full ml-1"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>'}
-      </div>
-      <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-[#f8fafc] border-b-2 border-[#e8ecf1]">
-                <th class="text-left py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase tracking-wider">Tratamiento</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Planif.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">C. Realiz.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Disc.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Plan.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Mat. Util.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase whitespace-nowrap">Disc. Mat.</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Estado</th>
-                <th class="text-center py-3 px-3 text-xs font-semibold text-[#6b7280] uppercase">Detalle</th>
-              </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}// Admin: Informe Discrepancia
-SCREENS['admin-informe-discrepancia'] = async () => {
-  const ct = $('pageContent');
-  ct.innerHTML = showLoading('Cargando informe de discrepancia...');
-  try {
-    const mesesNom = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    const fechaInicio = dayjs('2026-03-01');
-    const fechaFin = dayjs();
-    const mesesOp = [];
-    let fechaActual = fechaInicio;
-    
-    while (fechaActual.isBefore(fechaFin) || fechaActual.isSame(fechaFin, 'month')) {
-      mesesOp.push({
-        anio: fechaActual.year(),
-        mes: fechaActual.month() + 1,
-        label: mesesNom[fechaActual.month()] + ' ' + fechaActual.format('YYYY')
-      });
-      fechaActual = fechaActual.add(1, 'month');
-    }
-    
-    mesesOp.reverse();
-    
-    ct.innerHTML = `
-      <div class="fade-in">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-semibold text-[#2c3e50]">
-            <i class="fa-solid fa-file-excel text-menta mr-2"></i>Informe de Discrepancia
-          </h3>
-        </div>
-        <p class="text-sm text-[#6b7280] mb-4">Selecciona un mes para ver el informe detallado:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          ${mesesOp.map(m => `
-            <button onclick="verResumenDiscrepancias(${m.anio}, ${m.mes}, '${m.label}')" 
-              class="flex items-center gap-3 bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-4 hover:shadow-md hover:border-menta/30 transition-all text-left group">
-              <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0 group-hover:bg-menta-50 transition-colors">
-                <i class="fa-regular fa-calendar text-amber-500 group-hover:text-menta transition-colors"></i>
-              </div>
-              <div class="flex-1">
-                <p class="font-medium text-[#2c3e50] text-sm">${m.label}</p>
-                <p class="text-xs text-[#6b7280]">Ver discrepancias</p>
-              </div>
-              <i class="fa-solid fa-chevron-right text-[#9ca3af] text-xs"></i>
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  } catch (e) {
-    ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error.', 'Reintentar', "navigate('admin-informe-discrepancia')");
-  }
-};
-
-// Ver resumen de discrepancias por tratamiento
-async function verResumenDiscrepancias(anio, mes, label) {
-  const ct = $('pageContent');
-  ct.innerHTML = showLoading('Cargando resumen de tratamientos...');
-  
-  try {
-    const d = await api.get(`/api/reportes/discrepancias/resumen/${anio}/${mes}`);
-    
-    if (!d.success) {
-      throw new Error(d.error || 'Error al cargar resumen');
-    }
-    
-    const data = d.data || [];
-    renderResumenDiscrepancias(ct, data, anio, mes, label);
-    
-  } catch (e) {
-    ct.innerHTML = `
-      <div class="fade-in">
-        <div class="flex items-center gap-3 mb-5">
-          <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
-            <i class="fa-solid fa-arrow-left"></i> Volver
-          </button>
-          <span class="text-[#9ca3af]">/</span>
-          <h3 class="text-lg font-semibold text-[#2c3e50]">${label}</h3>
-        </div>
-        <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm p-8 text-center">
-          <i class="fa-solid fa-circle-exclamation text-red-400 text-4xl mb-3 block"></i>
-          <p class="text-red-500">${e.message || 'Error al cargar los datos'}</p>
-          <button onclick="navigate('admin-informe-discrepancia')" class="mt-4 px-4 py-2 bg-menta text-white rounded-xl text-sm">Volver</button>
-        </div>
-      </div>
-    `;
-  }
-}
-
-// Renderizar tabla de resumen por tratamiento
-function renderResumenDiscrepancias(ct, data, anio, mes, label) {
-  const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
-  
-  const colorDisc = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
-  const badgeDisc = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
-  
-  const hayDiscrep = data.some(r => (r.discrepancia || r.diferencia || 0) !== 0);
-  
-  const filas = data.length ? data.map(r => {
-    const cantPlan = Number(r.cantidad_planificada || r.planificados || 0);
-    const cantReal = Number(r.cantidad_realizada || r.realizados || 0);
-    const discTrat = Number(r.discrepancia || r.diferencia || 0) || (cantReal - cantPlan);
-    const matPlan = Number(r.materiales_planificados || r.mat_planificado || 0);
-    const matReal = Number(r.materiales_utilizados || r.mat_utilizado || 0);
-    const discMat = Number(r.discrepancia_materiales || 0) || (matReal - matPlan);
-    const idTrat = r.idtratamiento || r.id || '';
-    const nomTrat = (r.tratamiento || r.nombre || '—').replace(/'/g, "\\'");
-    
-    return `
-      <tr class="hover:bg-[#f8fafc] transition-colors border-b border-[#f1f5f9]">
-        <td class="py-3 px-3 text-sm font-medium text-[#2c3e50]">${nomTrat}</td>
-        <td class="py-3 px-3 text-center text-sm">${cantPlan}</td>
-        <td class="py-3 px-3 text-center text-sm">${cantReal}</td>
-        <td class="py-3 px-3 text-center"><span class="${colorDisc(discTrat)}">${discTrat > 0 ? '+' : ''}${discTrat}</span></td>
-        <td class="py-3 px-3 text-center text-sm">${matPlan}</td>
-        <td class="py-3 px-3 text-center text-sm">${matReal}</td>
-        <td class="py-3 px-3 text-center"><span class="${colorDisc(discMat)}">${discMat > 0 ? '+' : ''}${discMat}</span></td>
-        <td class="py-3 px-3 text-center">${badgeDisc(discTrat)}</td>
-        <td class="py-3 px-3 text-center">
-          ${idTrat ? `<button onclick="verDetalleDiscrepanciasTratamiento(${anio}, ${mes}, ${idTrat}, '${nomTrat}')" class="px-3 py-1.5 bg-lavender-100 text-spa text-xs font-medium rounded-lg hover:bg-lavender-200 transition-colors whitespace-nowrap"><i class="fa-solid fa-layer-group mr-1"></i>Ver materiales</button>` : '-'}
-        </td>
-      </table>
-    `;
-  }).join('') : '<tr><td colspan="9" class="py-12 text-center text-[#6b7280] text-sm">No hay datos para este mes</td></tr>';
-  
-  ct.innerHTML = `
-    <div class="fade-in">
-      <div class="flex items-center gap-3 mb-5">
-        <button onclick="navigate('admin-informe-discrepancia')" class="flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-menta px-3 py-1.5 rounded-xl hover:bg-menta-50 transition-colors">
-          <i class="fa-solid fa-arrow-left"></i> Volver
-        </button>
-        <span class="text-[#9ca3af]">/</span>
-        <h3 class="text-lg font-semibold text-[#2c3e50]">${mesLabel}</h3>
-        ${hayDiscrep ? '<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100 ml-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Con discrepancias</span>' : '<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full ml-1"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>'}
+        ${hayDiscrep
+          ? '<span class="px-2.5 py-0.5 bg-red-50 text-red-500 text-xs font-semibold rounded-full border border-red-100 ml-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Con discrepancias</span>'
+          : '<span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full ml-1"><i class="fa-solid fa-check mr-1"></i>Sin discrepancias</span>'}
       </div>
       <div class="bg-white rounded-2xl border border-[#e8ecf1] shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -1571,45 +1459,41 @@ function renderResumenDiscrepancias(ct, data, anio, mes, label) {
     </div>
   `;
 }
-
-// NOTA: La función verDetalleDiscrepanciasTratamiento necesita que el backend tenga el endpoint:
-// GET /api/reportes/discrepancias/:anio/:mes/tratamiento/:idTratamiento
 
 async function verDetalleDiscrepanciasTratamiento(anio, mes, idTratamiento, nomTrat) {
   openModal(showLoading('Cargando materiales...'));
-  
   try {
-    // Este endpoint debe existir en el backend
-    const d = await api.get(`/api/reportes/discrepancias/${anio}/${mes}/tratamiento/${idTratamiento}`);
-    
-    if (!d.success) {
-      throw new Error(d.error || 'Error al cargar detalle');
-    }
-    
-    const materiales = d.data || [];
-    const MESES_NOM = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const d = await api.get(`/api/reportes/discrepancias/${anio}/${mes}`);
+    if (!d.success) throw new Error(d.error || 'Error al cargar detalle');
+    const materiales = (d.data || []).filter(r => Number(r.id_tratamiento || r.idtratamiento) === Number(idTratamiento));
+    const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
-    
     const colorD = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
-    const badgeD = (d) => d < 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>' : d > 0 ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>' : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
-    
-    const filasMat = materiales.length ? materiales.map(r => {
-      const plan = Number(r.cantidad_planificada || r.planificado || 0);
-      const usada = Number(r.cantidad_utilizada || r.utilizado || 0);
-      const diff = Number(r.discrepancia || r.diferencia || 0) || (usada - plan);
-      return `
-        <tr class="border-b border-[#f1f5f9] hover:bg-[#f8fafc]">
-          <td class="py-2.5 px-4 text-sm font-medium text-[#2c3e50]">${r.nombrematerial || r.material || r.nombre || '—'}</td>
-          <td class="py-2.5 px-4 text-center text-sm">${plan}</td>
-          <td class="py-2.5 px-4 text-center text-sm">${usada}</td>
-          <td class="py-2.5 px-4 text-center"><span class="${colorD(diff)}">${diff > 0 ? '+' : ''}${diff}</span></td>
-          <td class="py-2.5 px-4 text-center">${badgeD(diff)}</td>
-        </tr>
-      `;
-    }).join('') : '<tr><td colspan="5" class="py-8 text-center text-[#6b7280] text-sm">Sin datos de materiales</td></tr>';
-    
+    const badgeD = (d) => d < 0
+      ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>'
+      : d > 0
+      ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
+      : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+
+    const filasMat = materiales.length
+      ? materiales.map(r => {
+          const plan  = Number(r.cantidad_planificada_material || r.cantidad_planificada || r.planificado || 0);
+          const usada = Number(r.cantidad_utilizada_material   || r.cantidad_utilizada   || r.utilizado   || 0);
+          const diff  = Number(r.discrepancia_material || r.discrepancia || r.diferencia || 0) || (usada - plan);
+          return `
+            <tr class="border-b border-[#f1f5f9] hover:bg-[#f8fafc]">
+              <td class="py-2.5 px-4 text-sm font-medium text-[#2c3e50]">${r.nombre_material || r.nombrematerial || r.material || r.nombre || '—'}</td>
+              <td class="py-2.5 px-4 text-center text-sm">${plan}</td>
+              <td class="py-2.5 px-4 text-center text-sm">${usada}</td>
+              <td class="py-2.5 px-4 text-center"><span class="${colorD(diff)}">${diff > 0 ? '+' : ''}${diff}</span></td>
+              <td class="py-2.5 px-4 text-center">${badgeD(diff)}</td>
+            </tr>
+          `;
+        }).join('')
+      : '<tr><td colspan="5" class="py-8 text-center text-[#6b7280] text-sm">Sin datos de materiales</td></tr>';
+
     const modalContent = `
-      <div class="p-6" style="max-width: 560px">
+      <div class="p-6" style="max-width:560px">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold text-[#2c3e50]">
             <i class="fa-solid fa-layer-group text-menta mr-2"></i>${nomTrat}
@@ -1636,14 +1520,11 @@ async function verDetalleDiscrepanciasTratamiento(anio, mes, idTratamiento, nomT
         <button onclick="closeModal()" class="mt-4 w-full px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button>
       </div>
     `;
-    
+
     const mb = document.getElementById('modalBody');
-    if (mb) {
-      mb.innerHTML = modalContent;
-    } else {
-      openModal(modalContent);
-    }
-    
+    if (mb) mb.innerHTML = modalContent;
+    else openModal(modalContent);
+
   } catch (e) {
     closeModal();
     toast(e.message || 'Error al cargar materiales', false);
