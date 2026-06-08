@@ -192,6 +192,16 @@ class TratamientoRepository {
         );
         return result.rows;
     }
+        async buscarAreaPorTratamiento(idTratamiento) {
+        const result = await pool.query(
+            `SELECT a.idarea, a.nombre
+            FROM areas a
+            INNER JOIN categorias c ON c.idarea = a.idarea
+            INNER JOIN tratamientos t ON t.idcategoria = c.idcategoria
+            WHERE t.idtratamiento = $1`, [idTratamiento]
+        );
+        return result.rows[0];
+    }
 }
 
 module.exports = new TratamientoRepository();

@@ -5,6 +5,7 @@ const materialesPorTratamientoRepository = require('../repositories/materialesPo
 const empleadoRepository = require('../repositories/empleadoRepository');
 const { MaterialTratamiento } = require('../models/Relaciones');
 const Tratamiento = require('../models/Tratamiento');
+const areaRepository = require('../repositories/areaRepository');
 
 const tratamientoService = {
 
@@ -123,7 +124,21 @@ const tratamientoService = {
             if (e.code === '23503') throw new Error('No se puede eliminar: el tratamiento tiene citas, paquetes o materiales asociados');
             throw e;
         }
-    }
+    },
+        async obtenerEmpleadosDisponibles(idTratamiento) {
+        const tratamiento = await tratamientoRepository.buscarPorId(idTratamiento);
+        if (!tratamiento) throw new Error('Tratamiento no encontrado');
+
+        const fijos = await tratamientoRepository.buscarEmpleadosPorTratamiento(idTratamiento);
+
+        const area = await tratamientoRepository.buscarAreaPorTratamiento(idTratamiento);
+        let suplentes = [];
+        if (area) {
+            suplentes = await areaRepository.buscarEmpleadosSuplentesPorArea(area.idarea);
+        }
+
+        return { fijos, suplentes };
+    },
 };
 
 module.exports = tratamientoService;

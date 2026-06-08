@@ -113,15 +113,14 @@ async function venderPaquete(id, nombre, precio) {
     }
     
     // Cargar empleados para cada tratamiento
-    const empleadosMap = {};
+        const empleadosMap = {};
     for (const trat of tratamientos) {
-      // ✅ CORREGIDO: usar 'idtratamiento' (con 't' minúscula después de la 'm')
       const tratId = trat.idtratamiento;
-      const empsRes = await api.get('/api/tratamientos/' + tratId + '/empleados-fijos');
+      const empsRes = await api.get('/api/tratamientos/' + tratId + '/empleados-disponibles');
       if (empsRes.success && empsRes.data) {
         empleadosMap[tratId] = empsRes.data;
       } else {
-        empleadosMap[tratId] = [];
+        empleadosMap[tratId] = { fijos: [], suplentes: [] };
       }
     }
     
@@ -150,16 +149,38 @@ async function venderPaquete(id, nombre, precio) {
                      data-trat="${trat.idtratamiento}" data-index="${i}" value="${fechaMin}">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-[#6b7280] mb-1">Hora *</label>
-              <input type="time" class="citaHora w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
-                     data-trat="${trat.idtratamiento}" data-index="${i}" value="10:00">
+             <select class="citaHora w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
+        data-trat="${trat.idtratamiento}" data-index="${i}">
+  <option value="09:00">09:00</option>
+  <option value="09:30">09:30</option>
+  <option value="10:00" selected>10:00</option>
+  <option value="10:30">10:30</option>
+  <option value="11:00">11:00</option>
+  <option value="11:30">11:30</option>
+  <option value="12:00">12:00</option>
+  <option value="12:30">12:30</option>
+  <option value="01:00">13:00</option>
+  <option value="01:30">13:30</option>
+  <option value="02:00">14:00</option>
+  <option value="02:30">14:30</option>
+ 
+</select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-[#6b7280] mb-1">Empleado *</label>
-              <select class="citaEmpleado w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
+                           <select class="citaEmpleado w-full px-3 py-2 border border-[#d1d5db] rounded-lg text-sm" 
                       data-trat="${trat.idtratamiento}" data-index="${i}">
                 <option value="">Seleccionar</option>
-                ${empleadosMap[trat.idtratamiento].map(e => `<option value="${e.idempleado}">${e.nombre}</option>`).join('')}
+                ${empleadosMap[trat.idtratamiento].fijos && empleadosMap[trat.idtratamiento].fijos.length
+                  ? '<optgroup label="Fijos del tratamiento">'
+                    + empleadosMap[trat.idtratamiento].fijos.map(e => '<option value="' + e.idempleado + '">' + e.nombre + '</option>').join('')
+                    + '</optgroup>'
+                  : ''}
+                ${empleadosMap[trat.idtratamiento].suplentes && empleadosMap[trat.idtratamiento].suplentes.length
+                  ? '<optgroup label="Suplentes del área">'
+                    + empleadosMap[trat.idtratamiento].suplentes.map(e => '<option value="' + e.idempleado + '">' + e.nombre + '</option>').join('')
+                    + '</optgroup>'
+                  : ''}
               </select>
             </div>
           </div>

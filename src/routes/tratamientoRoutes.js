@@ -16,5 +16,6 @@ router.delete('/:idTratamiento/empleados-fijos/:idEmpleado', tratamientoControll
 router.post('/', tratamientoController.crear);
 router.put('/:idTratamiento', tratamientoController.actualizar);
 router.delete('/:idTratamiento', tratamientoController.eliminar);
+router.get('/:idTratamiento/empleados-disponibles', tratamientoController.obtenerEmpleadosDisponibles);
 
 module.exports = router;

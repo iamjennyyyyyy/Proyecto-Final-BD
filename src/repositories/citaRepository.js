@@ -1,9 +1,13 @@
 const pool = require('../config/database');
 
 class CitaRepository {
-    async listarTodos() {
-        const result = await pool.query(
-            `SELECT * from vw_citas`);
+        async listarTodos() {
+        await pool.query(
+            `UPDATE citas SET estado = 'cancelada'
+             WHERE estado = 'pendiente'
+               AND (fecha < CURRENT_DATE OR (fecha = CURRENT_DATE AND CURRENT_TIME > '17:00:00'))`
+        );
+        const result = await pool.query(`SELECT * from vw_citas`);
         return result.rows;
     }
 

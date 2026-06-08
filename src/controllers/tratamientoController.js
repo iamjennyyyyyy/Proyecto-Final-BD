@@ -143,7 +143,16 @@ const tratamientoController = {
       } catch (error) {
         res.status(404).json({ success: false, error: error.message });
       }
-    }
+    },
+        async obtenerEmpleadosDisponibles(req, res) {
+        try {
+            const { idTratamiento } = req.params;
+            const empleados = await tratamientoService.obtenerEmpleadosDisponibles(idTratamiento);
+            res.json({ success: true, data: empleados });
+        } catch (e) {
+            res.status(400).json({ success: false, error: e.message });
+        }
+    },
 };
 
 module.exports = tratamientoController;

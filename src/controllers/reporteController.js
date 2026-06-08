@@ -101,54 +101,54 @@ const reporteController = {
         }
     },
 
-    async obtenerReporteResumenPorTratamiento(req, res) {
-        try {
-            const { anio, mes } = req.params;
-            
-            const anioNum = parseInt(anio);
-            const mesNum = parseInt(mes);
-            
-            const reporte = await reporteService.obtenerReporteResumenPorTratamiento(anioNum, mesNum);
-            
-            // Calcular resumen general
-            const totalTratamientos = reporte.length;
-            const totalCitasPlanificadas = reporte.reduce((sum, item) => sum + (item.citas_planificadas || 0), 0);
-            const totalCitasRealizadas = reporte.reduce((sum, item) => sum + (item.citas_realizadas || 0), 0);
-            const totalDiscrepanciaCitas = reporte.reduce((sum, item) => sum + (item.discrepancia_citas || 0), 0);
-            
-            const totalMaterialesPlanificados = reporte.reduce((sum, item) => sum + (item.materiales_planificados || 0), 0);
-            const totalMaterialesUsados = reporte.reduce((sum, item) => sum + (item.materiales_usados || 0), 0);
-            const totalDiscrepanciaMateriales = reporte.reduce((sum, item) => sum + (item.discrepancia_materiales || 0), 0);
-            
-            res.json({
-                success: true,
-                params: {
-                    anio: anioNum,
-                    mes: mesNum
+   async obtenerReporteResumenPorTratamiento(req, res) {
+    try {
+        const { anio, mes } = req.params;
+        
+        const anioNum = parseInt(anio);
+        const mesNum = parseInt(mes);
+        
+        const reporte = await reporteService.obtenerReporteResumenPorTratamiento(anioNum, mesNum);
+        
+        // Calcular resumen general
+        const totalTratamientos = reporte.length;
+        const totalCitasPlanificadas = reporte.reduce((sum, item) => sum + (item.total_citas_planificadas || 0), 0);
+        const totalCitasRealizadas = reporte.reduce((sum, item) => sum + (item.total_citas_realizadas || 0), 0);
+        const totalDiscrepanciaCitas = reporte.reduce((sum, item) => sum + (item.discrepancia_citas || 0), 0);
+        
+        const totalMaterialesPlanificados = reporte.reduce((sum, item) => sum + (item.total_material_planificado || 0), 0);
+        const totalMaterialesUsados = reporte.reduce((sum, item) => sum + (item.total_material_utilizado || 0), 0);
+        const totalDiscrepanciaMateriales = reporte.reduce((sum, item) => sum + (item.discrepancia_material || 0), 0);
+        
+        res.json({
+            success: true,
+            params: {
+                anio: anioNum,
+                mes: mesNum
+            },
+            summary: {
+                total_tratamientos: totalTratamientos,
+                citas: {
+                    planificadas: totalCitasPlanificadas,
+                    realizadas: totalCitasRealizadas,
+                    discrepancia: totalDiscrepanciaCitas
                 },
-                summary: {
-                    total_tratamientos: totalTratamientos,
-                    citas: {
-                        planificadas: totalCitasPlanificadas,
-                        realizadas: totalCitasRealizadas,
-                        discrepancia: totalDiscrepanciaCitas
-                    },
-                    materiales: {
-                        planificados: totalMaterialesPlanificados,
-                        usados: totalMaterialesUsados,
-                        discrepancia: totalDiscrepanciaMateriales
-                    }
-                },
-                data: reporte
-            });
-        } catch (error) {
-            if (error.message.includes('año') || error.message.includes('mes')) {
-                res.status(400).json({ success: false, error: error.message });
-            } else {
-                res.status(500).json({ success: false, error: error.message });
-            }
+                materiales: {
+                    planificados: totalMaterialesPlanificados,
+                    usados: totalMaterialesUsados,
+                    discrepancia: totalDiscrepanciaMateriales
+                }
+            },
+            data: reporte
+        });
+    } catch (error) {
+        if (error.message.includes('año') || error.message.includes('mes')) {
+            res.status(400).json({ success: false, error: error.message });
+        } else {
+            res.status(500).json({ success: false, error: error.message });
         }
     }
+}
 };
 
 module.exports = reporteController;

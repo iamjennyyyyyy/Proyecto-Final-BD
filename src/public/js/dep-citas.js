@@ -1,39 +1,25 @@
-let citasFilterFechaDesde='',citasFilterFechaHasta='',citasFilterPrecioMin='',citasFilterPrecioMax='';
+let citasFilterPeriodo='hoy';
 SCREENS.citas = async () => {
   const ct = $('pageContent');
   ct.innerHTML = showLoading();
   try {
-    let url = '/api/citas';
-    if (citasFilterEstado !== 'todas' || citasFilterFechaDesde || citasFilterFechaHasta || citasFilterPrecioMin || citasFilterPrecioMax) {
-      const params = [];
-      if (citasFilterEstado !== 'todas') params.push('estado=' + encodeURIComponent(citasFilterEstado));
-      if (citasFilterPrecioMin || citasFilterPrecioMax) params.push('precioMin=' + (citasFilterPrecioMin || '0') + '&precioMax=' + (citasFilterPrecioMax || '999999'));
-      if (citasFilterFechaDesde && citasFilterFechaHasta) params.push('fecha1=' + encodeURIComponent(citasFilterFechaDesde) + '&fecha2=' + encodeURIComponent(citasFilterFechaHasta));
-      else if (citasFilterFechaDesde) params.push('fecha=' + encodeURIComponent(citasFilterFechaDesde));
-      else if (citasFilterFechaHasta) params.push('fecha=' + encodeURIComponent(citasFilterFechaHasta));
-      if (citasFilterEstado !== 'todas' && !citasFilterFechaDesde && !citasFilterFechaHasta && !citasFilterPrecioMin && !citasFilterPrecioMax)
-        url = '/api/citas/estado?estado=' + encodeURIComponent(citasFilterEstado);
-      else if (citasFilterFechaDesde && citasFilterFechaHasta && !citasFilterPrecioMin && !citasFilterPrecioMax && citasFilterEstado === 'todas')
-        url = '/api/citas/intervalo/fechas?fecha1=' + encodeURIComponent(citasFilterFechaDesde) + '&fecha2=' + encodeURIComponent(citasFilterFechaHasta);
-      else if (citasFilterPrecioMin || citasFilterPrecioMax) {
-        url = '/api/citas';
-      }
-    }
+       let url = '/api/citas';
     const d = await api.get(url);
     if (!d.success) {
       ct.innerHTML = showEmpty('fa-regular fa-calendar-xmark', 'Sin datos', 'No se pudieron cargar las citas.', 'Reintentar', 'navigate(\'citas\')');
       return;
     }
-    let citas = d.data || [];
-    if (citasFilterEstado !== 'todas' && url === '/api/citas') citas = citas.filter(c => c.estado === citasFilterEstado);
-    if (citasFilterFechaDesde) citas = citas.filter(c => !c.fecha || c.fecha >= citasFilterFechaDesde);
-    if (citasFilterFechaHasta) citas = citas.filter(c => !c.fecha || c.fecha <= citasFilterFechaHasta);
-    if (citasFilterPrecioMin) citas = citas.filter(c => Number(c.precio || 0) >= Number(citasFilterPrecioMin));
-    if (citasFilterPrecioMax) citas = citas.filter(c => Number(c.precio || 0) <= Number(citasFilterPrecioMax));
-    citas.sort((a, b) => new Date(a.fecha || 0) - new Date(b.fecha || 0));
-    const filtrosActivos = citasFilterEstado !== 'todas' || citasFilterFechaDesde || citasFilterFechaHasta || citasFilterPrecioMin || citasFilterPrecioMax;
-    
-    ct.innerHTML = '<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">' + citas.length + '</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterEstado === 'todas' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterEstado=\'todas\';SCREENS.citas()">Todas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterEstado === 'pendiente' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterEstado=\'pendiente\';SCREENS.citas()">Pendientes</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterEstado === 'realizada' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterEstado=\'realizada\';SCREENS.citas()">Realizadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterEstado === 'cancelada' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterEstado=\'cancelada\';SCREENS.citas()">Canceladas</button></div></div></div><div class="flex flex-wrap items-center gap-2 mb-4 p-3 bg-[#f8fafc] rounded-xl border border-[#e8ecf1]"><i class="fa-solid fa-filter text-xs text-[#6b7280]"></i><input type="date" id="filtroFechaDesde" value="' + citasFilterFechaDesde + '" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaDesde=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">a</span><input type="date" id="filtroFechaHasta" value="' + citasFilterFechaHasta + '" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-36" onchange="citasFilterFechaHasta=this.value;SCREENS.citas()"><input type="number" id="filtroPrecioMin" placeholder="Precio min" value="' + citasFilterPrecioMin + '" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMin=this.value;SCREENS.citas()"><span class="text-xs text-[#6b7280]">-</span><input type="number" id="filtroPrecioMax" placeholder="Precio max" value="' + citasFilterPrecioMax + '" class="px-2.5 py-1.5 border border-[#d1d5db] rounded-lg text-xs w-24" onchange="citasFilterPrecioMax=this.value;SCREENS.citas()">' + (filtrosActivos ? '<button onclick="citasFilterFechaDesde=\'\';citasFilterFechaHasta=\'\';citasFilterPrecioMin=\'\';citasFilterPrecioMax=\'\';citasFilterEstado=\'todas\';SCREENS.citas()" class="px-3 py-1.5 bg-gray-200 text-[#6b7280] text-xs font-medium rounded-lg hover:bg-gray-300">Limpiar</button>' : '') + '</div><div class="flex justify-end mb-4"><button onclick="citaModal()" class="px-4 py-2 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agendar Cita</button></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
+             let citas = d.data || [];
+    const today = todayStr();
+    if (citasFilterPeriodo === 'hoy') citas = citas.filter(c => dayjs(c.fecha).format('YYYY-MM-DD') === today);
+    else if (citasFilterPeriodo === 'pasadas') citas = citas.filter(c => dayjs(c.fecha).format('YYYY-MM-DD') < today);
+    else if (citasFilterPeriodo === 'futuras') citas = citas.filter(c => dayjs(c.fecha).format('YYYY-MM-DD') > today);
+    if (citasFilterPeriodo === 'pasadas') {
+      citas.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0) || (b.hora || '').localeCompare(a.hora || ''));
+    } else {
+      citas.sort((a, b) => new Date(a.fecha || 0) - new Date(b.fecha || 0) || (a.hora || '').localeCompare(b.hora || ''));
+    }
+    ct.innerHTML = '<div class="fade-in relative"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5"><div class="flex items-center gap-2"><h3 class="text-lg font-semibold text-[#2c3e50]">Citas</h3><span class="px-2.5 py-0.5 bg-menta-50 text-menta-700 text-xs font-semibold rounded-full">' + citas.length + '</span></div><div class="flex items-center gap-2"><div class="flex bg-[#f1f5f9] rounded-xl p-1"><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterPeriodo === 'pasadas' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterPeriodo=\'pasadas\';SCREENS.citas()">Pasadas</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterPeriodo === 'hoy' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterPeriodo=\'hoy\';SCREENS.citas()">Hoy</button><button class="btn-filtro px-3 py-1.5 text-xs font-medium rounded-lg transition-all ' + (citasFilterPeriodo === 'futuras' ? 'bg-white text-[#2c3e50] shadow-sm' : 'text-[#6b7280] hover:text-[#2c3e50]') + '" onclick="citasFilterPeriodo=\'futuras\';SCREENS.citas()">Futuras</button></div></div></div><div class="flex justify-end mb-4"><button onclick="citaModal()" class="px-4 py-2 bg-menta text-white text-sm font-medium rounded-xl hover:bg-menta-600 shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Agendar Cita</button></div><button onclick="citaModal()" class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-menta to-menta-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-xl sm:hidden"><i class="fa-solid fa-plus"></i></button>';
     
     if (citas.length) {
       ct.querySelector('.fade-in').insertAdjacentHTML('beforeend', renderTable([
@@ -65,7 +51,7 @@ SCREENS.citas = async () => {
         }
       ], citas));
     } else {
-      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend', showEmpty((citasFilterEstado === 'todas' ? 'fa-regular fa-calendar-check' : 'fa-regular fa-filter'), (citasFilterEstado === 'todas' ? 'No hay citas registradas' : 'No hay citas ' + citasFilterEstado), 'Agenda la primera cita para comenzar.', 'Agendar Cita', 'citaModal()'));
+      ct.querySelector('.fade-in').insertAdjacentHTML('beforeend', showEmpty('fa-regular fa-calendar-check', 'No hay citas ' + (citasFilterPeriodo === 'hoy' ? 'para hoy' : citasFilterPeriodo === 'pasadas' ? 'pasadas' : 'futuras'), 'Agenda la primera cita para comenzar.', 'Agendar Cita', 'citaModal()'));
     }
   } catch (e) {
     ct.innerHTML = showEmpty('fa-regular fa-circle-exclamation', 'Error', 'Ocurrió un error.', 'Reintentar', 'navigate(\'citas\')');
@@ -119,27 +105,46 @@ async function citaModal(editData) {
       return;
     }
     
-    const loadEmps = async (tratId) => {
+        const loadEmps = async (tratId) => {
       var sel = $('citaEmpleado');
       if (!tratId) {
         if (sel) sel.innerHTML = '<option value="">Selecciona un tratamiento primero</option>';
         return;
       }
       try {
-        const e = await api.get('/api/tratamientos/' + tratId + '/empleados-fijos');
+        const e = await api.get('/api/tratamientos/' + tratId + '/empleados-disponibles');
         if (e.success && e.data) {
           sel.innerHTML = '';
-          if (!e.data.length) {
-            sel.innerHTML = '<option value="">No hay empleados fijos para este tratamiento</option>';
+          const fijos = e.data.fijos || [];
+          const suplentes = e.data.suplentes || [];
+          if (!fijos.length && !suplentes.length) {
+            sel.innerHTML = '<option value="">No hay empleados disponibles</option>';
             return;
           }
-          e.data.forEach(function(en) {
-            var opt = document.createElement('option');
-            opt.value = en.idempleado;
-            if (editData && editData.idempleado == en.idempleado) opt.selected = true;
-            opt.textContent = en.nombre;
-            sel.appendChild(opt);
-          });
+          if (fijos.length) {
+            var g = document.createElement('optgroup');
+            g.label = 'Fijos del tratamiento';
+            fijos.forEach(function(en) {
+              var opt = document.createElement('option');
+              opt.value = en.idempleado;
+              if (editData && editData.idempleado == en.idempleado) opt.selected = true;
+              opt.textContent = en.nombre;
+              g.appendChild(opt);
+            });
+            sel.appendChild(g);
+          }
+          if (suplentes.length) {
+            var g2 = document.createElement('optgroup');
+            g2.label = 'Suplentes del área';
+            suplentes.forEach(function(en) {
+              var opt = document.createElement('option');
+              opt.value = en.idempleado;
+              if (editData && editData.idempleado == en.idempleado) opt.selected = true;
+              opt.textContent = en.nombre;
+              g2.appendChild(opt);
+            });
+            sel.appendChild(g2);
+          }
         } else {
           sel.innerHTML = '<option value="">Error al cargar empleados</option>';
         }
@@ -199,9 +204,23 @@ async function citaModal(editData) {
       '<input type="date" id="citaFecha" value="' + (editData ? editData.fecha || '' : todayStr()) + '" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
     
     // Hora
+        // Hora
     body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Hora *</label>' +
-      '<input type="time" id="citaHora" value="' + (editData ? editData.hora || '' : '09:00') + '" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"></div>';
-    
+      '<select id="citaHora" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm">' +
+      '<option value="09:00"' + (editData && editData.hora === '09:00' ? ' selected' : '') + '>09:00</option>' +
+      '<option value="09:30"' + (editData && editData.hora === '09:30' ? ' selected' : '') + '>09:30</option>' +
+      '<option value="10:00"' + (editData && editData.hora === '10:00' ? ' selected' : '') + '>10:00</option>' +
+      '<option value="10:30"' + (editData && editData.hora === '10:30' ? ' selected' : '') + '>10:30</option>' +
+      '<option value="11:00"' + (editData && editData.hora === '11:00' ? ' selected' : '') + '>11:00</option>' +
+      '<option value="11:30"' + (editData && editData.hora === '11:30' ? ' selected' : '') + '>11:30</option>' +
+      '<option value="12:00"' + (editData && editData.hora === '12:00' ? ' selected' : '') + '>12:00</option>' +
+      '<option value="12:30"' + (editData && editData.hora === '12:30' ? ' selected' : '') + '>12:30</option>' +
+      '<option value="13:00"' + (editData && editData.hora === '13:00' ? ' selected' : '') + '>01:00</option>' +
+      '<option value="13:30"' + (editData && editData.hora === '13:30' ? ' selected' : '') + '>01:30</option>' +
+      '<option value="14:00"' + (editData && editData.hora === '14:00' ? ' selected' : '') + '>02:00</option>' +
+      '<option value="14:30"' + (editData && editData.hora === '14:30' ? ' selected' : '') + '>02:30</option>' +
+     
+      '</select></div>';
     // Empleado
     body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label>' +
       '<select id="citaEmpleado" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm"><option value="">Cargando...</option></select></div>';

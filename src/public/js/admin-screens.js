@@ -914,40 +914,70 @@ async function guardarEmpleadoArea(idArea){
     toast('Empleado asignado al área');closeModal();loadAreaPanel(idArea);
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
-async function quitarEmpleadoArea(idArea, idEmpleado, nombre){
+async function quitarEmpleadoArea(idArea, idEmpleado, nombre) {
   try {
-    // Intentar quitar el empleado del área
-    const d = await api.del('/api/areas/' + idArea + '/empleados/' + idEmpleado);
-    if (!d.success) {
-      // Si hay error, ofrecer mover a otra área
-      const areasRes = await api.get('/api/areas');
-      const areas = areasRes.success ? (areasRes.data || []).filter(a => a.idarea !== idArea) : [];
-      
-      if (areas.length === 0) {
-        toast(d.error || 'Error al quitar empleado', false);
-        return;
-      }
-      
-      let modalHtml = '<div class="p-6" style="max-width:450px">';
-      modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>No se puede quitar empleado</h3>';
-      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">' + (d.error || 'Error al quitar el empleado del área.') + '</p>';
-      modalHtml += '<p class="text-sm text-[#6b7280] mb-4">¿Deseas mover a <strong>"' + nombre + '"</strong> a otra área?</p>';
-      modalHtml += '<select id="moverEmpAreaSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mb-4">';
+    const areasRes = await api.get('/api/areas');
+    const otrasAreas = areasRes.success ? (areasRes.data || []).filter(a => a.idarea !== idArea) : [];
+
+    let modalHtml = '<div class="p-6" style="max-width:450px">';
+    modalHtml += '<h3 class="text-lg font-semibold text-[#2c3e50] mb-4"><i class="fa-solid fa-user-tie text-menta mr-2"></i>' + nombre + '</h3>';
+    modalHtml += '<p class="text-sm text-[#6b7280] mb-4">¿Qué deseas hacer con este empleado?</p>';
+
+    if (otrasAreas.length > 0) {
+      modalHtml += '<div class="mb-4 p-4 bg-menta-50 rounded-xl border border-menta/20">';
+      modalHtml += '<label class="flex items-center gap-3 cursor-pointer">';
+      modalHtml += '<input type="radio" name="accionEmpleado" value="mover" class="w-4 h-4 text-menta focus:ring-menta/30" checked>';
+      modalHtml += '<div><p class="font-medium text-sm text-[#2c3e50]">Mover a otra área</p></div></label>';
+      modalHtml += '<select id="moverEmpAreaSelect" class="w-full px-4 py-2.5 border border-[#d1d5db] rounded-xl text-sm mt-2">';
       modalHtml += '<option value="">Seleccionar área destino...</option>';
-      modalHtml += areas.map(a => '<option value="' + a.idarea + '">' + a.nombre + '</option>').join('');
-      modalHtml += '</select>';
-      modalHtml += '<div class="flex gap-2">';
-      modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
-      modalHtml += '<button onclick="moverEmpleadoAOtraArea(' + idArea + ',' + idEmpleado + ')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">Mover a otra área</button>';
-      modalHtml += '</div></div>';
-      
-      openModal(modalHtml);
-    } else {
-      toast('Empleado quitado del área');
-      loadAreaPanel(idArea);
+      modalHtml += otrasAreas.map(a => '<option value="' + a.idarea + '">' + a.nombre + '</option>').join('');
+      modalHtml += '</select></div>';
     }
-  } catch(e) {
+
+    modalHtml += '<div class="mb-4 p-4 bg-red-50 rounded-xl border border-red-100">';
+    modalHtml += '<label class="flex items-center gap-3 cursor-pointer">';
+    modalHtml += '<input type="radio" name="accionEmpleado" value="quitar"' + (otrasAreas.length === 0 ? ' checked' : '') + ' class="w-4 h-4 text-red-500 focus:ring-red/30">';
+    modalHtml += '<div><p class="font-medium text-sm text-[#2c3e50]">Solo quitar del área</p>';
+    modalHtml += '<p class="text-xs text-[#6b7280]">El empleado dejará de pertenecer a esta área</p></div></label>';
+    modalHtml += '</div>';
+
+    modalHtml += '<div class="flex gap-2">';
+    modalHtml += '<button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cancelar</button>';
+    modalHtml += '<button onclick="confirmarAccionEmpleadoArea(' + idArea + ',' + idEmpleado + ',\'' + nombre.replace(/'/g, "\\'") + '\')" class="flex-1 px-4 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm">Confirmar</button>';
+    modalHtml += '</div></div>';
+
+    openModal(modalHtml);
+  } catch (e) {
     toast(e.message || 'Error de conexión', false);
+  }
+}
+
+async function confirmarAccionEmpleadoArea(idArea, idEmpleado, nombre) {
+  const seleccion = document.querySelector('input[name="accionEmpleado"]:checked');
+  if (!seleccion) return toast('Selecciona una opción', false);
+
+  if (seleccion.value === 'mover') {
+    const idAreaDestino = document.getElementById('moverEmpAreaSelect')?.value;
+    if (!idAreaDestino) return toast('Selecciona un área destino', false);
+    try {
+      await api.post('/api/areas/' + parseInt(idAreaDestino) + '/empleados/' + idEmpleado);
+      await api.del('/api/areas/' + idArea + '/empleados/' + idEmpleado);
+      toast('Empleado movido a nueva área');
+      closeModal();
+      loadAreaPanel(idArea);
+    } catch (e) {
+      toast(e.message || 'Error al mover', false);
+    }
+  } else {
+    try {
+      const d = await api.del('/api/areas/' + idArea + '/empleados/' + idEmpleado);
+      if (!d.success) throw new Error(d.error);
+      toast('Empleado quitado del área');
+      closeModal();
+      loadAreaPanel(idArea);
+    } catch (e) {
+      toast(e.message || 'Error al quitar', false);
+    }
   }
 }
 
@@ -1381,13 +1411,10 @@ async function verResumenDiscrepancias(anio, mes, label) {
 function renderResumenDiscrepancias(ct, data, anio, mes, label) {
   const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
-  const colorDisc = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
-  const badgeDisc = (d) => d < 0
-    ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>'
-    : d > 0
-    ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
-    : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
-
+ const colorDisc = (d) => d < 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
+const badgeDisc = (d) => d < 0
+  ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
+  : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
   const hayDiscrep = data.some(r => Number(r.discrepancia_citas || r.discrepancia || r.diferencia || 0) !== 0);
 
   const filas = data.length
@@ -1468,13 +1495,11 @@ async function verDetalleDiscrepanciasTratamiento(anio, mes, idTratamiento, nomT
     const materiales = (d.data || []).filter(r => Number(r.id_tratamiento || r.idtratamiento) === Number(idTratamiento));
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const mesLabel = MESES_NOM[mes - 1] + ' ' + anio;
-    const colorD = (d) => d < 0 ? 'text-red-500 font-semibold' : d > 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
-    const badgeD = (d) => d < 0
-      ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-50 text-red-500 border border-red-100">Déficit</span>'
-      : d > 0
-      ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
-      : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
-
+   const colorD = (d) => d < 0 ? 'text-amber-500 font-semibold' : 'text-menta font-semibold';
+const badgeD = (d) => d < 0
+  ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-100">Exceso</span>'
+  : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">OK</span>';
+  
     const filasMat = materiales.length
       ? materiales.map(r => {
           const plan  = Number(r.cantidad_planificada_material || r.cantidad_planificada || r.planificado || 0);
