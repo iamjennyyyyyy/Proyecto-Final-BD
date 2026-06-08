@@ -74,14 +74,6 @@ class CitaRepository {
         return result.rows;
     }
 
-    async buscarEmpleadosPorCliente(idCliente) {
-        const result = await pool.query(
-            `SELECT e.nombre
-            from citas c
-            join empleados e on c.idempleado = e.idempleado
-            WHERE c.idCliente =$1 and estado = 'realizada'`, [idCliente]);
-        return result.rows;
-    }
 
     async crear(datos) {
         const valores = [];

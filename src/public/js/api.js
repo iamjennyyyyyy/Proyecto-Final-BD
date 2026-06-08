@@ -45,14 +45,7 @@ async function apiDelete(url) {
   return j;
 }
 
-async function apiPostForm(url, formData) {
-  const h = { 'Authorization': 'Bearer ' + getToken() };
-  const r = await fetch(url, { method: 'POST', headers: h, body: formData });
-  if (r.status === 401) { clearSession(); window.location.reload(); }
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error || 'Error ' + r.status);
-  return j;
-}
+
 
 const api = {
   get: apiGet,

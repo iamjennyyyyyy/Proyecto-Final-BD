@@ -32,19 +32,7 @@ class TratamientoRepository {
         return result.rows;
     }
 
-    async buscarPorIntervaloPrecio(precioMin, precioMax) {
-        const result = await pool.query(
-            `SELECT * FROM vw_tratamientos
-            WHERE precio BETWEEN $1 AND $2`, [precioMin, precioMax]);
-        return result.rows;
-    }
-
-    async buscarPorIntervaloDuracion(duracionMin, duracionMax) {
-        const result = await pool.query(
-            `SELECT * FROM vw_tratamientos
-            WHERE duracion BETWEEN $1 AND $2`, [duracionMin, duracionMax]);
-        return result.rows;
-    }
+   
 
     //RELACION EMPLEADOSFIJOSPORTRATAMIENTO / TRATAMIENTO - EMPLEADOS
     async buscarEmpleadosPorTratamiento(idTratamiento){

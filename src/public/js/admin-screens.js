@@ -1301,7 +1301,7 @@ function renderVentasPaquetes(paquetes){
   }
   return '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b-2 border-[#e8ecf1]"><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Fecha Compra</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Cliente</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Paquete</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Precio</th><th class="text-left py-3 px-4 font-semibold text-[#6b7280] text-xs uppercase tracking-wider">Estado</th></tr></thead><tbody class="divide-y divide-[#f1f5f9]">'+paquetes.map(function(p){
     var hoy=dayjs().format('YYYY-MM-DD');
-    var activo=p.fechainicio<=hoy&&p.fechafin>=hoy;
+    var activo=dayjs(p.fechainicio).format('YYYY-MM-DD')<=hoy&&dayjs(p.fechafin).format('YYYY-MM-DD')>=hoy;
     return '<tr class="hover:bg-[#f8fafc] transition-colors"><td class="py-3 px-4 text-[#2c3e50]">'+formatDateShort(p.fechacompra)+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(p.clientenombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+(p.paquetenombre||'-')+'</td><td class="py-3 px-4 text-[#2c3e50]">'+$$(p.precio)+'</td><td class="py-3 px-4"><span class="px-2 py-0.5 text-xs font-semibold rounded-full '+(activo?'bg-menta-50 text-menta-700':'bg-gray-100 text-gray-500')+'">'+(activo?'Activo':'Vencido')+'</span></td></tr>';
   }).join('')+'</tbody></table></div>';
 }

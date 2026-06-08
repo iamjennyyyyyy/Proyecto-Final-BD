@@ -293,10 +293,10 @@ async function renderPaquetesVendidos() {
     
     // Filtrar por fechas
     if (paqueteVendidoFechaDesde) {
-      paquetes = paquetes.filter(p => p.fechacompra >= paqueteVendidoFechaDesde);
+      paquetes = paquetes.filter(p => dayjs(p.fechacompra).format('YYYY-MM-DD') >= paqueteVendidoFechaDesde);
     }
     if (paqueteVendidoFechaHasta) {
-      paquetes = paquetes.filter(p => p.fechacompra <= paqueteVendidoFechaHasta);
+      paquetes = paquetes.filter(p => dayjs(p.fechacompra).format('YYYY-MM-DD') <= paqueteVendidoFechaHasta);
     }
     
     // Ordenar por fecha de compra (más reciente primero)
@@ -325,7 +325,7 @@ async function renderPaquetesVendidos() {
         
         <div class="space-y-3">
           ${paquetes.length ? paquetes.map(pv => {
-            const esActivo = pv.fechainicio <= hoy && pv.fechafin >= hoy;
+           const esActivo = dayjs(pv.fechainicio).format('YYYY-MM-DD') <= hoy && dayjs(pv.fechafin).format('YYYY-MM-DD') >= hoy;
             const estadoBadge = !esActivo
               ? '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">Vencido</span>'
               : '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-menta-50 text-menta-700">Activo</span>';

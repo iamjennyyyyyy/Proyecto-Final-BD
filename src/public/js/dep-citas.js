@@ -63,23 +63,7 @@ async function verCita(id){
     if(!d.success)return toast(d.error||'Error',false);
     const c=d.data;
     
-    let botonesAccion='';
-    if(c.estado==='pendiente'){
-      botonesAccion=`
-        <button onclick="closeModal();cancelarCita(${id})" class="px-5 py-2.5 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200">
-          <i class="fa-solid fa-xmark mr-1.5"></i>Cancelar
-        </button>
-        <button onclick="closeModal();realizarCita(${id})" class="px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600">
-          <i class="fa-solid fa-check mr-1.5"></i>Realizar
-        </button>
-      `;
-    } else {
-      botonesAccion=`
-        <button onclick="closeModal();editarCita(${id})" class="px-5 py-2.5 bg-amber-100 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-200">
-          <i class="fa-regular fa-pen-to-square mr-1.5"></i>Editar
-        </button>
-      `;
-    }
+    
     openModal('<div class="p-6" style="max-width: 520px"><div class="flex items-center justify-between mb-5"><h3 class="text-lg font-semibold text-[#2c3e50]"><i class="fa-regular fa-circle-info text-menta mr-2"></i>Detalle de Cita</h3><span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border '+sc(c.estado)+'">'+cap(c.estado)+'</span></div><div class="space-y-3 text-sm"><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Cliente</span><span class="font-medium text-[#2c3e50]">'+c.clientenombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Teléfono</span><span class="font-medium text-[#2c3e50]">'+c.telefonocliente+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Tratamiento</span><span class="font-medium text-[#2c3e50]">'+c.tratamientonombre+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Precio</span><span class="font-medium text-[#2c3e50]">'+$$(c.precio)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Fecha</span><span class="font-medium text-[#2c3e50]">'+formatDate(c.fecha)+'</span></div><div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Hora</span><span class="font-medium text-[#2c3e50]">'+formatTime(c.hora)+'</span></div>'+(c.empleadonombre?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Empleado</span><span class="font-medium text-[#2c3e50]">'+c.empleadonombre+'</span></div>':'')+(c.observaciones?'<div class="flex justify-between py-2 border-b border-[#e8ecf1]"><span class="text-[#6b7280]">Observaciones</span><span class="font-medium text-[#2c3e50]">'+c.observaciones+'</span></div>':'')+'</div><div class="flex gap-2 mt-6 justify-end"><button onclick="closeModal()" class="px-5 py-2.5 bg-gray-100 text-[#6b7280] rounded-xl text-sm font-medium hover:bg-gray-200">Cerrar</button>'+(c.estado==='pendiente'?'<button onclick=\"closeModal();cancelarCita('+id+')\" class=\"px-5 py-2.5 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200\"><i class=\"fa-solid fa-xmark mr-1.5\"></i>Cancelar</button><button onclick=\"closeModal();realizarCita('+id+')\" class=\"px-5 py-2.5 bg-menta text-white rounded-xl text-sm font-medium shadow-sm hover:bg-menta-600\"><i class=\"fa-solid fa-check mr-1.5\"></i>Realizar</button>':'')+'</div></div>');
   }catch(e){toast('Error al cargar detalle',false)}
 }
@@ -215,11 +199,10 @@ async function citaModal(editData) {
       '<option value="11:30"' + (editData && editData.hora === '11:30' ? ' selected' : '') + '>11:30</option>' +
       '<option value="12:00"' + (editData && editData.hora === '12:00' ? ' selected' : '') + '>12:00</option>' +
       '<option value="12:30"' + (editData && editData.hora === '12:30' ? ' selected' : '') + '>12:30</option>' +
-      '<option value="13:00"' + (editData && editData.hora === '13:00' ? ' selected' : '') + '>01:00</option>' +
-      '<option value="13:30"' + (editData && editData.hora === '13:30' ? ' selected' : '') + '>01:30</option>' +
-      '<option value="14:00"' + (editData && editData.hora === '14:00' ? ' selected' : '') + '>02:00</option>' +
-      '<option value="14:30"' + (editData && editData.hora === '14:30' ? ' selected' : '') + '>02:30</option>' +
-     
+      '<option value="13:00"' + (editData && editData.hora === '13:00' ? ' selected' : '') + '>13:00</option>' +
+      '<option value="13:30"' + (editData && editData.hora === '13:30' ? ' selected' : '') + '>13:30</option>' +
+      '<option value="14:00"' + (editData && editData.hora === '14:00' ? ' selected' : '') + '>14:00</option>' +
+      '<option value="14:30"' + (editData && editData.hora === '14:30' ? ' selected' : '') + '>14:30</option>' +
       '</select></div>';
     // Empleado
     body += '<div><label class="block text-xs font-semibold text-[#6b7280] mb-1.5">Empleado *</label>' +
@@ -251,15 +234,7 @@ async function citaModal(editData) {
     toast(e.message || 'Error al cargar formulario', false);
   }
 }
-function autoFillPrecio(){
-  const sel=$('citaTratamiento');
-  if(!sel)return;
-  const opt=sel.options[sel.selectedIndex];
-  const precioInput=$('citaPrecio');
-  if(opt&&opt.dataset.precio&&precioInput&&(!precioInput.value||precioInput.value==='0')){
-    precioInput.value=opt.dataset.precio;
-  }
-}
+
 async function editarCita(id){
   try{
     const d=await api.get('/api/citas/'+id);
@@ -268,8 +243,8 @@ async function editarCita(id){
   }catch(e){toast(e.message||'Error de conexión',false)}
 }
 async function autocompleteClientes(){
-  const q=$('citaClienteInput')?.value;if(!q||q.length<2){$('clienteAutocomplete').classList.add('hidden');return;}
-  try{
+  const q=$('citaClienteInput')?.value;if(!q||q.length<2){$('clienteAutocomplete')?.classList.add('hidden');return;}
+    try{
     const d=await api.get('/api/clientes?q='+encodeURIComponent(q));
     if(!d.success)return;
     const ac=$('clienteAutocomplete');
@@ -291,7 +266,7 @@ async function guardarCita() {
   const hora = $('citaHora').value;
   const idempleado = $('citaEmpleado').value;
   const observaciones = $('citaObservaciones')?.value || '';
-  const estado = editId ? ($('citaEstado')?.value || null) : null;
+ 
   
   // Obtener el precio del tratamiento seleccionado
   const selTrat = $('citaTratamiento');
